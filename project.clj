@@ -7,16 +7,26 @@
                  [compojure "1.4.0"]
                  [ring "1.4.0"]
                  [json-html "0.3.6"]
-                 [reagent-forms "0.5.8"]]
+                 [reagent-forms "0.5.8"]
+                 ; Server dependencies
+                 [mount "0.1.8"]
+                 [com.novemberain/monger "3.0.2"]
+                 [com.taoensso/timbre "4.2.1"]
+                 [org.clojure/data.json "0.2.6"]]
 
   :min-lein-version "2.5.3"
 
   :source-paths ["src/clj"]
 
+  :main bluegenes.core
+
   :plugins [[lein-cljsbuild "1.1.2"]
             [lein-figwheel "0.5.0-2"]
             [lein-doo "0.1.6"]
-            [lein-less "1.7.5"]]
+            [lein-less "1.7.5"]
+            [lein-ring "0.8.10"]]
+
+  :ring {:handler bluegenes.bighandler/app}
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"
                                     "test/js"]
