@@ -35,8 +35,9 @@
                                    :asset-path "js/compiled/out"
                                    :source-map-timestamp true
                                    :foreign-libs [{:file "foreign-libs/im.min.js"
-                                                   :provides ["intermine.imjs"]}]
-                                   }}
+                                                   :provides ["intermine.imjs"]}
+                                                   {:file "foreign-libs/imtables.js"
+                                                    :provides ["intermine.imtables"]}]}}
 
                        {:id "test"
                         :source-paths ["src/cljs" "test/cljs"]
@@ -52,7 +53,9 @@
                                    ;:source-map "resources/public/js/compiled/prod.js.map"
                                    :externs ["externs/tools.js"]
                                    :foreign-libs [{:file "foreign-libs/im.min.js"
-                                                   :provides ["intermine.imjs"]}]
+                                                   :provides ["intermine.imjs"]}
+                                                   {:file "foreign-libs/imtables.min.js"
+                                                    :provides ["intermine.imtables"]}]
                                    :optimizations :advanced
                                    :closure-defines {goog.DEBUG false}
                                    :pretty-print false}}]})

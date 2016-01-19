@@ -2,7 +2,8 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [json-html.core :as json-html]
-            [bluegenes.components.dimmer :as dimmer]))
+            [bluegenes.components.dimmer :as dimmer]
+            [bluegenes.components.nextsteps.core :as nextsteps]))
 
 (defn settle [tool data]
   (re-frame/dispatch [:settle tool data]))
@@ -18,6 +19,7 @@
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
       {:reagent-render (fn [step-data]
+
                          (let [_ nil]
                            [:div.step-container
                             [:div.step-inner
@@ -44,16 +46,14 @@
 (defn not-settled-filter [step]
   (false? (:settled step)))
 
-(defn next-steps []
-  [:div.next-steps-container
-   [:div.next-steps-inner]])
-
 (defn previous-steps []
   (let [steps (re-frame/subscribe [:steps])
         mines (re-frame/subscribe [:mines])]
-    (into [:div] (for [s @steps
+    (into [:div] (for [s (reverse @steps)
                        :when (contains? s :input)]
-                   (do [step (assoc s :mines @mines) nil])))))
+                   (do
+                     (.log js/console "Loading step" (clj->js s))
+                     [step (assoc s :mines @mines) nil])))))
 
 (defn history-details []
   (let [history (re-frame/subscribe [:history])]
@@ -65,7 +65,7 @@
 (defn main-view []
   (let [steps (re-frame/subscribe [:steps])]
     [:div
-     [history-details]
+     [nextsteps/main]
+    ;  [history-details]
      [previous-steps]
-     [next-steps]
      [dimmer/main]]))

@@ -44,7 +44,7 @@
      (for [result (:results @search-results)]
        [:li (.-primaryIdentifier result)])]))
 
-(defn main []
+(defn ^:export main []
   (fn [input]
     (if (= "list" (-> input :input :data :format))
       (get-list-contents (get-in input [:input :service]) (get-in input [:input :data])))

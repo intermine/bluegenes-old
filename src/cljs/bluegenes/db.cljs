@@ -28,7 +28,7 @@
                                                                 :settled     true
                                                                 :input        nil
                                                                 :state       []}
-                                                               {:tool        "showlist"
+                                                               {:tool        "viewtable"
                                                                 :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e4126"
                                                                 :title       "List Shower"
                                                                 :description "View contents."
@@ -48,7 +48,7 @@
                                                                 :state       []
                                                                 :settled     false
                                                                 :input       nil}
-                                                               {:tool        "showlist"
+                                                               {:tool        "viewtable"
                                                                 :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
                                                                 :title       "List Shower"
                                                                 :description "Viewed them in a list."
@@ -68,7 +68,7 @@
                                                                 :state       [{:input "mad, zen, ey"}]
                                                                 :settled     false
                                                                 :input       nil}
-                                                               {:tool        "showlist"
+                                                               {:tool        "viewtable"
                                                                 :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
                                                                 :title       "List Shower"
                                                                 :description "Viewed them in a list."
