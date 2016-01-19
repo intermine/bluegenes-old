@@ -11,9 +11,9 @@
            :on-change #(reset! value (-> % .-target .-value))}])
 
 (defn results-handler [values mine comm]
-  (let [matches (.. values -matches -MATCH)]
+  (let [matches (-> values (aget "matches") (aget "MATCH"))]
     ((:has-something comm) {:data {:format "ids"
-                                   :values (into [] (map #(.-id %) matches))
+                                   :values (into [] (map #(aget % "id") matches))
                                    :type "Gene"}
                             :service {:root "www.flymine.org/query"}})))
 
@@ -31,7 +31,7 @@
                               ((:append-state comm) {:input identifiers})
                               (submit-handler identifiers comm)))} "Submit"])
 
-(defn main []
+(defn ^:export main []
   (fn [input comm]
     (let [input-atom (reagent.core/atom (-> input :state last :input))]
       (if-not (empty? (-> input :state))

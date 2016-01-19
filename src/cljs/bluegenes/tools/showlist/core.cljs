@@ -34,7 +34,6 @@
                                      :code "A"
                                      }]}))
         (.then (fn [results]
-                 (.log js/console "Results" results)
                  (swap! search-results assoc :results results))))))
 
 ; never re-renders
@@ -44,7 +43,7 @@
      (for [result (:results @search-results)]
        [:li (.-primaryIdentifier result)])]))
 
-(defn main []
+(defn ^:export main []
   (fn [input]
     (if (= "list" (-> input :input :data :format))
       (get-list-contents (get-in input [:input :service]) (get-in input [:input :data])))

@@ -5,12 +5,16 @@ body {
   background: #d3d1c6;
   background: white;
   background: #f7f7f7;
+  background: #D9D9D9;
   -webkit-font-smoothing: antialiased;
   font-family: 'Lora', serif;
   font-family: 'Roboto', sans-serif;
 }
 .sec {
   padding: 20px;
+}
+.highlight {
+  color: #FFDD2E;
 }
 #dimmer {
   position: fixed;
@@ -75,6 +79,10 @@ body {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
+}
+.next-steps {
+  background: #F3F3F3;
+  padding: 10px 20px 10px 20px;
 }
 .next-steps-container {
   width: 100%;
@@ -241,6 +249,7 @@ th.jh-key {
   border-bottom-width: 0px;
   border-radius: 0;
   border: none;
+  margin-bottom: 0;
 }
 #custom-bootstrap-menu.navbar-default .navbar-nav > li > a {
   color: #b5b3b3;
@@ -257,6 +266,7 @@ th.jh-key {
   color: #000000;
   background-color: #ffffff;
   background: #f7f7f7;
+  background: #F3F3F3;
 }
 #custom-bootstrap-menu.navbar-default .navbar-toggle {
   border-color: #f7f7f7;

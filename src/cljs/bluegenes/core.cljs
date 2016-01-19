@@ -10,6 +10,7 @@
               [bluegenes.tools.chooselist.core :as chooselist]
               [bluegenes.tools.showlist.core :as showlist]
               [bluegenes.tools.idresolver.core :as idresolver]
+              [bluegenes.tools.viewtable.core :as viewtable]
               [intermine.imjs :as imjs]))
 
 (enable-console-print!)

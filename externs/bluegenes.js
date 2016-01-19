@@ -11,8 +11,11 @@
 
 
 // Native tools
-// var bluegenes = {};
-// bluegenes.tools.chooselist.core.main = function() {};
+var bluegenes = {};
+bluegenes.tools.chooselist.core.main = function() {};
+bluegenes.tools.showlist.core.main = function() {};
+bluegenes.tools.viewtable.core.main = function() {};
+bluegenes.tools.idresolver.core.main = function() {};
 
 
 // Functions used by imjs
@@ -20,3 +23,8 @@
 var imjs = {};
 imjs.prototype.Service = function() {};
 imjs.prototype.Service.fetchLists = function() {};
+imjs.prototype.Service.resolveIds = function() {};
+imjs.prototype.Service.poll = function() {};
+
+var imtables = {};
+imtables.loadTable = function() {};

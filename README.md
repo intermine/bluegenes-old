@@ -7,6 +7,7 @@ A [re-frame](https://github.com/Day8/re-frame) application designed to ... well,
 ### Run application:
 
 ```
+lein foreign
 lein clean
 lein figwheel dev
 ```
@@ -22,11 +23,12 @@ lein clean
 lein doo phantom test once
 ```
 
-The above command assumes that you have [phantomjs](https://www.npmjs.com/package/phantomjs) installed. However, please note that [doo](https://github.com/bensu/doo) can be configured to run cljs.test in many other JS environments (chrome, ie, safari, opera, slimer, node, rhino, or nashorn). 
+The above command assumes that you have [phantomjs](https://www.npmjs.com/package/phantomjs) installed. However, please note that [doo](https://github.com/bensu/doo) can be configured to run cljs.test in many other JS environments (chrome, ie, safari, opera, slimer, node, rhino, or nashorn).
 
 ## Production Build
 
 ```
+lein foreign
 lein clean
 lein cljsbuild once min
 ```
