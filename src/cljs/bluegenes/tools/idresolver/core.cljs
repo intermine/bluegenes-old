@@ -11,7 +11,7 @@
            :on-change #(reset! value (-> % .-target .-value))}])
 
 (defn results-handler [values mine comm]
-  (let [matches (.. values -matches -MATCH)]
+  (let [matches (-> values (aget "matches") (aget "MATCH"))]
     ((:has-something comm) {:data {:format "ids"
                                    :values (into [] (map #(aget % "id") matches))
                                    :type "Gene"}

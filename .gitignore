@@ -4,4 +4,5 @@
 /resources/public/js/compiled
 out
 .lein-repl-history
-foreign-libs
+.lein-env
+foreign-libs/*

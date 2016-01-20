@@ -34,7 +34,6 @@
                                      :code "A"
                                      }]}))
         (.then (fn [results]
-                 (.log js/console "Results" results)
                  (swap! search-results assoc :results results))))))
 
 ; never re-renders

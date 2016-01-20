@@ -52,7 +52,7 @@
     (into [:div] (for [s (reverse @steps)
                        :when (contains? s :input)]
                    (do
-                     (.log js/console "Loading step" (clj->js s))
+                     (.debug js/console "Loading step" (clj->js s))
                      [step (assoc s :mines @mines) nil])))))
 
 (defn history-details []

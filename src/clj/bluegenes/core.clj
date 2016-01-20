@@ -1,1 +1,1 @@
-(ns bluegenes.core)
+(ns bluegenes.app)
