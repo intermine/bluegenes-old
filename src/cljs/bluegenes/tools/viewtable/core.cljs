@@ -29,14 +29,10 @@
   (let [selector "#some-elem"
         service (clj->js service-in)
         query (clj->js query-in)]
-    (println "service is" service)
-    (println "query is" query)
     (-> (.loadTable js/imtables
                     selector
                     #js {:start 0 :end 5}
-                    #js {:service service :query query})
-        (.then (fn [table] (println "TABLE table"))
-               (fn [error] (println "ERROR" error))))) nil)
+                    #js {:service service :query query}))) nil)
 
 (defn ^:export main []
   (fn [input]
