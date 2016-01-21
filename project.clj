@@ -8,7 +8,10 @@
                  [ring "1.4.0"]
                  [json-html "0.3.6"]
                  [environ "1.0.0"]
-                 [reagent-forms "0.5.8"]]
+                 [reagent-forms "0.5.8"]
+                 [org.clojure/core.async "0.2.374"]
+                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [bostonou/cljs-pprint "0.0.4-SNAPSHOT"]]
 
   :source-paths ["src/clj"]
 
@@ -32,8 +35,8 @@
   :uberjar-name "bluegenes.jar"
 
   :aliases {"foreign" ["do"
-                       ["shell" "wget" "http://cdn.intermine.org/js/intermine/im-tables/2.0.0/imtables.min.js" "-O" "foreign-libs/imtables.min.js"]
-                       ["shell" "wget" "http://cdn.intermine.org/js/intermine/imjs/3.15.0/im.min.js" "-O" "foreign-libs/im.min.js"]]}
+                       ["shell" "curl" "-o" "foreign-libs/imtables.min.js" "http://cdn.intermine.org/js/intermine/im-tables/2.0.0/imtables.min.js" "-O" "foreign-libs/imtables.min.js"]
+                       ["shell" "curl" "-o" "foreign-libs/im.min.js" "http://cdn.intermine.org/js/intermine/imjs/3.15.0/im.min.js" "-O" "foreign-libs/im.min.js"]]}
 
   :profiles {
              :dev {:cljsbuild {:builds

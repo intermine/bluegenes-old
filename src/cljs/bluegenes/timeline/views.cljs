@@ -3,23 +3,25 @@
             [reagent.core :as reagent]
             [json-html.core :as json-html]
             [bluegenes.components.dimmer :as dimmer]
-            [bluegenes.components.nextsteps.core :as nextsteps]))
-
-(defn settle [tool data]
-  (re-frame/dispatch [:settle tool data]))
+            [bluegenes.components.nextsteps.core :as nextsteps]
+            [bluegenes.utils :as utils]
+            [cljs.contrib.pprint :refer [pprint]]))
 
 (defn append-state [tool data]
-  (re-frame/dispatch [:append-state tool data]))
+  (re-frame/dispatch [:append-state (keyword (:uuid tool)) data]))
 
-(defn has-something [tool data & settle]
-  (re-frame/dispatch [:has-something tool data settle]))
+(defn replace-state [tool data]
+  (re-frame/dispatch [:replace-state (:uuid tool) data]))
+
+(defn has-something [tool data]
+  (re-frame/dispatch [:has-something (keyword (:uuid tool)) data]))
 
 (defn step []
   (let [current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
       {:reagent-render (fn [step-data]
-
+        (.debug js/console "Loading Step:" step-data)
                          (let [_ nil]
                            [:div.step-container
                             [:div.step-inner
@@ -33,27 +35,31 @@
                               (cond
                                 (= nil @current-tab)
                                 (do
+
                                   [(-> bluegenes.tools (aget (:tool step-data)) (aget "core") (aget "main"))
                                    step-data {:append-state (partial append-state step-data)
+                                              :replace-state (partial replace-state step-data)
                                               :has-something (partial has-something step-data)}])
                                 (= "data" @current-tab)
-                                (json-html/edn->hiccup step-data)
-                                )]]]))})))
+                                (json-html/edn->hiccup step-data))]]]))})))
 
-(defn settled-filter [step]
-  (true? (:settled step)))
-
-(defn not-settled-filter [step]
-  (false? (:settled step)))
+(defn step-tree [steps]
+  "Serialize the steps of a history."
+  (let [all-notifiers (remove nil? (map (fn [[step value]] (:notify value)) steps))
+        [starting-point] (utils/diff all-notifiers (keys steps))]
+    (loop [id starting-point
+           step-vec []]
+      (if-not (contains? (id steps) :notify)
+        (do
+          (conj step-vec (id steps)))
+        (recur (:notify (id steps)) (conj step-vec (id steps)))))))
 
 (defn previous-steps []
   (let [steps (re-frame/subscribe [:steps])
         mines (re-frame/subscribe [:mines])]
-    (into [:div] (for [s (reverse @steps)
-                       :when (contains? s :input)]
+    (into [:div] (for [s (reverse (step-tree @steps))]
                    (do
-                     (.debug js/console "Loading step" (clj->js s))
-                     [step (assoc s :mines @mines) nil])))))
+                     ^{:key (:uuid s)} [step (assoc s :mines @mines) nil])))))
 
 (defn history-details []
   (let [history (re-frame/subscribe [:history])]
@@ -63,9 +69,7 @@
        [:h4 (:description @history)]]]))
 
 (defn main-view []
-  (let [steps (re-frame/subscribe [:steps])]
     [:div
      [nextsteps/main]
-    ;  [history-details]
      [previous-steps]
-     [dimmer/main]]))
+     [dimmer/main]])

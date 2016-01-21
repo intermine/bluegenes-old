@@ -17,14 +17,17 @@
   (fn [db _]
     (reaction (get-in @db [:mines]))))
 
-
 (re-frame/register-sub
   :settled-steps
   (fn [db _]
     (reaction (filter #(true? (:settled %)) (get-in @db [:current-steps])))))
 
-
 (re-frame/register-sub
   :replay-timeline
   (fn [db _]
     (reaction (filter #(true? (:settled %)) (get-in @db [:current-steps])))))
+
+(re-frame/register-sub
+ :available-data
+ (fn [db _]
+   (reaction (get-in @db [:histories (:active-history @db) :available-data]))))
