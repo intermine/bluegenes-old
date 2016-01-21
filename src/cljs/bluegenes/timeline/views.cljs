@@ -49,7 +49,7 @@
 (defn previous-steps []
   (let [steps (re-frame/subscribe [:steps])
         mines (re-frame/subscribe [:mines])]
-    (into [:div] (for [s (reverse @steps)
+    (into [:div] (for [s @steps
                        :when (contains? s :input)]
                    (do
                      (.debug js/console "Loading step" (clj->js s))

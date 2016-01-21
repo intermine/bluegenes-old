@@ -8,7 +8,8 @@
                  [ring "1.4.0"]
                  [json-html "0.3.6"]
                  [environ "1.0.0"]
-                 [reagent-forms "0.5.8"]]
+                 [reagent-forms "0.5.8"]
+                 [org.clojure/core.async "0.2.374"]]
 
   :source-paths ["src/clj"]
 

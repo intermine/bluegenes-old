@@ -68,7 +68,7 @@
                                                                 :state       [{:input "mad, zen, ey"}]
                                                                 :settled     false
                                                                 :input       nil}
-                                                               {:tool        "viewtable"
+                                                               {:tool        "runtemplate"
                                                                 :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
                                                                 :title       "List Shower"
                                                                 :description "Viewed them in a list."
