@@ -25,22 +25,32 @@
             :code "A"
             }]})
 
-(defn table [service-in query-in]
+(defn table [service-in query-in responder]
   (let [selector "#some-elem"
         service (clj->js service-in)
         query (clj->js query-in)]
     (-> (.loadTable js/imtables
                     selector
                     #js {:start 0 :end 5}
-                    #js {:service service :query query}))) nil)
+                    #js {:service service :query query})
+        (.then (fn [table]
+                ;  (js* "debugger;")
+                 (responder {:server {:root "www.flyine.org/query"}
+                             :data {:format "query"
+                                    :type "Gene"
+                                    :value (clj->js (.. table -query toJSON))}})
+                 (.log js/console "TABLE IS" (.. table -query toJSON))
+                 )))) nil)
 
 (defn ^:export main []
-  (fn [input]
+  (fn [input comms]
     (let [query (cond
                   (= "list" (-> input :input :data :format))
                   (get-list-query (get-in input [:input :service]) (get-in input [:input :data]))
                   (= "ids" (-> input :input :data :format))
-                  (get-id-query (get-in input [:input :service]) (get-in input [:input :data])))]
+                  (get-id-query (get-in input [:input :service]) (get-in input [:input :data]))
+                  (= "query" (-> input :input :data :format))
+                  (get-in input [:input :data :value]))]
       [:div
        [:div#some-elem]
-       (table (get-in input [:input :service]) query)])))
+       (table (get-in input [:input :service]) query (get comms :has-something))])))

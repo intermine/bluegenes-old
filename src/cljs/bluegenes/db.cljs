@@ -68,10 +68,24 @@
                                                                 :state       [{:input "mad, zen, ey"}]
                                                                 :settled     false
                                                                 :input       nil}
+                                                                {:tool        "viewtable"
+                                                                 :uuid        "cb2afdgsssssssdg143-4cdd-4536-8e91-bba0b17e336"
+                                                                 :title       "List Shower"
+                                                                 :description "Viewed them in a list."
+                                                                 :has nil
+                                                                 :settled     true
+                                                                 :state       []}
                                                                {:tool        "runtemplate"
                                                                 :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
                                                                 :title       "List Shower"
                                                                 :description "Viewed them in a list."
                                                                 :has nil
                                                                 :settled     true
-                                                                :state       []}]}}})
+                                                                :state       []}
+                                                                {:tool        "viewtable"
+                                                                 :uuid        "cb2afdgsdg143-4cdd-4536-8e91-bba0b17e336"
+                                                                 :title       "List Shower"
+                                                                 :description "Viewed them in a list."
+                                                                 :has nil
+                                                                 :settled     true
+                                                                 :state       []}]}}})

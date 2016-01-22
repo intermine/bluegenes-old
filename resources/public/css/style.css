@@ -104,7 +104,6 @@ body {
 .step-container .step-inner .body {
   padding: 10px;
   background: white;
-  min-height: 300px;
   border-left: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
   border-right: 1px solid #ddd;

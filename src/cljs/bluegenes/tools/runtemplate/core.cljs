@@ -64,6 +64,15 @@
 ;      [button-runner]
 ;      ]))
 
+
+(defn replace-input-constraints [cons ids]
+  ; Replace the "input" constraint to be that of the previous tool
+  (if (= (:path cons) "Gene")
+    (assoc cons :values ids :path "Gene.id" :op "ONE OF")
+    cons))
+
+
+
 (defn filter-for-type [template]
   (let [wheres (get-in template [:where])]
     (if (true? (some #(= (:path %) "Gene") wheres))
@@ -82,35 +91,90 @@
 
 
 
-(defn template-dropdown [s]
+(defn template-dropdown [state ids]
   ; Holds a drop down of lists in an item and populates the selected atom with
   [:select.form-control {:on-change (fn [e]
                                       (let [name (str (-> e .-target .-value))
-                                            tpl ((keyword name) (:templates @s))]
-                                        (swap! s assoc :query tpl)))}
-   (for [item (:filtered @s)]
+                                            tpl ((keyword name) (:templates @state))
+                                            updated (update-in tpl [:where] (fn [cons]
+                                                                              (map (fn [c] (replace-input-constraints c ids)) cons)))]
+
+                                        (swap! state assoc :query updated)))}
+   (for [item (:filtered @state)]
      ^{:key (:name item)} [:option
                            {:value (:id item)}
                            (:name item)])])
 
- (defn replace-constraints [cons ids]
-   (if (= (:path cons) "Gene")
-     (assoc cons :value ids :path "Gene.id")
-     cons))
 
-(defn constraint [cons]
-  [:div (str cons)])
+
+; TODO We're currently updating constraints matched on the path and code.
+; Is there a better way to do this? What makes a constraint unique?
+(defn update-constraint! [e cons state]
+  (let [value (str (-> e .-target .-value))
+        matcher (fn [c] (and
+                         (= (:path cons) (:path c))
+                         (= (:code cons) (:code c))))]
+
+    (swap! state update-in [:query :where] (fn [cs] (map #(if (matcher %)
+                                                            (assoc % :value value)
+                                                            %) cs)))))
+
+(defn constraint [cons state]
+  (fn [cons state]
+    [:div
+     [:div (str cons)]
+     [:div.form-group
+        [:label (str (:path cons)) " " [:span.badge (:op cons)]]
+        [:input.form-control {:type "text"
+                              :value (:value cons)
+                              :on-change (fn [e] (update-constraint! e cons state))}]]]))
+
+
+; (defn results-handler [values mine comm]
+;   (let [matches (-> values (aget "matches") (aget "MATCH"))]
+;     ((:has-something comm) {:data {:format "ids"
+;                                    :values (into [] (map #(aget % "id") matches))
+;                                    :type "Gene"}
+;                             :service {:root "www.flymine.org/query"}})))
+
+(defn submit-button [state emit]
+  [:div.form-group
+   [:button.btn {:on-click (fn [e]
+                             (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
+                                   query (clj->js (:query @state))
+                                   imquery (.query mine query)]
+                               (-> imquery (.then (fn [r]
+                                                    (emit {:service {:root "www.flymine.org/query"}
+                                                           :data {:format "query"
+                                                                  :type "Gene"
+                                                                  :value (js->clj (-> r .toJSON))}})
+                                                    ; (.log js/console "R" r)
+                                                    )))))}
+    "Submit"]])
 
 (defn template-details [s]
   [:div
   (for [cons (:where (:query @s))]
-    [constraint cons])])
+    ^{:key (:path cons)} [constraint cons s])])
 
-(defn ^:export main [step-data]
-  (let [state (reagent/atom {:query nil
-                             :selected nil
-                             :filtered nil})]
-    (fetch-templates state)
-    [:div
-    [template-dropdown state]
-    [template-details state]]))
+(defn query-state [q]
+  [:div (str (:query @q))])
+
+(defn ^:export main [step-data responders]
+  (reagent/create-class
+   {:reagent-render (fn []
+                      (println ":REAGENT-RENDER")
+                      (let [state (reagent/atom {:query nil
+                              :selected nil
+                              :filtered nil})]
+     (fetch-templates state)
+     [:div
+      [template-dropdown state (-> step-data :input :data :values)]
+      [template-details state]
+      [submit-button state (get responders :has-something)]
+      [query-state state]]))
+
+    ; Runs once immediately after the initial rendering occurs.
+    :component-did-mount (fn [e]
+                           (.log js/console ":COMPONENT-DID-MOUNT" (clj->js e)))})
+  )
