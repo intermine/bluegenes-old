@@ -11,6 +11,9 @@
 (defn append-state [tool data]
   (re-frame/dispatch [:append-state tool data]))
 
+(defn replace-state [tool data]
+  (re-frame/dispatch [:replace-state tool data]))
+
 (defn has-something [tool data & settle]
   (re-frame/dispatch [:has-something tool data settle]))
 
@@ -35,10 +38,11 @@
                                 (do
                                   [(-> bluegenes.tools (aget (:tool step-data)) (aget "core") (aget "main"))
                                    step-data {:append-state (partial append-state step-data)
+                                              :replace-state (partial replace-state step-data)
                                               :has-something (partial has-something step-data)}])
                                 (= "data" @current-tab)
-                                (json-html/edn->hiccup step-data)
-                                )]]]))})))
+                                (json-html/edn->hiccup step-data))]]]))})))
+
 
 (defn settled-filter [step]
   (true? (:settled step)))

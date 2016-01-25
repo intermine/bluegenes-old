@@ -16,7 +16,19 @@
            :default   {:root "www.humanmine.org/humanmine"
                        :token nil}}
 
-   :histories {"1d4183ab-ef64-440d-8e1d-1c27423ef395" {:uuid "1d4183ab-ef64-440d-8e1d-1c27423ef395"
+   :histories {"ft9987-ef64-440d-8e1d-1c27423ef395" {:uuid "ft2352-ef64-440d-8e1d-1c27423ef395"
+                                                       :name "FAKE TOOL"
+                                                       :slug "history-x"
+                                                       :description "Select a list and then view its output."
+                                                       :steps [{:tool        "faketool"
+                                                                :uuid        "ft118-0256-410a-994f-3e45fbed3952"
+                                                                :title       "List Chooser"
+                                                                :description "Select a list."
+                                                                :has nil
+                                                                :settled     true
+                                                                :input        nil
+                                                                :state       []}]}
+               "1d4183ab-ef64-440d-8e1d-1c27423ef395" {:uuid "1d4183ab-ef64-440d-8e1d-1c27423ef395"
                                                        :name "New history with a starting point."
                                                        :slug "history-1"
                                                        :description "Select a list and then view its output."
@@ -28,7 +40,7 @@
                                                                 :settled     true
                                                                 :input        nil
                                                                 :state       []}
-                                                               {:tool        "viewtable"
+                                                               {:tool        "faketool"
                                                                 :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e4126"
                                                                 :title       "List Shower"
                                                                 :description "View contents."
@@ -68,13 +80,13 @@
                                                                 :state       [{:input "mad, zen, ey"}]
                                                                 :settled     false
                                                                 :input       nil}
-                                                                {:tool        "viewtable"
-                                                                 :uuid        "cb2afdgsssssssdg143-4cdd-4536-8e91-bba0b17e336"
-                                                                 :title       "List Shower"
-                                                                 :description "Viewed them in a list."
-                                                                 :has nil
-                                                                 :settled     true
-                                                                 :state       []}
+                                                               {:tool        "viewtable"
+                                                                :uuid        "cb2afdgsssssssdg143-4cdd-4536-8e91-bba0b17e336"
+                                                                :title       "List Shower"
+                                                                :description "Viewed them in a list."
+                                                                :has nil
+                                                                :settled     true
+                                                                :state       []}
                                                                {:tool        "runtemplate"
                                                                 :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
                                                                 :title       "List Shower"
@@ -82,10 +94,10 @@
                                                                 :has nil
                                                                 :settled     true
                                                                 :state       []}
-                                                                {:tool        "viewtable"
-                                                                 :uuid        "cb2afdgsdg143-4cdd-4536-8e91-bba0b17e336"
-                                                                 :title       "List Shower"
-                                                                 :description "Viewed them in a list."
-                                                                 :has nil
-                                                                 :settled     true
-                                                                 :state       []}]}}})
+                                                               {:tool        "viewtable"
+                                                                :uuid        "cb2afdgsdg143-4cdd-4536-8e91-bba0b17e336"
+                                                                :title       "List Shower"
+                                                                :description "Viewed them in a list."
+                                                                :has nil
+                                                                :settled     true
+                                                                :state       []}]}}})

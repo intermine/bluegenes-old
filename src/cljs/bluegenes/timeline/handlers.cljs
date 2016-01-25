@@ -34,6 +34,13 @@
       (update-in db [:histories (:active-history db) :steps idx :state] conj data))))
 
 (re-frame/register-handler
+  :replace-state
+  trim-v
+  (fn [db [tool data]]
+    (let [idx (get-idx (:uuid tool) (get-in db [:histories (:active-history db) :steps]))]
+      (assoc-in db [:histories (:active-history db) :steps idx :state] [data]))))
+
+(re-frame/register-handler
   :has-something
   trim-v
   (fn [db [tool data & settle]]
