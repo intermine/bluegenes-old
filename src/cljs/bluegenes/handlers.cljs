@@ -1,7 +1,8 @@
 (ns bluegenes.handlers
     (:require [re-frame.core :as re-frame :refer [trim-v]]
               [bluegenes.db :as db]
-              [bluegenes.timeline.handlers]))
+              [bluegenes.timeline.handlers]
+              [intermine.imjs :as imjs]))
 
 (re-frame/register-handler
  :initialize-db
@@ -19,22 +20,31 @@
  (fn [db [_ active-panel & args]]
    (assoc db :active-panel active-panel)))
 
-(re-frame/register-handler
-  :set-timeline-panel trim-v
-  (fn [db [active-panel slug]]
-    ;Look up the UUID of the history based on the slug (friendly) name
-    ;TODO - if the slug doesn't exist then check for the UUID directly
-    (let [uuid (first (keep #(when (= (:slug (val %)) slug) (key %)) (:histories db)))]
-      (assoc db :active-panel active-panel :active-history uuid))))
+
 
 (re-frame/register-handler
-  :activate-dimmer
-  (fn [db [_ message]]
-    (.log js/console "activate dimmer handler" message)
-    (assoc db :dimmer {:active true :message message})))
+ :set-timeline-panel trim-v
+ (fn [db [active-panel slug]]
+   ;Look up the UUID of the history based on the slug (friendly) name
+   ;TODO - if the slug doesn't exist then check for the UUID directly
+   (let [uuid (first (keep #(when (= (:slug (val %)) slug) (key %)) (:histories db)))]
+     (assoc db :active-panel active-panel :active-history uuid))))
 
 (re-frame/register-handler
-  :deactivate-dimmer
-  (fn [db [_]]
-    (assoc db :dimmer {:active false :message nil})))
+ :activate-dimmer
+ (fn [db [_ message]]
+   (.log js/console "activate dimmer handler" message)
+   (assoc db :dimmer {:active true :message message})))
 
+(re-frame/register-handler
+ :deactivate-dimmer
+ (fn [db [_]]
+   (assoc db :dimmer {:active false :message nil})))
+
+
+(re-frame/register-handler
+ :refresh-lists
+ trim-v
+ (fn [db [mine lists]]
+   (println "INCOMING LISTS" lists)
+   (assoc-in db [:mines mine :lists] [lists])))

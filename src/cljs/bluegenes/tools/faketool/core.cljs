@@ -10,37 +10,37 @@
     (if (true? (some #(= (get % "path") type) wheres))
       template)))
 
+(defn fetch-templates-handler [local-state]
+  "Store Intermine's templates in our local state atom"
+  (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
+      (.fetchTemplates)
+      (.then (fn [response]
+               (swap! local-state assoc :templates (js->clj response))))))
 
-(defn fetch-templates-handler [app-state]
-  (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
-        tpl-promise (-> mine .fetchTemplates)]
-    (-> tpl-promise (.then (fn [templates]
-                             (swap! app-state assoc :templates (js->clj templates)))))))
+(defn template-matches-pathtype? [path template]
+  "True if a template has a constraint with a cerain type"
+  (if (some (fn [constraint]
+              (= (get constraint "path") path))
+            (get (second template) "where"))
+    template))
 
+(defn get-templates-for-type [path templates]
+  "Filter a collection of templates for a certain path type"
+  (filter #(template-matches-pathtype? path %) templates))
 
+(defn get-valid-templates [type tpls]
+  "Get templates that can use our input type"
+  (get-templates-for-type type tpls))
 
-(defn drop-down [app-state local-state comms input]
+(defn drop-down [{:keys [templates on-change-handler]}]
+  "Render a drop down that only shows our valid templates"
+  ; (println "RUN WITH TEMPLATE" templates)
   [:div
-  ;  (println @input)
-   (println "list" (-> input :input :data :format))
-  ;  (println "selected" (:selected @local-state))
    [:select.form-control
-    {:on-change (fn [e]
-                  (do (swap! app-state assoc
-                        :selected (-> e .-target .-value)
-                        :query (get (:templates @local-state) (-> e .-target .-value)))
-                        ((:replace-state comms) (dissoc @app-state :templates))
-                        ))}
+    {:on-change on-change-handler}
     (doall
-      (for [[k v] (filter #(filter-for-type % (get-in input [:input :data :type])) (seq (:templates @local-state)))]
-        ^{:key (get v "name")} [:option {:value (get v "name")
-                                         :default (if (= (get v "name") (:selected @app-state)) "test")}
-                                (get v "title")]))]])
-
-(defn prepare-input-constraint [input con]
-  (if (= (get con "path") ("Gene"))
-    (assoc con "value" "REPLACED")
-    con))
+      (for [[name values] templates]
+        ^{:key name} [:option {:value name} (get values "title")]))]])
 
 (defn lock-contraint? [con]
   (if (= (get con "path") "Gene")
@@ -71,19 +71,19 @@
    [:div
     [:button.btn.btn-success "Run"]]))
 
+(defn drop-down-handler [state templates e]
+  (let [name (-> e .-target .-value)]
+    (swap! state assoc :selected name :query (get templates name))))
+
 (defn ^:export main [input]
   (let [local-state (reagent.core/atom {:templates nil})]
     (reagent/create-class
      {:component-did-mount  (fn []
                               (fetch-templates-handler local-state))
-      :reagent-render       (fn [input comms]
+      :reagent-render       (fn [input {:keys [has-something
+                                               replace-state]}]
                               (let [app-state (reagent.core/atom (last (:state input)))]
                                 [:div
-                                ;  [add-state-button comms]
-                                 [drop-down app-state local-state comms input]
-                                 [constraints (get-in @app-state [:query "where"])]
-                                 [run app-state]
-
-                                ;  [:div (str (dissoc @app-state :templates))]
-                                 ])
-                              )})))
+                                 [drop-down {:templates (get-valid-templates "Gene" (:templates @local-state))
+                                             :on-change-handler (comp replace-state (partial drop-down-handler app-state (:templates @local-state)))}]
+                                 [constraints (get-in @app-state [:query "where"])]]))})))
