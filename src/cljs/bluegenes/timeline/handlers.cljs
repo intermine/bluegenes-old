@@ -26,12 +26,12 @@
   (fn [db [data idx]]
     (update-in db [:histories (:active-history db) :steps idx] assoc :input data)))
 
+
 (re-frame/register-handler
   :append-state
   trim-v
-  (fn [db [tool data]]
-    (let [idx (get-idx (:uuid tool) (get-in db [:histories (:active-history db) :steps]))]
-      (update-in db [:histories (:active-history db) :steps idx :state] conj data))))
+  (fn [db [step-id data]]
+      (update-in db [:histories (:active-history db) :steps step-id :state] conj data)))
 
 (re-frame/register-handler
   :replace-state
@@ -43,7 +43,24 @@
 (re-frame/register-handler
   :has-something
   trim-v
-  (fn [db [tool data & settle]]
-    (let [idx (get-idx (:uuid tool) (get-in db [:histories (:active-history db) :steps]))]
-      (re-frame/dispatch [:pass-input data (inc idx)])
-      (update-in db [:histories (:active-history db) :steps idx] assoc :has data))))
+  (fn [db [step-id data]]
+      (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
+                                                                                                 :step step-id}))))
+
+
+(re-frame/register-handler
+ :create-next-step
+ trim-v
+ (fn [db [tool-name]]
+   (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
+         source (:source last-emitted)
+         data (:data last-emitted)]
+     (update-in db [:histories (:active-history db) :steps] assoc :banananana {:tool        "faketool"
+                                                                               :uuid        "33333-4cdd-4536-8e91-bba0b17e4126"
+                                                                               :title       "List Shower"
+                                                                               :description "View contents."
+                                                                               :input "TEST"
+                                                                               :has nil
+                                                                              ;  :notify :1dd2a806-d602-4fea-bb79-7f17915bc2c2
+                                                                               :settled     true
+                                                                               :state       []}))))

@@ -9,7 +9,8 @@
                  [json-html "0.3.6"]
                  [environ "1.0.0"]
                  [reagent-forms "0.5.8"]
-                 [org.clojure/core.async "0.2.374"]]
+                 [org.clojure/core.async "0.2.374"]
+                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]]
 
   :source-paths ["src/clj"]
 

@@ -1,4 +1,8 @@
-(ns bluegenes.db)
+(ns bluegenes.db
+  (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
+
+
+(defn rid [] (str (make-random-uuid)))
 
 (def default-db
   {:name           "βlueGenes"
@@ -17,36 +21,55 @@
                        :token nil}}
 
    :histories {"ft9987-ef64-440d-8e1d-1c27423ef395" {:uuid "ft2352-ef64-440d-8e1d-1c27423ef395"
-                                                       :name "FAKE TOOL"
-                                                       :slug "history-x"
-                                                       :description "Select a list and then view its output."
-                                                       :steps [{:tool        "faketool"
-                                                                :uuid        "ft118-0256-410a-994f-3e45fbed3952"
-                                                                :title       "List Chooser"
-                                                                :description "Select a list."
-                                                                :has nil
-                                                                :settled     true
-                                                                :input        nil
-                                                                :state       []}]}
+                                                     :name "FAKE TOOL"
+                                                     :slug "history-x"
+                                                     :description "Select a list and then view its output."
+                                                     :steps [{:tool        "faketool"
+                                                              :uuid        "ft118-0256-410a-994f-3e45fbed3952"
+                                                              :title       "List Chooser"
+                                                              :description "Select a list."
+                                                              :has nil
+                                                              :settled     true
+                                                              :input        nil
+                                                              :state       []}
+                                                             {:tool        "viewtable"
+                                                              :uuid        "xxx-0256-410a-994f-sdgsdgsdg"
+                                                              :title       "List Chooser"
+                                                              :description "Select a list."
+                                                              :has nil
+                                                              :settled     true
+                                                              :input        nil
+                                                              :state       []}]
+                                                     }
                "1d4183ab-ef64-440d-8e1d-1c27423ef395" {:uuid "1d4183ab-ef64-440d-8e1d-1c27423ef395"
                                                        :name "New history with a starting point."
                                                        :slug "history-1"
                                                        :description "Select a list and then view its output."
-                                                       :steps [{:tool        "chooselist"
-                                                                :uuid        "e42bdcbf-0256-410a-994f-3e45fbed3952"
-                                                                :title       "List Chooser"
-                                                                :description "Select a list."
-                                                                :has nil
-                                                                :settled     true
-                                                                :input        nil
-                                                                :state       []}
-                                                               {:tool        "faketool"
-                                                                :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e4126"
-                                                                :title       "List Shower"
-                                                                :description "View contents."
-                                                                :has nil
-                                                                :settled     true
-                                                                :state       []}]}
+                                                       :starting-point "e42bdcbf-0256-410a-994f-3e45fbed3952"
+                                                       :steps {:e42bdcbf-0256-410a-994f-3e45fbed3952 {:tool        "chooselist"
+                                                                                                      :uuid        "e42bdcbf-0256-410a-994f-3e45fbed3952"
+                                                                                                      :title       "List Chooser"
+                                                                                                      :description "Select a list."
+                                                                                                      :has nil
+                                                                                                      :settled     true
+                                                                                                      :input        nil
+                                                                                                      :notify :cb2af143-4cdd-4536-8e91-bba0b17e4126
+                                                                                                      :state       []}
+                                                               :cb2af143-4cdd-4536-8e91-bba0b17e4126 {:tool        "faketool"
+                                                                                                      :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e4126"
+                                                                                                      :title       "List Shower"
+                                                                                                      :description "View contents."
+                                                                                                      :has nil
+                                                                                                      :notify :1dd2a806-d602-4fea-bb79-7f17915bc2c2
+                                                                                                      :settled     true
+                                                                                                      :state       []}
+                                                               :1dd2a806-d602-4fea-bb79-7f17915bc2c2 {:tool        "viewtable"
+                                                                                                      :uuid        "1dd2a806-d602-4fea-bb79-7f17915bc2c2"
+                                                                                                      :title       "List Shower"
+                                                                                                      :description "View contents."
+                                                                                                      :has nil
+                                                                                                      :settled     true
+                                                                                                      :state       []}}}
 
                "d3893c7d-031c-452b-b85b-fc1757c383f9" {:uuid "d3893c7d-031c-452b-b85b-fc1757c383f9"
                                                        :slug "history-2"

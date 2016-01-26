@@ -34,7 +34,7 @@
 
 (defn drop-down [{:keys [templates on-change-handler]}]
   "Render a drop down that only shows our valid templates"
-  ; (println "RUN WITH TEMPLATE" templates)
+  ; (println "RUN WITH TEMPLATE" templa_tes)
   [:div
    [:select.form-control
     {:on-change on-change-handler}
@@ -44,7 +44,6 @@
 
 (defn constraint [con & [locked]]
   (fn []
-    (println "LAST SPLIT" )
     [:div
     ; Hide constraints that can't be changed
     ;  {:class (if (= (get con "edidtable" false)) "hide")}
@@ -63,33 +62,41 @@
 (defn constraints [cons]
   "Renders a list of constraints ignoring any constraints on id."
   [:div
-   (for [con cons :when (false? (= "id" (path-end (get con "path"))))]
+   (for [con cons :when (not (get con "hide"))]
      ^{:key (get con "path")} [constraint con])])
 
+(defn run-button-handler [state emit]
+  "Emit the data."
+  (emit {:service {:root "www.flymine.org/query"}
+         :data {:format "query"
+                :type "Gene"
+                :value (js->clj (-> (:query @state)))}}))
+
+(defn run-button [state emit]
+  [:button.btn.btn-primary {:on-click (fn [e] (run-button-handler state emit)) } "Run"])
+
 (defn convert-input-to-constraint [input]
-  (println "--------conver input" input)
   (cond
     (= (get-in input [:data :format]) "list")
-    {"path" (str (get-in input [:data :type]) ".id")
+    {"path" (str (get-in input [:data :type]) "")
      "op" "IN"
-     "value" (get-in input [:data :name])}
-     (= (get-in input [:data :format]) "ids")
-     {"path" (str (get-in input [:data :type]) ".id")
-      "op" "ONE OF"
-      "value" (get-in input [:data :values])}))
+     "value" (get-in input [:data :name])
+     "hide" true}
+
+    (= (get-in input [:data :format]) "ids")
+    {"path" (str (get-in input [:data :type]) ".id")
+     "op" "ONE OF"
+     "hide" true
+     "value" (get-in input [:data :values])}))
 
 (defn replace-input-constraint [template input]
-  (println "replacing constraints" (get-in input [:data :type]))
   (update-in template ["where"] #(map (fn [con]
-                                        (println "looking at path" con)
-                                        (println "about to produce" (merge con (convert-input-to-constraint input)))
                                         (if (true? (= (get con "path") (get-in input [:data :type])))
                                           (merge con (convert-input-to-constraint input))
                                           con)) %)))
 
 (defn drop-down-handler [state templates input e]
   (let [name (-> e .-target .-value)]
-    (println "dropdown handler has state" (:input input))
     (swap! state assoc :selected name :query (replace-input-constraint (get templates name) (:input input)))))
 
 (defn ^:export main [input]
@@ -103,4 +110,5 @@
                                 [:div
                                  [drop-down {:templates (get-valid-templates "Gene" (:templates @local-state))
                                              :on-change-handler (comp replace-state (partial drop-down-handler app-state (:templates @local-state) input))}]
-                                 [constraints (get-in @app-state [:query "where"])]]))})))
+                                 [constraints (get-in @app-state [:query "where"])]
+                                 [run-button app-state has-something]]))})))
