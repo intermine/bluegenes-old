@@ -42,16 +42,12 @@
       (for [[name values] templates]
         ^{:key name} [:option {:value name} (get values "title")]))]])
 
-(defn lock-contraint? [con]
-  (if (= (get con "path") "Gene")
-    true
-    false))
-
 (defn constraint [con & [locked]]
   (fn []
+    (println "LAST SPLIT" )
     [:div
     ; Hide constraints that can't be changed
-    ;  {:class (if (true? locked) "hide")}
+    ;  {:class (if (= (get con "edidtable" false)) "hide")}
      [:form
      [:div.form-group
       [:label (get con "path")]
@@ -59,21 +55,42 @@
        [:span.input-group-addon (get con "op")]
        [:input.form-control {:type "text"
                              :value (get con "value")
-                             :disabled (if (true? locked) "true")}]]]]]))
+                             :disabled (if (= false (get con "editable")) "true")}]]]]]))
+
+(defn path-end [path]
+  (last (clojure.string/split path #"\.")))
 
 (defn constraints [cons]
+  "Renders a list of constraints ignoring any constraints on id."
   [:div
-   (for [con cons]
-     ^{:key (get con "path")} [constraint con (lock-contraint? con)])])
+   (for [con cons :when (false? (= "id" (path-end (get con "path"))))]
+     ^{:key (get con "path")} [constraint con])])
 
-(defn run [app-state]
- (fn []
-   [:div
-    [:button.btn.btn-success "Run"]]))
+(defn convert-input-to-constraint [input]
+  (println "--------conver input" input)
+  (cond
+    (= (get-in input [:data :format]) "list")
+    {"path" (str (get-in input [:data :type]) ".id")
+     "op" "IN"
+     "value" (get-in input [:data :name])}
+     (= (get-in input [:data :format]) "ids")
+     {"path" (str (get-in input [:data :type]) ".id")
+      "op" "ONE OF"
+      "value" (get-in input [:data :values])}))
 
-(defn drop-down-handler [state templates e]
+(defn replace-input-constraint [template input]
+  (println "replacing constraints" (get-in input [:data :type]))
+  (update-in template ["where"] #(map (fn [con]
+                                        (println "looking at path" con)
+                                        (println "about to produce" (merge con (convert-input-to-constraint input)))
+                                        (if (true? (= (get con "path") (get-in input [:data :type])))
+                                          (merge con (convert-input-to-constraint input))
+                                          con)) %)))
+
+(defn drop-down-handler [state templates input e]
   (let [name (-> e .-target .-value)]
-    (swap! state assoc :selected name :query (get templates name))))
+    (println "dropdown handler has state" (:input input))
+    (swap! state assoc :selected name :query (replace-input-constraint (get templates name) (:input input)))))
 
 (defn ^:export main [input]
   (let [local-state (reagent.core/atom {:templates nil})]
@@ -85,5 +102,5 @@
                               (let [app-state (reagent.core/atom (last (:state input)))]
                                 [:div
                                  [drop-down {:templates (get-valid-templates "Gene" (:templates @local-state))
-                                             :on-change-handler (comp replace-state (partial drop-down-handler app-state (:templates @local-state)))}]
+                                             :on-change-handler (comp replace-state (partial drop-down-handler app-state (:templates @local-state) input))}]
                                  [constraints (get-in @app-state [:query "where"])]]))})))
