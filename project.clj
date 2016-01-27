@@ -35,8 +35,8 @@
   :uberjar-name "bluegenes.jar"
 
   :aliases {"foreign" ["do"
-                       ["shell" "curl" "-o" "foreign-libs/imtables.min.js" "http://cdn.intermine.org/js/intermine/im-tables/2.0.0/imtables.min.js" "-O" "foreign-libs/imtables.min.js"]
-                       ["shell" "curl" "-o" "foreign-libs/im.min.js" "http://cdn.intermine.org/js/intermine/imjs/3.15.0/im.min.js" "-O" "foreign-libs/im.min.js"]]}
+                       ["shell" "curl" "-o" "foreign-libs/imtables.min.js" "http://cdn.intermine.org/js/intermine/im-tables/2.0.0/imtables.min.js"]
+                       ["shell" "curl" "-o" "foreign-libs/im.min.js" "http://cdn.intermine.org/js/intermine/imjs/3.15.0/im.min.js"]]}
 
   :profiles {
              :dev {:cljsbuild {:builds
