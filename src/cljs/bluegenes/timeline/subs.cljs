@@ -4,7 +4,7 @@
 
 (re-frame/register-sub
   :steps
-  (fn [db _]
+  (fn [db [_ testvalue]]
     (reaction (get-in @db [:histories (:active-history @db) :steps]))))
 
 (re-frame/register-sub

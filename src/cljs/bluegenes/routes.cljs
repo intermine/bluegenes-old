@@ -30,9 +30,7 @@
               (re-frame/dispatch [:set-timeline-panel :timeline-panel id])))
 
   (defroute "/timeline" []
-            (re-frame/dispatch [:set-active-panel :timeline-panel]))
-
-
+            (re-frame/dispatch [:set-timeline-panel :timeline-panel]))
 
   (defroute "/debug" []
             (re-frame/dispatch [:set-active-panel :debug-panel]))

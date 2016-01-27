@@ -20,11 +20,9 @@
  (fn [db [_ active-panel & args]]
    (assoc db :active-panel active-panel)))
 
-
-
 (re-frame/register-handler
  :set-timeline-panel trim-v
- (fn [db [active-panel slug]]
+ (fn [db [active-panel & [slug]]]
    ;Look up the UUID of the history based on the slug (friendly) name
    ;TODO - if the slug doesn't exist then check for the UUID directly
    (let [uuid (first (keep #(when (= (:slug (val %)) slug) (key %)) (:histories db)))]
@@ -40,11 +38,3 @@
  :deactivate-dimmer
  (fn [db [_]]
    (assoc db :dimmer {:active false :message nil})))
-
-
-(re-frame/register-handler
- :refresh-lists
- trim-v
- (fn [db [mine lists]]
-   (println "INCOMING LISTS" lists)
-   (assoc-in db [:mines mine :lists] [lists])))
