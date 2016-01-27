@@ -10,7 +10,7 @@
               false)) (seq toolmap/tools)))
 
 (defn next-step-handler [name]
-  (re-frame/dispatch [:create-next-step]))
+  (re-frame/dispatch [:create-next-step name]))
 
 (defn tool-card [[name props]]
   [:div.tool-card
@@ -27,5 +27,5 @@
              (for [tool (filter-available-tools (:type (:data @available-data)) )]
                [tool-card tool]))
        [:div.clear-fix]
-       (json-html/edn->hiccup @available-data)
+      ;  (json-html/edn->hiccup @available-data)
        ])))

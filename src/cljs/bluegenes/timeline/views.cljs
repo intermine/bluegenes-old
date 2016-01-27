@@ -55,11 +55,13 @@
         (recur (:notify (id steps)) (conj step-vec (id steps)))))))
 
 (defn previous-steps []
-  (let [steps (re-frame/subscribe [:steps])
+  (let [steps-reaction (re-frame/subscribe [:steps])
         mines (re-frame/subscribe [:mines])]
-    (into [:div] (for [s (reverse (step-tree @steps))]
-                   (do
-                     ^{:key (:uuid s)} [step (assoc s :mines @mines) nil])))))
+    (let [steps @steps-reaction]
+      (if (nil? steps)
+        [:h1 "New history"]
+        (into [:div] (for [s (reverse (step-tree steps))]
+                       (do ^{:key (:uuid s)} [step (assoc s :mines @mines) nil])))))))
 
 (defn history-details []
   (let [history (re-frame/subscribe [:history])]
