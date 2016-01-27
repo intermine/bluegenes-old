@@ -1,5 +1,5 @@
 (ns bluegenes.toolmap)
 
-(def toolmap
+(def tools
   {"runtemplate" {:title "Structured Search"
                   :accepts {:type "Gene"}}})

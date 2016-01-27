@@ -7,7 +7,7 @@
   (filter (fn [[tool-name tool-data]]
             (if (= (-> tool-data :accepts :type) datatype)
               true
-              false)) (seq toolmap/toolmap)))
+              false)) (seq toolmap/tools)))
 
 (defn next-step-handler [name]
   (re-frame/dispatch [:create-next-step]))
