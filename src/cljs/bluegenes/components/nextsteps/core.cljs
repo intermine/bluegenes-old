@@ -24,7 +24,7 @@
       [:div.next-steps
        [:div.next-steps-title "Next Steps"]
        (into [:div.tool-card-container]
-             (for [tool (filter-available-tools "Gene" )]
+             (for [tool (filter-available-tools (:type (:data @available-data)) )]
                [tool-card tool]))
        [:div.clear-fix]
        (json-html/edn->hiccup @available-data)
