@@ -5,4 +5,3 @@
 out
 .lein-repl-history
 .lein-env
-foreign-libs/*
