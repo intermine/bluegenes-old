@@ -3,7 +3,7 @@
             [reagent.core :as reagent]
             [intermine.imjs :as imjs]))
 
-(def flymine (js/imjs.Service. #js {:root "www.humanmine.org/humanmine"}))
+(def flymine (js/imjs.Service. #js {:root "www.flymine.org/query"}))
 
 (def lists (reagent/atom nil))
 
@@ -17,7 +17,7 @@
                          [:span.badge (.-size list)]
                          [:span {:on-click (fn []
                                              ((:append-state responders) {:chose (.-name list)})
-                                             ((:has-something responders) {:service {:root "www.humanmine.org/humanmine"}
+                                             ((:has-something responders) {:service {:root "www.flymine.org/query"}
                                                                            :data {:format "list"
                                                                                   :type (.-type list)
                                                                                   :name (.-name list)}}))}

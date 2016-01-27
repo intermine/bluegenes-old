@@ -25,22 +25,54 @@
             :code "A"
             }]})
 
-(defn table [service-in query-in]
+(defn table [service-in query-in responder]
   (let [selector "#some-elem"
         service (clj->js service-in)
         query (clj->js query-in)]
     (-> (.loadTable js/imtables
                     selector
-                    #js {:start 0 :end 5}
-                    #js {:service service :query query}))) nil)
+                    (clj->js {:start 0 :size 5})
+                    (clj->js {:service service :query query}))
+        (.then (fn [e]
+                ;  (.log js/console e)
+                 (responder {:banana "yellow"}))))
+        ; (.then (fn [table]
+        ;         ;  (js* "debugger;")
+        ;          (responder {:server {:root "www.flymine.org/query"}
+        ;                      :data {:format "query"
+        ;                             :type "Gene"
+        ;                             :value (clj->js (.. table -query toJSON))}})
+        ;          (.log js/console "TABLE IS" (.. table -query toJSON))
+        ;          ))
+        ))
 
 (defn ^:export main []
-  (fn [input]
-    (let [query (cond
-                  (= "list" (-> input :input :data :format))
-                  (get-list-query (get-in input [:input :service]) (get-in input [:input :data]))
-                  (= "ids" (-> input :input :data :format))
-                  (get-id-query (get-in input [:input :service]) (get-in input [:input :data])))]
-      [:div
-       [:div#some-elem]
-       (table (get-in input [:input :service]) query)])))
+  (fn [input comms]
+    (reagent/create-class
+     {:reagent-render (fn []
+                        [:div
+                         [:div#some-elem]])
+      :component-did-mount (fn [comp]
+                             (let [input (reagent/props comp)
+                                   query (cond
+                                           (= "list" (-> input :input :data :format))
+                                           (get-list-query (get-in input [:input :service]) (get-in input [:input :data]))
+                                           (= "ids" (-> input :input :data :format))
+                                           (get-id-query (get-in input [:input :service]) (get-in input [:input :data]))
+                                           (= "query" (-> input :input :data :format))
+                                           (get-in input [:input :data :value]))]
+                              (println "running with new query" query)
+                               (table (get-in input [:input :service]) query (get comms :has-something))))
+
+      :component-did-update (fn [input]
+                             (let [input (reagent/props comp)
+                                   query (cond
+                                           (= "list" (-> input :input :data :format))
+                                           (get-list-query (get-in input [:input :service]) (get-in input [:input :data]))
+                                           (= "ids" (-> input :input :data :format))
+                                           (get-id-query (get-in input [:input :service]) (get-in input [:input :data]))
+                                           (= "query" (-> input :input :data :format))
+                                           (get-in input [:input :data :value]))]
+                              (println "running with new query" query)
+                               (table (get-in input [:input :service]) query (get comms :has-something)))
+                             )})))

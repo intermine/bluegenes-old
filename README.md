@@ -32,3 +32,27 @@ lein foreign
 lein clean
 lein cljsbuild once min
 ```
+
+## Docker
+
+To build an image locally:
+```
+docker build -t bluegenes:[version tag]
+```
+
+To run a container from the image
+```
+docker run -it --rm -p 8080:5000 --name bluegenes-server bluegenes:[version tag]
+```
+
+## Deploy to Dokku
+
+If not done already, add your dokku server as a remote:
+```
+git remote add dokkuserver dokku@example.com:bluegenes
+```
+
+Push the repository:
+```
+git push dokkuserver master
+```

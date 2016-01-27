@@ -16,13 +16,15 @@ bluegenes.tools.chooselist.core.main = function() {};
 bluegenes.tools.showlist.core.main = function() {};
 bluegenes.tools.viewtable.core.main = function() {};
 bluegenes.tools.idresolver.core.main = function() {};
-
+bluegenes.tools.runtemplate.core.main = function() {};
+bluegenes.tools.faketool.core.main = function() {};
 
 // Functions used by imjs
 // TODO: we should create an IMJS externs file for all those cool CLJS hipsters out there.
 var imjs = {};
 imjs.prototype.Service = function() {};
 imjs.prototype.Service.fetchLists = function() {};
+imjs.prototype.Service.fetchTemplates = function() {};
 imjs.prototype.Service.resolveIds = function() {};
 imjs.prototype.Service.poll = function() {};
 

@@ -55,7 +55,6 @@
 (defmethod panels :debug-panel [] [debug-panel])
 (defmethod panels :default [] [:div])
 
-
 (defn main-panel []
   (let [active-panel (re-frame/subscribe [:active-panel])]
     (fn []
