@@ -102,6 +102,8 @@ body {
   color: #bbe9f0;
 }
 .next-steps {
+  height: 250px;
+  overflow-y: scroll;
   background: #F3F3F3;
   background: #3C4750;
   padding: 10px 20px 10px 20px;
@@ -149,6 +151,7 @@ body {
   /* Firefox, other Gecko */
   box-sizing: border-box;
   /* Opera/IE 8+ */
+  font-size: 10px;
 }
 .jh-key,
 .jh-value {

@@ -20,27 +20,28 @@
            :default   {:root "www.humanmine.org/humanmine"
                        :token nil}}
 
-   :histories {"ft9987-ef64-440d-8e1d-1c27423ef395" {:uuid "ft2352-ef64-440d-8e1d-1c27423ef395"
-                                                     :name "FAKE TOOL"
-                                                     :slug "history-x"
-                                                     :description "Select a list and then view its output."
-                                                     :steps [{:tool        "faketool"
-                                                              :uuid        "ft118-0256-410a-994f-3e45fbed3952"
-                                                              :title       "List Chooser"
-                                                              :description "Select a list."
-                                                              :has nil
-                                                              :settled     true
-                                                              :input        nil
-                                                              :state       []}
-                                                             {:tool        "viewtable"
-                                                              :uuid        "xxx-0256-410a-994f-sdgsdgsdg"
-                                                              :title       "List Chooser"
-                                                              :description "Select a list."
-                                                              :has nil
-                                                              :settled     true
-                                                              :input        nil
-                                                              :state       []}]
-                                                     }
+   :histories {
+              ;  "ft9987-ef64-440d-8e1d-1c27423ef395" {:uuid "ft2352-ef64-440d-8e1d-1c27423ef395"
+              ;                                        :name "FAKE TOOL"
+              ;                                        :slug "history-x"
+              ;                                        :description "Select a list and then view its output."
+              ;                                        :steps [{:tool        "faketool"
+              ;                                                 :uuid        "ft118-0256-410a-994f-3e45fbed3952"
+              ;                                                 :title       "List Chooser"
+              ;                                                 :description "Select a list."
+              ;                                                 :has nil
+              ;                                                 :settled     true
+              ;                                                 :input        nil
+              ;                                                 :state       []}
+              ;                                                {:tool        "viewtable"
+              ;                                                 :uuid        "xxx-0256-410a-994f-sdgsdgsdg"
+              ;                                                 :title       "List Chooser"
+              ;                                                 :description "Select a list."
+              ;                                                 :has nil
+              ;                                                 :settled     true
+              ;                                                 :input        nil
+              ;                                                 :state       []}]
+              ;                                        }
                "1d4183ab-ef64-440d-8e1d-1c27423ef395" {:uuid "1d4183ab-ef64-440d-8e1d-1c27423ef395"
                                                        :name "New history with a starting point."
                                                        :slug "history-1"
@@ -53,74 +54,76 @@
                                                                                                       :has nil
                                                                                                       :settled     true
                                                                                                       :input        nil
-                                                                                                      :notify :cb2af143-4cdd-4536-8e91-bba0b17e4126
+                                                                                                      ; :notify :cb2af143-4cdd-4536-8e91-bba0b17e4126
                                                                                                       :state       []}
-                                                               :cb2af143-4cdd-4536-8e91-bba0b17e4126 {:tool        "faketool"
-                                                                                                      :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e4126"
-                                                                                                      :title       "List Shower"
-                                                                                                      :description "View contents."
-                                                                                                      :has nil
-                                                                                                      :notify :1dd2a806-d602-4fea-bb79-7f17915bc2c2
-                                                                                                      :settled     true
-                                                                                                      :state       []}
-                                                               :1dd2a806-d602-4fea-bb79-7f17915bc2c2 {:tool        "viewtable"
-                                                                                                      :uuid        "1dd2a806-d602-4fea-bb79-7f17915bc2c2"
-                                                                                                      :title       "List Shower"
-                                                                                                      :description "View contents."
-                                                                                                      :has nil
-                                                                                                      :settled     true
-                                                                                                      :state       []}}}
+                                                              ;  :cb2af143-4cdd-4536-8e91-bba0b17e4126 {:tool        "faketool"
+                                                              ;                                         :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e4126"
+                                                              ;                                         :title       "List Shower"
+                                                              ;                                         :description "View contents."
+                                                              ;                                         :has nil
+                                                              ;                                         :notify :1dd2a806-d602-4fea-bb79-7f17915bc2c2
+                                                              ;                                         :settled     true
+                                                              ;                                         :state       []}
+                                                              ;  :1dd2a806-d602-4fea-bb79-7f17915bc2c2 {:tool        "viewtable"
+                                                              ;                                         :uuid        "1dd2a806-d602-4fea-bb79-7f17915bc2c2"
+                                                              ;                                         :title       "List Shower"
+                                                              ;                                         :description "View contents."
+                                                              ;                                         :has nil
+                                                              ;                                         :settled     true
+                                                              ;                                         :state       []}
+                                                               }}
 
-               "d3893c7d-031c-452b-b85b-fc1757c383f9" {:uuid "d3893c7d-031c-452b-b85b-fc1757c383f9"
-                                                       :slug "history-2"
-                                                       :name "New history with different starting point, same endpoint."
-                                                       :description "This workflow simulates an entry point with no initial input. User interaction required."
-                                                       :steps [
-                                                               {:tool        "idresolver"
-                                                                :uuid        "f5da98e2-bec6-4f2f-802e-ab5c6cf035b4"
-                                                                :title       "ID Resolver"
-                                                                :description "Uploaded genes from my experiment."
-                                                                :state       []
-                                                                :settled     false
-                                                                :input       nil}
-                                                               {:tool        "faketool"
-                                                                :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
-                                                                :title       "List Shower"
-                                                                :description "Viewed them in a list."
-                                                                :has nil
-                                                                :settled     true
-                                                                :state       []}]}
-
-               "a4c84b0d-332f-46bd-9fd8-0ddbf1983e29" {:uuid "a4c84b0d-332f-46bd-9fd8-0ddbf1983e29"
-                                                       :slug "results-for-thesis"
-                                                       :name "Two tools, state saved."
-                                                       :description "Workflow that gets repeated when loaded. No user interaction required."
-                                                       :steps [
-                                                               {:tool        "idresolver"
-                                                                :uuid        "f5da98e2-bec6-4f2f-802e-ab5c6cf035b4"
-                                                                :title       "ID Resolver"
-                                                                :description "Uploaded genes from my experiment."
-                                                                :state       [{:input "mad, zen, ey"}]
-                                                                :settled     false
-                                                                :input       nil}
-                                                               {:tool        "viewtable"
-                                                                :uuid        "cb2afdgsssssssdg143-4cdd-4536-8e91-bba0b17e336"
-                                                                :title       "List Shower"
-                                                                :description "Viewed them in a list."
-                                                                :has nil
-                                                                :settled     true
-                                                                :state       []}
-                                                               {:tool        "runtemplate"
-                                                                :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
-                                                                :title       "List Shower"
-                                                                :description "Viewed them in a list."
-                                                                :has nil
-                                                                :settled     true
-                                                                :state       []}
-                                                               {:tool        "viewtable"
-                                                                :uuid        "cb2afdgsdg143-4cdd-4536-8e91-bba0b17e336"
-                                                                :title       "List Shower"
-                                                                :description "Viewed them in a list."
-                                                                :has nil
-                                                                :settled     true
-                                                                :state       []}]}}})
+              ;  "d3893c7d-031c-452b-b85b-fc1757c383f9" {:uuid "d3893c7d-031c-452b-b85b-fc1757c383f9"
+              ;                                          :slug "history-2"
+              ;                                          :name "New history with different starting point, same endpoint."
+              ;                                          :description "This workflow simulates an entry point with no initial input. User interaction required."
+              ;                                          :steps [
+              ;                                                  {:tool        "idresolver"
+              ;                                                   :uuid        "f5da98e2-bec6-4f2f-802e-ab5c6cf035b4"
+              ;                                                   :title       "ID Resolver"
+              ;                                                   :description "Uploaded genes from my experiment."
+              ;                                                   :state       []
+              ;                                                   :settled     false
+              ;                                                   :input       nil}
+              ;                                                  {:tool        "faketool"
+              ;                                                   :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
+              ;                                                   :title       "List Shower"
+              ;                                                   :description "Viewed them in a list."
+              ;                                                   :has nil
+              ;                                                   :settled     true
+              ;                                                   :state       []}]}
+               ;
+              ;  "a4c84b0d-332f-46bd-9fd8-0ddbf1983e29" {:uuid "a4c84b0d-332f-46bd-9fd8-0ddbf1983e29"
+              ;                                          :slug "results-for-thesis"
+              ;                                          :name "Two tools, state saved."
+              ;                                          :description "Workflow that gets repeated when loaded. No user interaction required."
+              ;                                          :steps [
+              ;                                                  {:tool        "idresolver"
+              ;                                                   :uuid        "f5da98e2-bec6-4f2f-802e-ab5c6cf035b4"
+              ;                                                   :title       "ID Resolver"
+              ;                                                   :description "Uploaded genes from my experiment."
+              ;                                                   :state       [{:input "mad, zen, ey"}]
+              ;                                                   :settled     false
+              ;                                                   :input       nil}
+              ;                                                  {:tool        "viewtable"
+              ;                                                   :uuid        "cb2afdgsssssssdg143-4cdd-4536-8e91-bba0b17e336"
+              ;                                                   :title       "List Shower"
+              ;                                                   :description "Viewed them in a list."
+              ;                                                   :has nil
+              ;                                                   :settled     true
+              ;                                                   :state       []}
+              ;                                                  {:tool        "runtemplate"
+              ;                                                   :uuid        "cb2af143-4cdd-4536-8e91-bba0b17e336"
+              ;                                                   :title       "List Shower"
+              ;                                                   :description "Viewed them in a list."
+              ;                                                   :has nil
+              ;                                                   :settled     true
+              ;                                                   :state       []}
+              ;                                                  {:tool        "viewtable"
+              ;                                                   :uuid        "cb2afdgsdg143-4cdd-4536-8e91-bba0b17e336"
+              ;                                                   :title       "List Shower"
+              ;                                                   :description "Viewed them in a list."
+              ;                                                   :has nil
+              ;                                                   :settled     true
+              ;                                                   :state       []}]}
+               }})

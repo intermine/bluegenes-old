@@ -10,7 +10,8 @@
                  [environ "1.0.0"]
                  [reagent-forms "0.5.8"]
                  [org.clojure/core.async "0.2.374"]
-                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]]
+                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [bostonou/cljs-pprint "0.0.4-SNAPSHOT"]]
 
   :source-paths ["src/clj"]
 

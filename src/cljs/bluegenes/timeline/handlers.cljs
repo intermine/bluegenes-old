@@ -1,7 +1,8 @@
 (ns bluegenes.timeline.handlers
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame :refer [debug trim-v]]
-            [bluegenes.db :as db]))
+            [bluegenes.db :as db])
+  (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (defn get-idx [id steps]
   (loop [needle id
@@ -36,9 +37,13 @@
 (re-frame/register-handler
   :replace-state
   trim-v
-  (fn [db [tool data]]
-    (let [idx (get-idx (:uuid tool) (get-in db [:histories (:active-history db) :steps]))]
-      (assoc-in db [:histories (:active-history db) :steps idx :state] [data]))))
+  (fn [db [step-id data]]
+    (println "state got id" step-id)
+    (println "got data" data)
+    (println "aobut to update tool" (get-in db [:histories (:active-history db) :steps step-id]))
+    (println "now its" (assoc-in db [:histories (:active-history db) :steps step-id :state] [data]))
+
+      (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
 
 (re-frame/register-handler
   :has-something
@@ -47,6 +52,13 @@
       (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
                                                                                                  :step step-id}))))
 
+(defn rid [] (str (make-random-uuid)))
+
+(defn link-new-step-to-source [db old-step-id new-step-id]
+  (update-in db [:histories (:active-history db) :steps old-step-id] assoc :notify new-step-id))
+
+(defn create-step [db id new-step]
+  (update-in db [:histories (:active-history db) :steps] assoc id new-step))
 
 (re-frame/register-handler
  :create-next-step
@@ -54,13 +66,14 @@
  (fn [db [tool-name]]
    (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
          source (:source last-emitted)
-         data (:data last-emitted)]
-     (update-in db [:histories (:active-history db) :steps] assoc :banananana {:tool        "faketool"
-                                                                               :uuid        "33333-4cdd-4536-8e91-bba0b17e4126"
-                                                                               :title       "List Shower"
-                                                                               :description "View contents."
-                                                                               :input "TEST"
-                                                                               :has nil
-                                                                              ;  :notify :1dd2a806-d602-4fea-bb79-7f17915bc2c2
-                                                                               :settled     true
-                                                                               :state       []}))))
+         data (:data last-emitted)
+         uuid (keyword (rid))]
+     (link-new-step-to-source (create-step db  uuid {:tool        "faketool"
+                                                     :uuid        uuid
+                                                     :title       "List Shower"
+                                                     :description "View contents."
+                                                     :has nil
+                                                     :settled     true
+                                                     :state       []})
+                              (:step source)
+                              uuid))))
