@@ -11,8 +11,6 @@
   (re-frame/dispatch [:append-state (keyword (:uuid tool)) data]))
 
 (defn replace-state [tool data]
-  (println "replacing state on tool" (:uuid tool))
-  (println "with data" data)
   (re-frame/dispatch [:replace-state (:uuid tool) data]))
 
 (defn has-something [tool data]
@@ -23,7 +21,7 @@
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
       {:reagent-render (fn [step-data]
-        (println "looking for tool"  (:tool step-data))
+        (.debug js/console "Loading Step:" step-data)
                          (let [_ nil]
                            [:div.step-container
                             [:div.step-inner
@@ -51,22 +49,16 @@
         [starting-point] (utils/diff all-notifiers (keys steps))]
     (loop [id starting-point
            step-vec []]
-      ; (println "starting point is" starting-point)
       (if-not (contains? (id steps) :notify)
         (do
-          ; (println "final tree is" (conj step-vec (id steps)))
           (conj step-vec (id steps)))
         (recur (:notify (id steps)) (conj step-vec (id steps)))))))
 
 (defn previous-steps []
   (let [steps (re-frame/subscribe [:steps])
         mines (re-frame/subscribe [:mines])]
-    ; (into [:div] (for [s (step-tree @steps) :when (contains? s :input)]
-    (println "allsteps")
-    (println (pprint (step-tree @steps)))
     (into [:div] (for [s (reverse (step-tree @steps))]
                    (do
-                     (.debug js/console "Loading step" (clj->js s))
                      ^{:key (:uuid s)} [step (assoc s :mines @mines) nil])))))
 
 (defn history-details []

@@ -12,7 +12,6 @@
               [bluegenes.tools.idresolver.core :as idresolver]
               [bluegenes.tools.viewtable.core :as viewtable]
               [bluegenes.tools.runtemplate.core :as runtemplate]
-              [bluegenes.tools.faketool.core :as faketool]
               [intermine.imjs :as imjs]))
 
 (enable-console-print!)

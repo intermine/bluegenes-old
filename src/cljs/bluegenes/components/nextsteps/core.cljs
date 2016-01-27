@@ -5,25 +5,26 @@
 
 (defn filter-available-tools [datatype]
   (filter (fn [[tool-name tool-data]]
-            (if (= (-> tool-data :accepts :format) datatype)
+            (if (= (-> tool-data :accepts :type) datatype)
               true
               false)) (seq toolmap/toolmap)))
 
 (defn next-step-handler [name]
-  (println "dipatching name" name)
   (re-frame/dispatch [:create-next-step]))
 
 (defn tool-card [[name props]]
   [:div.tool-card
    {:on-click (fn [] (next-step-handler name))}
-   [:div.title name]])
+   [:div.title (:title props)]
+   [:div.body name]])
 
 (defn main []
   (let [available-data (re-frame/subscribe [:available-data])]
     (fn []
       [:div.next-steps
+       [:div.next-steps-title "Next Steps"]
        (into [:div.tool-card-container]
-             (for [tool (filter-available-tools "list" )]
+             (for [tool (filter-available-tools "Gene" )]
                [tool-card tool]))
        [:div.clear-fix]
        (json-html/edn->hiccup @available-data)

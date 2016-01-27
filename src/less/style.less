@@ -16,8 +16,6 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-
-
 .sec {
     padding: 20px;
 }
@@ -99,6 +97,17 @@ body {
   display: flex;
 }
 
+.next-steps-title {
+
+  background: #3C4750;
+  float: left;
+  color: white;
+  color: #bbe9f0;
+  padding: 20px;
+  font-size: 1.5em;
+  font-style: italic;
+
+}
 .tool-card {
 
   &:hover {
@@ -123,7 +132,7 @@ body {
 }
 
 .next-steps {
-  height: 250px;
+  max-height: 250px;
   overflow-y: scroll;
   background: #F3F3F3;
   background: #3C4750;
@@ -152,48 +161,23 @@ body {
         padding: 10px;
         background: white;
         min-height: 300px;
-
-
-
     }
-
   }
-
 }
 
 .step-container {
-
-    // background: red;
     width: 100%;
-
-    // border-top: 1px solid black;
-    // border-bottom: 1px solid #dedede;
-
     .step-inner {
-
-
         margin: 10px 20px 10px 20px;
-
-        .toolbar {
-            // background: @rgba-primary-3;
-            // background: whitesmoke;
-        }
 
         .body {
             padding: 10px;
             background: white;
-            // min-height: 300px;
             border-left: 1px solid #ddd;
             border-bottom: 1px solid #ddd;
             border-right: 1px solid #ddd;
-            // max-height: 1200px;
-            // overflow-y: scroll;
-
         }
-
     }
-
-
 }
 
 
@@ -203,6 +187,7 @@ body {
  -moz-box-sizing: border-box;    /* Firefox, other Gecko */
  box-sizing: border-box;         /* Opera/IE 8+ */
  font-size: 10px;
+ background: transparent;
 }
 
 .jh-key, .jh-value{
@@ -298,42 +283,6 @@ th.jh-key{
  font-size: small;
 }
 
-/*
-.navbar-default {
-    background: #333333;
-    border-radius: 0;
-    border: 0;
-    color: white;
-    font-size: 1.3em;
-}
-
-.navbar-default .navbar-brand {
-    color: #47D2E9;
-    color: #bbe9f0;
-    font-size: 1.2em;
-}
-.navbar-default .navbar-nav>li>a {
-    color: white;
-}
-
-
-.nav > li > a:hover{
-    background-color:#FCC;
-}
-
- .navbar-default .navbar-nav > .active > a,
- .navbar-default .navbar-nav > .active > a:hover,
- .navbar-default .navbar-nav > .active > a:focus {
-      color: black;
-      background: #47D2E9;
-      background: #bbe9f0;
-      //background: white;
-      //border-bottom: 1px solid #bbe9f0;
- }*/
-
-
-
-
 #custom-bootstrap-menu.navbar-default .navbar-brand {
     color: rgba(187, 233, 240, 1);
     font-weight: bold;
@@ -352,6 +301,7 @@ th.jh-key{
 #custom-bootstrap-menu.navbar-default .navbar-nav>li>a {
     color: rgba(181, 179, 179, 1);
     background-color: rgba(51, 51, 51, 1);
+    border-top: 3px solid transparent;
 }
 #custom-bootstrap-menu.navbar-default .navbar-nav>li>a:hover,
 #custom-bootstrap-menu.navbar-default .navbar-nav>li>a:focus {
@@ -362,10 +312,8 @@ th.jh-key{
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:hover,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:focus {
     color: rgba(0, 0, 0, 1);
-    background-color: rgba(255, 255, 255, 1);
-    background: #f7f7f7;
-    background: #F3F3F3;
-    // background: #F3F3F3;
+    border-top: 3px solid #bbe9f0;
+    color: white;
 }
 #custom-bootstrap-menu.navbar-default .navbar-toggle {
     border-color: #f7f7f7;

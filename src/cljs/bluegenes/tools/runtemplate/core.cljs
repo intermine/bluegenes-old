@@ -1,180 +1,114 @@
 (ns bluegenes.tools.runtemplate.core
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
-            [intermine.imjs :as imjs]
-            [cljs.core.async :refer [put! chan <! >! timeout close!]]))
-
-(enable-console-print!)
-
-(def state2 (reagent/atom {}))
+            [clojure.string :as str]
+            [intermine.imjs :as imjs]))
 
 
-
-(defn get-id-query [service list]
-  {:from "Gene"
-   :select "*"
-   :where [{:path "Gene.id"
-            :values (:values list)
-            :op "ONE OF"
-            :code "A"
-            }]})
-
-; (defn constraint [cons]
-;   [:div.form-group
-;    [:label (:path cons)]
-;    [:input.form-control {:type "text"
-;                          :value (:value cons)}]])
-
-
-
-; (defn button-runner []
-;   [:button.btn.disabled {:disabled "disabled"} "Run"])
-
-; (defn selected-template [has]
-;   (println "HAS" has)
-;   (fn []
-;     (let [templates (:templates @state2)
-;           selected (:selected @state2)
-;           thekey (keyword (str selected))
-;           template (thekey templates)]
-;       [:div
-;        [:span (str template)]
-;        [:h2 (:name template)]
-;        [:h4 (:description template)]
-;        [:div (doall (for [cons (map #(replace-constraints % (-> has :input :data :values) ) (:where template))] [constraint cons]))]
-;        [:span (str (:where template))]])))
-
-(defn template-dropdown2 []
-  ; Holds a drop down of lists in an item and populates the selected atom with
-  [:select.form-control {:on-change (fn [e]
-                                      (swap! state2 assoc :selected (-> e .-target .-value)))}
-   (for [item (:filtered @state2)]
-     ^{:key (:name item)} [:option
-                           {:value (:id item)}
-                           (:name item)])])
-
-; (defn ^:export main [data]
-;   (fetch-templates)
-;   (fn [data]
-;     (println "Template tool is rendering.")
-;     [:div
-;      [template-dropdown]
-;      [selected-template data]
-;      [button-runner]
-;      ]))
-
-
-(defn replace-input-constraints [cons ids]
-  ; Replace the "input" constraint to be that of the previous tool
-  (if (= (:path cons) "Gene")
-    (assoc cons :values ids :path "Gene.id" :op "ONE OF")
-    cons))
-
-
-
-(defn filter-for-type [template]
-  (let [wheres (get-in template [:where])]
-    (if (true? (some #(= (:path %) "Gene") wheres))
+(defn filter-for-type [[name template] type]
+  (let [wheres (get template "where")]
+    (if (true? (some #(= (get % "path") type) wheres))
       template)))
 
-(defn fetch-templates [s]
-  (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
-        templates (-> mine .fetchTemplates)]
-    (-> templates (.then (fn [r]
-                           (let [results (js->clj r :keywordize-keys true)
-                                 chopped (into [] (for [k (keys results)]
-                                                    (assoc (get results k) :id k)))]
-                             (swap! s assoc :templates results)
-                             (swap! s assoc :filtered (doall (filter filter-for-type chopped)))
-                             ))))))
+(defn fetch-templates-handler [local-state]
+  "Store Intermine's templates in our local state atom"
+  (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
+      (.fetchTemplates)
+      (.then (fn [response]
+               (swap! local-state assoc :templates (js->clj response))))))
 
+(defn template-matches-pathtype? [path template]
+  "True if a template has a constraint with a cerain type"
+  (if (some (fn [constraint]
+              (= (get constraint "path") path))
+            (get (second template) "where"))
+    template))
 
+(defn get-templates-for-type [path templates]
+  "Filter a collection of templates for a certain path type"
+  (filter #(template-matches-pathtype? path %) templates))
 
-(defn template-dropdown [state ids]
-  ; Holds a drop down of lists in an item and populates the selected atom with
-  [:select.form-control {:on-change (fn [e]
-                                      (let [name (str (-> e .-target .-value))
-                                            tpl ((keyword name) (:templates @state))
-                                            updated (update-in tpl [:where] (fn [cons]
-                                                                              (map (fn [c] (replace-input-constraints c ids)) cons)))]
+(defn get-valid-templates [type tpls]
+  "Get templates that can use our input type"
+  (get-templates-for-type type tpls))
 
-                                        (swap! state assoc :query updated)))}
-   (for [item (:filtered @state)]
-     ^{:key (:name item)} [:option
-                           {:value (:id item)}
-                           (:name item)])])
-
-
-
-; TODO We're currently updating constraints matched on the path and code.
-; Is there a better way to do this? What makes a constraint unique?
-(defn update-constraint! [e cons state]
-  (let [value (str (-> e .-target .-value))
-        matcher (fn [c] (and
-                         (= (:path cons) (:path c))
-                         (= (:code cons) (:code c))))]
-
-    (swap! state update-in [:query :where] (fn [cs] (map #(if (matcher %)
-                                                            (assoc % :value value)
-                                                            %) cs)))))
-
-(defn constraint [cons state]
-  (fn [cons state]
-    [:div
-     [:div (str cons)]
-     [:div.form-group
-        [:label (str (:path cons)) " " [:span.badge (:op cons)]]
-        [:input.form-control {:type "text"
-                              :value (:value cons)
-                              :on-change (fn [e] (update-constraint! e cons state))}]]]))
-
-
-; (defn results-handler [values mine comm]
-;   (let [matches (-> values (aget "matches") (aget "MATCH"))]
-;     ((:has-something comm) {:data {:format "ids"
-;                                    :values (into [] (map #(aget % "id") matches))
-;                                    :type "Gene"}
-;                             :service {:root "www.flymine.org/query"}})))
-
-(defn submit-button [state emit]
-  [:div.form-group
-   [:button.btn {:on-click (fn [e]
-                             (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
-                                   query (clj->js (:query @state))
-                                   imquery (.query mine query)]
-                               (-> imquery (.then (fn [r]
-                                                    (emit {:service {:root "www.flymine.org/query"}
-                                                           :data {:format "query"
-                                                                  :type "Gene"
-                                                                  :value (js->clj (-> r .toJSON))}})
-                                                    ; (.log js/console "R" r)
-                                                    )))))}
-    "Submit"]])
-
-(defn template-details [s]
+(defn drop-down [{:keys [templates on-change-handler]}]
+  "Render a drop down that only shows our valid templates"
+  ; (println "RUN WITH TEMPLATE" templa_tes)
   [:div
-  (for [cons (:where (:query @s))]
-    ^{:key (:path cons)} [constraint cons s])])
+   [:select.form-control
+    {:on-change on-change-handler}
+    (doall
+      (for [[name values] templates]
+        ^{:key name} [:option {:value name} (get values "title")]))]])
 
-(defn query-state [q]
-  [:div (str (:query @q))])
+(defn constraint [con & [locked]]
+  (fn []
+    [:div
+    ; Hide constraints that can't be changed
+    ;  {:class (if (= (get con "edidtable" false)) "hide")}
+     [:form
+     [:div.form-group
+      [:label (get con "path")]
+      [:div.input-group
+       [:span.input-group-addon (get con "op")]
+       [:input.form-control {:type "text"
+                             :value (get con "value")
+                             :disabled (if (= false (get con "editable")) "true")}]]]]]))
 
-(defn ^:export main [step-data responders]
-  (reagent/create-class
-   {:reagent-render (fn []
-                      (println ":REAGENT-RENDER")
-                      (let [state (reagent/atom {:query nil
-                              :selected nil
-                              :filtered nil})]
-     (fetch-templates state)
-     [:div
-      [template-dropdown state (-> step-data :input :data :values)]
-      [template-details state]
-      [submit-button state (get responders :has-something)]
-      [query-state state]]))
+(defn path-end [path]
+  (last (clojure.string/split path #"\.")))
 
-    ; Runs once immediately after the initial rendering occurs.
-    :component-did-mount (fn [e]
-                           (.log js/console ":COMPONENT-DID-MOUNT" (clj->js e)))})
-  )
+(defn constraints [cons]
+  "Renders a list of constraints ignoring any constraints on id."
+  [:div
+   (for [con cons :when (not (get con "hide"))]
+     ^{:key (get con "path")} [constraint con])])
+
+(defn run-button-handler [state emit]
+  "Emit the data."
+  (emit {:service {:root "www.flymine.org/query"}
+         :data {:format "query"
+                :type "Gene"
+                :value (js->clj (-> (:query @state)))}}))
+
+(defn run-button [state emit]
+  [:button.btn.btn-primary {:on-click (fn [e] (run-button-handler state emit)) } "Run"])
+
+(defn convert-input-to-constraint [input]
+  (cond
+    (= (get-in input [:data :format]) "list")
+    {"path" (str (get-in input [:data :type]) "")
+     "op" "IN"
+     "value" (get-in input [:data :name])
+     "hide" true}
+
+    (= (get-in input [:data :format]) "ids")
+    {"path" (str (get-in input [:data :type]) ".id")
+     "op" "ONE OF"
+     "hide" true
+     "value" (get-in input [:data :values])}))
+
+(defn replace-input-constraint [template input]
+  (update-in template ["where"] #(map (fn [con]
+                                        (if (true? (= (get con "path") (get-in input [:data :type])))
+                                          (merge con (convert-input-to-constraint input))
+                                          con)) %)))
+
+(defn drop-down-handler [state templates input e]
+  (let [name (-> e .-target .-value)]
+    (swap! state assoc :selected name :query (replace-input-constraint (get templates name) (:input input)))))
+
+(defn ^:export main [input]
+  (let [local-state (reagent.core/atom {:templates nil})]
+    (reagent/create-class
+     {:component-did-mount  (fn []
+                              (fetch-templates-handler local-state))
+      :reagent-render       (fn [input {:keys [has-something
+                                               replace-state]}]
+                              (let [app-state (reagent.core/atom (last (:state input)))]
+                                [:div
+                                 [drop-down {:templates (get-valid-templates "Gene" (:templates @local-state))
+                                             :on-change-handler (comp replace-state (partial drop-down-handler app-state (:templates @local-state) input))}]
+                                 [constraints (get-in @app-state [:query "where"])]
+                                 [run-button app-state has-something]]))})))

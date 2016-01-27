@@ -27,7 +27,6 @@
   (fn [db [data idx]]
     (update-in db [:histories (:active-history db) :steps idx] assoc :input data)))
 
-
 (re-frame/register-handler
   :append-state
   trim-v
@@ -38,11 +37,6 @@
   :replace-state
   trim-v
   (fn [db [step-id data]]
-    (println "state got id" step-id)
-    (println "got data" data)
-    (println "aobut to update tool" (get-in db [:histories (:active-history db) :steps step-id]))
-    (println "now its" (assoc-in db [:histories (:active-history db) :steps step-id :state] [data]))
-
       (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
 
 (re-frame/register-handler
@@ -51,7 +45,6 @@
   (fn [db [step-id data]]
       (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
                                                                                                  :step step-id}))))
-
 (defn rid [] (str (make-random-uuid)))
 
 (defn link-new-step-to-source [db old-step-id new-step-id]
@@ -60,6 +53,7 @@
 (defn create-step [db id new-step]
   (update-in db [:histories (:active-history db) :steps] assoc id new-step))
 
+; TODO - Hardcoded for testing, make this dynamic
 (re-frame/register-handler
  :create-next-step
  trim-v
@@ -68,7 +62,7 @@
          source (:source last-emitted)
          data (:data last-emitted)
          uuid (keyword (rid))]
-     (link-new-step-to-source (create-step db  uuid {:tool        "faketool"
+     (link-new-step-to-source (create-step db  uuid {:tool        "runtemplate"
                                                      :uuid        uuid
                                                      :title       "List Shower"
                                                      :description "View contents."
