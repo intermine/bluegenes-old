@@ -24,25 +24,42 @@ body {
   color: #FFDD2E;
 }
 
-#dimmer {
-  position: fixed;
+
+.cover {
+  opacity:0.5;
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-color:white;
+}
+
+.cover-inside {
+
+}
+
+.dimmer {
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   text-align: center;
   background-color: #000;
-  filter: alpha(opacity=50);
+  // filter: alpha(opacity=50);
   -moz-opacity: 0.5;
-  opacity: 0.5;
-  z-index: 9999''
+  opacity: 0.6;
+  z-index: 9999;
+  background: #A9A9A9;
 
 }
 
-#dimmer div.message {
+.dimmer div.message {
     padding: 5px;
     border-radius: 5px;
     color: #000;
+    color: #bbe9f0;
     position:relative;
     top:50%;
 }
@@ -50,6 +67,8 @@ body {
 .hide {
     display: none;
 }
+
+@spinner-color: #bbe9f0;
 
 .loader {
   margin: auto auto;
@@ -72,6 +91,8 @@ body {
   width: 10em;
   height: 10em;
 }
+
+
 @-webkit-keyframes load8 {
   0% {
     -webkit-transform: rotate(0deg);
@@ -172,6 +193,7 @@ body {
         margin: 10px 20px 10px 20px;
 
         .body {
+            position: relative;
             padding: 10px;
             background: white;
             border-left: 1px solid #ddd;
