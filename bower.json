@@ -1,0 +1,21 @@
+{
+  "name": "bluegenes",
+  "homepage": "https://github.com/intermine/bluegenes",
+  "authors": [
+    "Joshua Heimbach <joshkh@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-material-design": "#9b434de6af15aa564ce5562fad20ddc12a58c84b"
+  }
+}
