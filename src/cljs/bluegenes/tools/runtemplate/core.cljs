@@ -73,7 +73,7 @@
                 :value (js->clj (-> (:query @state)))}}))
 
 (defn run-button [state emit]
-  [:button.btn.btn-primary {:on-click (fn [e] (run-button-handler state emit)) } "Run"])
+  [:button.btn.btn-info.btn-raised {:on-click (fn [e] (run-button-handler state emit)) } "Run"])
 
 (defn convert-input-to-constraint [input]
   (cond

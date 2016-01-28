@@ -2,7 +2,7 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [json-html.core :as json-html]
-            [bluegenes.components.dimmer :as dimmer]
+            ; [bluegenes.components.dimmer :as dimmer]
             [bluegenes.components.nextsteps.core :as nextsteps]
             [bluegenes.utils :as utils]
             [cljs.contrib.pprint :refer [pprint]]))
@@ -16,32 +16,39 @@
 (defn has-something [tool data]
   (re-frame/dispatch [:has-something (keyword (:uuid tool)) data]))
 
+(defn somedimmer []
+  [:div.dimmer
+   [:div.message
+    [:div.loader]]])
+
 (defn step []
   (let [current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
-      {:reagent-render (fn [step-data]
-        (.debug js/console "Loading Step:" step-data)
-                         (let [_ nil]
-                           [:div.step-container
-                            [:div.step-inner
+     {:reagent-render (fn [step-data]
+                        (.debug js/console "Loading Step:" step-data)
+                        (let [_ nil]
+                          [:div.step-container
+                           [:div.step-inner
                             ;  [:h4 (:description step-data)]
-                             [:div.toolbar
-                              [:ul.nav.nav-tabs
-                               [:li {:class (if (= @current-tab nil) "active")} [:a {:on-click #(swap-tab nil)} (:tool step-data)]]
-                               [:li {:class (if (= @current-tab "data") "active")} [:a {:data-target "test"
-                                                                                        :on-click    #(swap-tab "data")} "Data"]]]]
-                             [:div.body
-                              (cond
-                                (= nil @current-tab)
-                                (do
-
-                                  [(-> bluegenes.tools (aget (:tool step-data)) (aget "core") (aget "main"))
-                                   step-data {:append-state (partial append-state step-data)
-                                              :replace-state (partial replace-state step-data)
-                                              :has-something (partial has-something step-data)}])
-                                (= "data" @current-tab)
-                                (json-html/edn->hiccup step-data))]]]))})))
+                            [:div.toolbar
+                             [:ul.nav.nav-tabs
+                              [:li {:class (if (= @current-tab nil) "active")} [:a {:on-click #(swap-tab nil)} (:tool step-data)]]
+                              [:li {:class (if (= @current-tab "data") "active")} [:a {:data-target "test"
+                                                                                       :on-click    #(swap-tab "data")} "Data"]]]]
+                            [:div.body
+                             (cond
+                               (= nil @current-tab)
+                               (do
+                                 [(-> bluegenes.tools (aget (:tool step-data)) (aget "core") (aget "main"))
+                                  step-data {:append-state (partial append-state step-data)
+                                             :replace-state (partial replace-state step-data)
+                                             :has-something (partial has-something step-data)}])
+                               (= "data" @current-tab)
+                               (json-html/edn->hiccup step-data))
+                            ;  [somedimmer]
+                             ]
+                            ]]))})))
 
 (defn step-tree [steps]
   "Serialize the steps of a history."
@@ -73,5 +80,4 @@
 (defn main-view []
     [:div
      [nextsteps/main]
-     [previous-steps]
-     [dimmer/main]])
+     [previous-steps]])
