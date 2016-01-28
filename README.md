@@ -9,6 +9,7 @@ A [re-frame](https://github.com/Day8/re-frame) application designed to ... well,
 ```
 lein foreign
 lein clean
+lein bower install
 lein figwheel dev
 ```
 

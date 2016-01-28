@@ -5,3 +5,5 @@
 out
 .lein-repl-history
 .lein-env
+bower_components
+dev-resources
