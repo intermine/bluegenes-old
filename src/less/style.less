@@ -40,6 +40,7 @@ body {
 }
 
 
+
 .cover {
   opacity:0.5;
   position:absolute;
@@ -178,6 +179,7 @@ body {
   -webkit-box-shadow: 0px 3px 30px 0px rgba(50, 50, 50, 0.67);
   -moz-box-shadow:    0px 3px 30px 0px rgba(50, 50, 50, 0.67);
   box-shadow:         0px 3px 30px 0px rgba(50, 50, 50, 0.67);
+
 }
 
 .clear-fix {
@@ -188,7 +190,6 @@ body {
 .next-steps-container {
 
   width: 100%;
-
 
   .next-steps-inner {
 
@@ -203,7 +204,10 @@ body {
 }
 
 .step-container {
+    -webkit-transition: all .3s ease-out; /* Safari */
+    transition: all .3s ease-out;
     width: 100%;
+    position: absolute; /* Tools are manually position on the DOM. */
     .step-inner {
         margin: 10px 20px 10px 20px;
 
@@ -217,7 +221,6 @@ body {
         }
     }
 }
-
 
 
 .jh-root, .jh-type-object, .jh-type-array, .jh-key, .jh-value, .jh-root tr{
