@@ -22,6 +22,16 @@
   }
 
   .selected, .selected:hover {
-    background:@selectedColor
+    background:@selectedColor;
+    color:@selectedColorText;
+    td, td.selected {
+    box-shadow:4px 4px 4px rgba(0,0,0,0.3);
+  //  display:inline-block;
+  }
+    .type-Gene {
+      background : @selectedColorText;
+      color : @selectedColor;
+      border-left:solid @selectedColor 3px;
+    }
   }
 }
