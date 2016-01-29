@@ -32,8 +32,7 @@
                                                               :name (.-name list)}}))
             :class (if (is-selected list state)
                      "selected")}
-        [:td {:class "list-type"}
-         [:span {:class (str "type-" (.-type list))} (.-type list)]]
+        [:td {:class (str "type-" (.-type list) " list-type")} (.-type list)]
         [:td {:class "count"} (.-size list)]
         [:td {:class "list-name"} (.-name list)]
        ])}))
@@ -45,10 +44,12 @@
         [:div
         ; [:h2 (:description step-data) ]
           [:table {:class "list-chooser"}
+           [:thead
             [:tr
-              [:td "Type"]
-              [:td "#"]
-              [:td "Name"]]
+              [:th "Type"]
+              [:th "#"]
+              [:th "Name"]]]
+           [:tbody
             (for [l @lists]
-              ^{:key (.-name l)} [list-row l responders step-data])]])
+              ^{:key (.-name l)} [list-row l responders step-data])]]])
        :component-did-mount get-lists }))
