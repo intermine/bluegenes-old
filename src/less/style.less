@@ -130,6 +130,7 @@ body {
   }
 }
 
+
 .tool-card-container {
   display: flex;
 }
@@ -197,27 +198,45 @@ body {
 
     .body {
         padding: 10px;
-        background: white;
         min-height: 300px;
     }
   }
 }
 
+
 .step-container {
+
     -webkit-transition: all .3s ease-out; /* Safari */
     transition: all .3s ease-out;
     width: 100%;
     position: absolute; /* Tools are manually position on the DOM. */
     .step-inner {
-        margin: 10px 20px 10px 20px;
+      .toolbar {
+        @toolbarColor: #eee;
+        color:rgba(0,0,0, 0.87);
+        .clearfix;
+        background:@toolbarColor;
+        border:solid 1px @toolbarColor;
+        li {
+          a {color:rgba(0,0,0, 0.87);}
 
+          padding:0 1em;
+          min-height:3em;
+          line-height:3em;
+          background:@toolbarColor;
+          display:block;
+          float:left;
+          list-style-type:none;
+        }
+      }
+
+        margin: 10px 20px 10px 20px;
+        .panel;
+        .panel-default;
         .body {
+          .panel-body;
             position: relative;
             padding: 10px;
-            background: white;
-            border-left: 1px solid #ddd;
-            border-bottom: 1px solid #ddd;
-            border-right: 1px solid #ddd;
         }
     }
 }

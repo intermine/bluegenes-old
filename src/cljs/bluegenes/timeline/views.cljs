@@ -58,10 +58,10 @@
                           [:div.step-container
                            [:div.step-inner
                             [:div.toolbar
-                             [:ul.nav.nav-tabs
+                             [:ul
                               [:li {:class (if (= @current-tab nil) "active")} [:a {:on-click #(swap-tab nil)} (:tool step-data)]]
                               [:li {:class (if (= @current-tab "data") "active")} [:a {:data-target "test"
-                                                                                       :on-click    #(swap-tab "data")} "Data"]]]]
+                               :on-click    #(swap-tab "data")} "Data"]]]]
                             [:div.body
                              ; Show the contents of the selected tab
                              (cond
