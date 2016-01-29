@@ -27,7 +27,7 @@
 (defn ^:export main [step-data responders]
   (let [nothing nil]
     (reagent/create-class
-      {:reagent-render (fn []
+      {:reagent-render (fn [step-data]
                          [:div
                           ; [:h2 (:description step-data) ]
                           [:div (for [l @lists]

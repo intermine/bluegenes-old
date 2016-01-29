@@ -9950,7 +9950,11 @@ body {
   min-height: 300px;
 }
 .step-container {
+  -webkit-transition: all 0.3s ease-out;
+  /* Safari */
+  transition: all 0.3s ease-out;
   width: 100%;
+  position: absolute;
 }
 .step-container .step-inner {
   margin: 10px 20px 10px 20px;

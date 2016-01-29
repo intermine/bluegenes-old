@@ -102,7 +102,7 @@
 (defn ^:export main [input]
   (let [local-state (reagent.core/atom {:templates nil})]
     (reagent/create-class
-     {:component-did-mount  (fn []
+     {:component-did-mount  (fn [e]
                               (fetch-templates-handler local-state))
       :reagent-render       (fn [input {:keys [has-something
                                                replace-state]}]
