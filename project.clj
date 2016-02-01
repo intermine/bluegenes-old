@@ -5,10 +5,16 @@
                  [re-frame "0.6.0"]
                  [secretary "1.2.3"]
                  [compojure "1.4.0"]
+                 [cheshire "4.0.3"]
+                 [ring/ring-json "0.2.0"]
                  [ring "1.4.0"]
                  [json-html "0.3.6"]
                  [environ "1.0.0"]
+                 [mount "0.1.9"]
+                 [prismatic/schema "1.0.4"]
+                 [slugger "1.0.1"]
                  [reagent-forms "0.5.8"]
+                 [com.novemberain/monger "3.0.2"]
                  [org.clojure/core.async "0.2.374"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [bostonou/cljs-pprint "0.0.4-SNAPSHOT"]]
@@ -16,7 +22,7 @@
   :source-paths ["src/clj"]
 
   :figwheel {:css-dirs ["resources/public/css"]
-             :ring-handler bluegenes.handler/handler}
+             :ring-handler bluegenes.handler/app}
 
   :main bluegenes.handler
 
