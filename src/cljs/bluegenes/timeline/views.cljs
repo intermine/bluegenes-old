@@ -104,9 +104,8 @@
   "Not used as of yet."
   (let [history (re-frame/subscribe [:history])]
     [:div.step-container
-      [:div.step-inner
        [:h2 (:name @history)]
-       [:h4 (:description @history)]]]))
+       [:h4 (:description @history)]]))
 
 (defn main-view []
     [:div

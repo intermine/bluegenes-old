@@ -109,6 +109,20 @@ body {
     transform: rotate(360deg);
   }
 }
+
+//'fade', belowm is used to slide in a component from the top.
+// We allow it to size from 0 to auto in a newly created element using max-height and animations. Thanks, https://www.christianheilmann.com/2015/08/30/quicky-fading-in-a-newly-created-element-using-css/
+// and
+//http://stackoverflow.com/questions/3508605/how-can-i-transition-height-0-to-height-auto-using-css
+@keyframes fade {
+  from {
+    max-height: 0;
+  }
+  to {
+    max-height: 3000px;
+  }
+}
+
 .tool-card-container {
   display: flex;
 }
@@ -174,20 +188,7 @@ body {
     animation: fade 3s;
     animation-timing-function: cubic-bezier(0.2, 2.0, 0.2);
   }
-  /* We allow it to size from 0 to auto in a newly created element using max-height and animations. Thanks, https://www.christianheilmann.com/2015/08/30/quicky-fading-in-a-newly-created-element-using-css/
-      and
-      http://stackoverflow.com/questions/3508605/how-can-i-transition-height-0-to-height-auto-using-css
-       */
-  @keyframes fade {
-    from {
-//      background-color:red;
-      max-height: 0;
-    }
-    to {
-  //    background-color:turquoise;
-      max-height: 3000px;
-    }
-  }
+
   box-sizing: border-box;
   margin: 10px 20px;
   .panel;

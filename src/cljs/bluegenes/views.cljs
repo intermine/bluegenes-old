@@ -18,10 +18,9 @@
   (let [name (re-frame/subscribe [:name])]
     (fn []
       [:div.step-container
-       [:div.step-inner
         [:div.body
          [histories-section]]
-        ]])))
+        ])))
 
 (defn about-panel []
   (fn []
