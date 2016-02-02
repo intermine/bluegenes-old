@@ -3,9 +3,9 @@
             [reagent.core :as reagent]
             [json-html.core :as json-html]
             ; [bluegenes.components.dimmer :as dimmer]
+            ; [ajax.core :refer [GET POST]]
             [bluegenes.components.nextsteps.core :as nextsteps]
-            [bluegenes.utils :as utils]
-            [cljs.contrib.pprint :refer [pprint]]))
+            [bluegenes.utils :as utils]))
 
 
 ; TODO: The following three functions are passed to tools as a way to communicate
@@ -13,15 +13,15 @@
 
 (defn append-state [tool data]
   "Append a tool's state to the previous states."
-  (re-frame/dispatch [:append-state (keyword (:uuid tool)) data]))
+  (re-frame/dispatch [:append-state (keyword (:_id tool)) data]))
 
 (defn replace-state [tool data]
   "Replace a tool's state with its current state."
-  (re-frame/dispatch [:replace-state (:uuid tool) data]))
+  (re-frame/dispatch [:replace-state (:_id tool) data]))
 
 (defn has-something [tool data]
   "Notify the world that the tool has consumable data."
-  (re-frame/dispatch [:has-something (keyword (:uuid tool)) data]))
+  (re-frame/dispatch [:has-something (keyword (:_id tool)) data]))
 
 (defn tool-dimmer []
   "Loading screen that can be applied over a step. TODO: Move to components namespace."
@@ -40,15 +40,18 @@
                        (+ total (.-offsetHeight e)))
                      (.-offsetHeight (first veced)) (rest veced))))
 
-(defn step []
+(defn step [step-data-2]
   "A generic component that houses a step in the history. Using the supplied tool name,
   it constructs a child component and passes it the tool's known state."
   (let [current-tab (reagent/atom nil)
-        swap-tab (fn [name] (reset! current-tab name))]
+        swap-tab (fn [name] (reset! current-tab name))
+        parent-step (re-frame/subscribe [:to-step (first (:subscribe step-data-2))])]
+    (.log js/console "subscribed to step " (clj->js @parent-step))
     (reagent/create-class
      {:display-name "step"
       :component-did-mount (fn [this]
                              "Reposition all tools if this tool's DOM has mutated"
+
                              (let [dn (.getDOMNode this)]
                                (.bind (js/$ dn) "DOMSubtreeModified" position-all-tools)))
 
@@ -68,11 +71,11 @@
                                (= nil @current-tab)
                                (do
                                  [(-> bluegenes.tools (aget (:tool step-data)) (aget "core") (aget "main"))
-                                  step-data {:append-state (partial append-state step-data)
+                                  (assoc step-data :input (:produced @parent-step)) {:append-state (partial append-state step-data)
                                              :replace-state (partial replace-state step-data)
                                              :has-something (partial has-something step-data)}])
                                (= "data" @current-tab)
-                               (json-html/edn->hiccup step-data))
+                               (json-html/edn->hiccup (assoc step-data :input (:produced @parent-step))))
                               ; [tool-dimmer]
                              ]
                             ]]))})))
@@ -90,16 +93,34 @@
           (conj step-vec (id steps)))
         (recur (:notify (id steps)) (conj step-vec (id steps)))))))
 
+(defn step-tree-subscribe [steps]
+  "Serialize the steps of a history.
+  Assume that a tool with no subscription is a starting point. Then recursively
+  find other steps that subscribe to the starting point. Subscriptions are
+  vectors (meaning that a step can subscribe to more than one step), but for now
+  this only supports one item in the subscription (hence the 'first' function.)"
+  (let [[starting-point-id] (first (filter (fn [[step value]] (nil? (:subscribe value))) steps))
+        find-children (fn [parent-id]
+                        (filter (fn [[step value]]
+                                  (not (nil? (some #{parent-id} (:subscribe value)))))
+                                steps))]
+    (loop [id starting-point-id
+           step-vec []]
+      (let [[children] (find-children id)]
+        (if (nil? children)
+          (conj step-vec (id steps))
+          (recur (first children) (conj step-vec (id steps))))))))
 
 (defn previous-steps []
   "Iterates over steps in the history and creates a step component for each."
   (let [steps-reaction (re-frame/subscribe [:steps])
         mines (re-frame/subscribe [:mines])]
     (let [steps @steps-reaction]
+      (.log js/console "steps reaction subscription" (clj->js (step-tree-subscribe steps)))
       (if (nil? steps)
         [:h1 "New history"]
-        (into [:div] (for [s (reverse (step-tree steps))]
-                       (do ^{:key (:uuid s)} [step (assoc s :mines @mines) nil])))))))
+        (into [:div] (for [s (reverse (step-tree-subscribe steps))]
+                       (do ^{:key (:_id s)} [step (assoc s :mines @mines) nil])))))))
 
 (defn history-details []
   "Not used as of yet."
@@ -108,6 +129,11 @@
       [:div.step-inner
        [:h2 (:name @history)]
        [:h4 (:description @history)]]]))
+
+; (GET "http://localhost:3449/api/history/394537ae-b4eb-4b13-a78d-edadbd11a6f8/steps"
+;      {:keywords? true
+;       :response-format :json
+;       :handler (fn [response] "res" (println response))})
 
 (defn main-view []
     [:div

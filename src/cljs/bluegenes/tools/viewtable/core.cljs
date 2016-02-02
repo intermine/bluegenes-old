@@ -27,6 +27,7 @@
   (let [selector (str "#" (name el-id))
         service (clj->js service-in)
         query (clj->js query-in)]
+    [:h1 "disabled"]
     (-> (.loadTable js/imtables
                     selector
                     (clj->js {:start 0 :size 5})
@@ -35,14 +36,16 @@
                  (responder {:service {:root "www.flymine.org/query"}
                              :data {:format "query"
                                     :type (-> e .-query .-root)
-                                    :value (js->clj (-> e .-query .toJSON))}}))))))
+                                    :value (js->clj (-> e .-query .toJSON))}}))))
+    ))
 
 (defn ^:export main []
   (fn [input comms]
+    (.log js/console "view table loaded with input" (clj->js input))
     (reagent/create-class
      {:reagent-render (fn []
                         [:div
-                         [:div {:id (str "z" (name (:uuid input)))}]])
+                         [:div {:id (str "z" (name (:_id input)))}]])
       :component-did-mount (fn [comp]
                              (let [input (reagent/props comp)
                                    query (cond
@@ -52,7 +55,7 @@
                                            (get-id-query (get-in input [:input :service]) (get-in input [:input :data]))
                                            (= "query" (-> input :input :data :format))
                                            (get-in input [:input :data :value]))]
-                               (table (str "z" (name (:uuid input))) (get-in input [:input :service]) query (get comms :has-something))))
+                               (table (str "z" (name (:_id input))) (get-in input [:input :service]) query (get comms :has-something))))
 
       :component-did-update (fn [comp]
                              (let [input (reagent/props comp)
@@ -63,4 +66,4 @@
                                            (get-id-query (get-in input [:input :service]) (get-in input [:input :data]))
                                            (= "query" (-> input :input :data :format))
                                            (get-in input [:input :data :value]))]
-                               (table (str "z" (name (:uuid input))) (get-in input [:input :service]) query (get comms :has-something))))})))
+                               (table (str "z" (name (:_id input))) (get-in input [:input :service]) query (get comms :has-something))))})))

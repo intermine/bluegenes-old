@@ -1,11 +1,19 @@
 (ns bluegenes.timeline.subs
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :as re-frame]))
+  (:require [re-frame.core :as re-frame :refer [trim-v]]))
 
 (re-frame/register-sub
   :steps
   (fn [db [_ testvalue]]
     (reaction (get-in @db [:histories (:active-history @db) :steps]))))
+
+(re-frame/register-sub
+ :to-step
+ (fn [db [_ step-id]]
+   (reaction (get-in @db [:histories
+                          (:active-history @db)
+                          :steps
+                          (keyword step-id)]))))
 
 (re-frame/register-sub
  :history
