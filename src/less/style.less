@@ -1,60 +1,47 @@
-@rgba-primary-0: rgba(211,209,198,1);	/* Main Primary color */
+@rgba-primary-0: rgba(211,209,198,1);
+/* Main Primary color */
 @rgba-primary-1: rgba(249,242,213,1);
 @rgba-primary-2: rgba(195,191,174,1);
 @rgba-primary-3: rgba(175,170,147,1);
 @rgba-primary-4: rgba(160,153,125,1);
-
 @selectedColor: #3F51B5;
-@selectedColorText:#fff;
-
+@selectedColorText: #fff;
 //define master colours for popular data types. Try to draw from 500 colours
 //here: https://www.google.com/design/spec/style/color.html# to keep the colours
 //visually distinct. They should be used ONLY for data type tagging, not general theming
 @color-Gene: #8BC34A;
 @color-Protein: #FFC107;
-
 @import url(https://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic);
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,900,300italic,300,400italic);
 @import "../../bower_components/bootstrap/less/bootstrap";
 @import "../../bower_components/bootstrap-material-design/less/bootstrap-material-design";
-
 //tool import:
 @import "list-chooser";
-
 body {
-    background: @rgba-primary-0;
-    background: white;
-    background: #f7f7f7;
-    background: #D9D9D9;
-    -webkit-font-smoothing: antialiased;
-    font-family: 'Lora', serif;
-    font-family: 'Roboto', sans-serif;
+  background: @rgba-primary-0;
+  background: white;
+  background: #f7f7f7;
+  background: #D9D9D9;
+  -webkit-font-smoothing: antialiased;
+  font-family: 'Lora', serif;
+  font-family: 'Roboto', sans-serif;
 }
-
 .sec {
-    padding: 20px;
+  padding: 20px;
 }
-
 .highlight {
   color: #FFDD2E;
 }
-
-
-
 .cover {
-  opacity:0.5;
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background-color:white;
+  opacity: 0.5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
 }
-
-.cover-inside {
-
-}
-
+.cover-inside {}
 .dimmer {
   position: absolute;
   top: 0;
@@ -68,26 +55,21 @@ body {
   opacity: 0.6;
   z-index: 9999;
   background: #A9A9A9;
-
 }
-
 .dimmer div.message {
-    padding: 5px;
-    border-radius: 5px;
-    color: #000;
-    color: #bbe9f0;
-    position:relative;
-    top:50%;
+  padding: 5px;
+  border-radius: 5px;
+  color: #000;
+  color: #bbe9f0;
+  position: relative;
+  top: 50%;
 }
-
 .hide {
-    display: none;
+  display: none;
 }
-
 @spinner-color: #bbe9f0;
-
 .loader {
-  margin: auto auto;
+  margin: auto;
   font-size: 10px;
   position: relative;
   text-indent: -9999em;
@@ -107,8 +89,6 @@ body {
   width: 10em;
   height: 10em;
 }
-
-
 @-webkit-keyframes load8 {
   0% {
     -webkit-transform: rotate(0deg);
@@ -129,14 +109,10 @@ body {
     transform: rotate(360deg);
   }
 }
-
-
 .tool-card-container {
   display: flex;
 }
-
 .next-steps-title {
-
   // background: #3C4750;
   float: left;
   color: white;
@@ -144,249 +120,244 @@ body {
   padding: 20px;
   font-size: 1.5em;
   font-style: italic;
-
 }
 .tool-card {
-
   &:hover {
     background-color: #868686;
   }
-
   &:active {
     background: #B7D9F4;
     color: white;
   }
-
   // background: #3C4750;
   float: left;
   color: white;
   padding: 20px;
-
   .title {
     text-align: center;
     font-weight: bold;
     color: #bbe9f0;
   }
 }
-
 .next-steps {
   max-height: 250px;
   overflow-y: scroll;
   background: #F3F3F3;
   background: #3C4750;
   background: rgba(82, 82, 82, 1);
-  padding: 10px 20px 10px 20px;
   padding: 0;
-  -webkit-box-shadow: 0px 3px 30px 0px rgba(50, 50, 50, 0.67);
-  -moz-box-shadow:    0px 3px 30px 0px rgba(50, 50, 50, 0.67);
-  box-shadow:         0px 3px 30px 0px rgba(50, 50, 50, 0.67);
-
+  -webkit-box-shadow: 0 3px 30px 0 rgba(50, 50, 50, 0.67);
+  -moz-box-shadow: 0 3px 30px 0 rgba(50, 50, 50, 0.67);
+  box-shadow: 0 3px 30px 0 rgba(50, 50, 50, 0.67);
 }
-
 .clear-fix {
   clear: both;
 }
-
-
 .next-steps-container {
-
   width: 100%;
-
   .next-steps-inner {
-
-    margin: 10px 20px 10px 20px;
-
+    margin: 10px 20px;
     .body {
-        padding: 10px;
-        min-height: 300px;
+      padding: 10px;
+      min-height: 300px;
     }
   }
 }
-
-
 .step-container {
-
-    -webkit-transition: all .3s ease-out; /* Safari */
-    transition: all .3s ease-out;
-    width: 100%;
-    position: absolute; /* Tools are manually position on the DOM. */
-    .step-inner {
-      .toolbar {
-        @toolbarColor: #eee;
-        color:rgba(0,0,0, 0.87);
-        .clearfix;
-        background:@toolbarColor;
-        border:solid 1px @toolbarColor;
-        li {
-          a {color:rgba(0,0,0, 0.87);}
-
-          padding:0 1em;
-          min-height:3em;
-          line-height:3em;
-          background:@toolbarColor;
-          display:block;
-          float:left;
-          list-style-type:none;
-        }
-      }
-
-        margin: 10px 20px 10px 20px;
-        .panel;
-        .panel-default;
-        .body {
-          .panel-body;
-            position: relative;
-            padding: 10px;
-        }
+  &.babyCard {
+    max-height: 10px;
+    overflow: hidden;
+  }
+  &.growingUp {
+    max-height: 3000px;
+    -webkit-animation: fade 3s;
+    animation: fade 3s;
+    animation-timing-function: cubic-bezier(0.2, 2.0, 0.2);
+  }
+  /* We allow it to size from 0 to auto in a newly created element using max-height and animations. Thanks, https://www.christianheilmann.com/2015/08/30/quicky-fading-in-a-newly-created-element-using-css/
+      and
+      http://stackoverflow.com/questions/3508605/how-can-i-transition-height-0-to-height-auto-using-css
+       */
+  @keyframes fade {
+    from {
+//      background-color:red;
+      max-height: 0;
     }
+    to {
+  //    background-color:turquoise;
+      max-height: 3000px;
+    }
+  }
+  box-sizing: border-box;
+  margin: 10px 20px;
+  .panel;
+  .panel-default;
+  .body {
+    .panel-body;
+    position: relative;
+    padding: 10px;
+  }
+  .toolbar {
+    @toolbarColor: #eee;
+    color: rgba(0,0,0, 0.87);
+    .clearfix;
+    background: @toolbarColor;
+    border: solid 1px @toolbarColor;
+    li {
+      a {
+        color: rgba(0,0,0, 0.87);
+      }
+      padding: 0 1em;
+      min-height: 3em;
+      line-height: 3em;
+      background: @toolbarColor;
+      display: block;
+      float: left;
+      list-style-type: none;
+    }
+  }
 }
-
-
-.jh-root, .jh-type-object, .jh-type-array, .jh-key, .jh-value, .jh-root tr{
- -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
- -moz-box-sizing: border-box;    /* Firefox, other Gecko */
- box-sizing: border-box;         /* Opera/IE 8+ */
- font-size: 10px;
- background: transparent;
+.jh-root,
+.jh-type-object,
+.jh-type-array,
+.jh-key,
+.jh-value,
+.jh-root tr {
+  -webkit-box-sizing: border-box;
+  /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box;
+  /* Firefox, other Gecko */
+  box-sizing: border-box;
+  /* Opera/IE 8+ */
+  font-size: 10px;
+  background: transparent;
 }
-
-.jh-key, .jh-value{
- margin: 0;
- padding: 0.2em;
+.jh-key,
+.jh-value {
+  margin: 0;
+  padding: 0.2em;
 }
-
 .jh-empty-collection:before {
   content: '[]';
 }
-
 .jh-empty-map:before {
   content: '{}';
 }
-
 .jh-empty-set:before {
   content: '#{}';
 }
-
 .jh-empty-string:before {
   content: '""';
 }
-
-.jh-value{
-    border-left: 1px solid #ddd;
+.jh-value {
+  border-left: 1px solid #ddd;
 }
-
-.jh-type-bool, .jh-type-number{
-    font-weight: bold;
-    text-align: center;
-    color: #5286BC;
+.jh-type-bool,
+.jh-type-number {
+  font-weight: bold;
+  text-align: center;
+  color: #5286BC;
 }
-
-.jh-type-string{
-    font-style: italic;
-    color: #4C7C84;
+.jh-type-string {
+  font-style: italic;
+  color: #4C7C84;
 }
-
-.jh-type-date{
-    font-style: italic;
-    color: #839C00;
+.jh-type-date {
+  font-style: italic;
+  color: #839C00;
 }
-
-.jh-array-key{
-    font-style: italic;
-    font-size: small;
-    text-align: center;
+.jh-array-key {
+  font-style: italic;
+  font-size: small;
+  text-align: center;
 }
-
-.jh-object-key, .jh-array-key{
-    color: #444;
-    vertical-align: top;
+.jh-object-key,
+.jh-array-key {
+  color: #444;
+  vertical-align: top;
 }
-
-.jh-type-object > tbody > tr:nth-child(odd), .jh-type-array > tbody > tr:nth-child(odd){
-    background-color: #f5f5f5;
+.jh-type-object > tbody > tr:nth-child(odd),
+.jh-type-array > tbody > tr:nth-child(odd) {
+  background-color: #f5f5f5;
 }
-
-.jh-type-object > tbody > tr:nth-child(even), .jh-type-array > tbody > tr:nth-child(even){
-    background-color: #fff;
+.jh-type-object > tbody > tr:nth-child(even),
+.jh-type-array > tbody > tr:nth-child(even) {
+  background-color: #fff;
 }
-
-.jh-type-object, .jh-type-array{
-    width: 100%;
-    border-collapse: collapse;
+.jh-type-object,
+.jh-type-array {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-.jh-root{
- border: 1px solid #ccc;
- margin: 0.2em;
+.jh-root {
+  border: 1px solid #ccc;
+  margin: 0.2em;
 }
-
-th.jh-key{
- text-align: left;
+th.jh-key {
+  text-align: left;
 }
-
-.jh-type-object > tbody > tr, .jh-type-array > tr{
- border: 1px solid #ddd;
- border-bottom: none;
+.jh-type-object > tbody > tr,
+.jh-type-array > tr {
+  border: 1px solid #ddd;
+  border-bottom: none;
 }
-
-.jh-type-object > tbody > tr:last-child, .jh-type-array > tbody > tr:last-child{
- border-bottom: 1px solid #ddd;
+.jh-type-object > tbody > tr:last-child,
+.jh-type-array > tbody > tr:last-child {
+  border-bottom: 1px solid #ddd;
 }
-
-.jh-type-object > tbody > tr:hover, .jh-type-array > tbody > tr:hover{
- border: 1px solid #F99927;
+.jh-type-object > tbody > tr:hover,
+.jh-type-array > tbody > tr:hover {
+  border: 1px solid #F99927;
 }
-
-.jh-empty{
- font-style: italic;
- color: #999;
- font-size: small;
+.jh-empty {
+  font-style: italic;
+  color: #999;
+  font-size: small;
 }
-
 #custom-bootstrap-menu.navbar-default .navbar-brand {
-    color: rgba(187, 233, 240, 1);
-    font-weight: bold;
-    font-style: italic;
-    font-size: 1.7em;
-    font-family: 'Lora', serif;
+  color: rgba(187, 233, 240, 1);
+  font-weight: bold;
+  font-style: italic;
+  font-size: 1.7em;
+  font-family: 'Lora', serif;
 }
 #custom-bootstrap-menu.navbar-default {
-    font-size: 1em;
-    background-color: rgba(51, 51, 51, 1);
-    border-bottom-width: 0px;
-    border-radius: 0;
-    border: none;
-    margin-bottom: 0;
+  font-size: 1em;
+  background-color: rgba(51, 51, 51, 1);
+  border-bottom-width: 0;
+  border-radius: 0;
+  border: none;
+  margin-bottom: 0;
 }
 #custom-bootstrap-menu.navbar-default .navbar-nav>li>a {
-    color: rgba(181, 179, 179, 1);
-    background-color: rgba(51, 51, 51, 1);
-    border-top: 3px solid transparent;
+  color: rgba(181, 179, 179, 1);
+  background-color: rgba(51, 51, 51, 1);
+  border-top: 3px solid transparent;
 }
 #custom-bootstrap-menu.navbar-default .navbar-nav>li>a:hover,
 #custom-bootstrap-menu.navbar-default .navbar-nav>li>a:focus {
-    color: rgba(250, 250, 250, 1);
-    background-color: rgba(82, 82, 82, 1);
+  color: rgba(250, 250, 250, 1);
+  background-color: rgba(82, 82, 82, 1);
 }
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:hover,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:focus {
-    color: rgba(0, 0, 0, 1);
-    border-top: 3px solid #bbe9f0;
-    color: white;
-    background-color: rgba(82, 82, 82, 1);
+  color: rgba(0, 0, 0, 1);
+  border-top: 3px solid #bbe9f0;
+  color: white;
+  background-color: rgba(82, 82, 82, 1);
 }
 #custom-bootstrap-menu.navbar-default .navbar-toggle {
-    border-color: #f7f7f7;
+  border-color: #f7f7f7;
 }
 #custom-bootstrap-menu.navbar-default .navbar-toggle:hover,
 #custom-bootstrap-menu.navbar-default .navbar-toggle:focus {
-    background-color: #f7f7f7;
+  background-color: #f7f7f7;
 }
 #custom-bootstrap-menu.navbar-default .navbar-toggle .icon-bar {
-    background-color: #f7f7f7;
+  background-color: #f7f7f7;
 }
 #custom-bootstrap-menu.navbar-default .navbar-toggle:hover .icon-bar,
 #custom-bootstrap-menu.navbar-default .navbar-toggle:focus .icon-bar {
-    background-color: #333333;
+  background-color: #333333;
 }

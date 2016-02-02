@@ -29,16 +29,16 @@
    [:div.message
     [:div.loader]]])
 
-(defn position-all-tools []
-  "Position tools vertically based on the size of their predecessor(s).
-  Combined with a CSS transition, this will produce a sliding effect when new tools
-  are added to the history."
-  (let [steps (.getElementsByClassName js/document "step-container")
-        veced (into [] (map #(.item steps %) (range (.-length steps))))]
-    (reduce (fn [total e]
-                       (aset e "style" "transform" (str "translateY(" total "px)"))
-                       (+ total (.-offsetHeight e)))
-                     (.-offsetHeight (first veced)) (rest veced))))
+(defn remove-slider-classes [dom-node]
+  "Remove the classes used to animate the sliding container"
+  (.remove (.-classList dom-node) "growingUp")
+  (.remove (.-classList dom-node) "babyContainer"))
+
+(defn slide-in-tool [dom-node]
+  "The first render of a tool slides it in from the top"
+  (.add (.-classList dom-node) "growingUp")
+  (.setTimeout js/window #(remove-slider-classes dom-node) 2000))
+
 
 (defn step []
   "A generic component that houses a step in the history. Using the supplied tool name,
@@ -47,17 +47,16 @@
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
      {:display-name "step"
-      :component-did-mount (fn [this]
-                             "Reposition all tools if this tool's DOM has mutated"
-                             (let [dn (.getDOMNode this)]
-                               (.bind (js/$ dn) "DOMSubtreeModified" position-all-tools)))
+     :component-did-mount (fn [this]
+       "Slide the tool in gracefully"
+       (let [dn (.getDOMNode this)]
+         (slide-in-tool dn)))
 
       :reagent-render (fn [step-data]
                         (.debug js/console "Loading Step:" (clj->js step-data))
                         (let [_ nil]
-                          [:div.step-container
-                           [:div.step-inner
-                            [:div.toolbar
+                          [:section.step-container.babyContainer
+                            [:header.toolbar
                              [:ul
                               [:li {:class (if (= @current-tab nil) "active")} [:a {:on-click #(swap-tab nil)} (:tool step-data)]]
                               [:li {:class (if (= @current-tab "data") "active")} [:a {:data-target "test"
@@ -75,7 +74,7 @@
                                (json-html/edn->hiccup step-data))
                               ; [tool-dimmer]
                              ]
-                            ]]))})))
+                            ]))})))
 
 (defn step-tree [steps]
   "Serialize the steps of a history in order of notification.
