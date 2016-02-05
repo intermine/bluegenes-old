@@ -71,9 +71,13 @@
 (defn stable-viewport []
   "Tools re-rendering above the current viewport can result in the content jumping.
 So let's check if the element is IN the viewport right now. If it IS, just re-render. If not, count the distance from the bottom and re-focus the tool there."
-  (.log js/console "%csetting scrolltop to" "background:turquoise;font-weight:bold;" (- (viewport-distance-from-bottom) window-location) "docheight: " (get-doc-height) "windowlocation" window-location)
+  ;(.log js/console "%csetting scrolltop to" "background:turquoise;font-weight:bold;" (- (viewport-distance-from-bottom) window-location))
   (aset js/document "body" "scrollTop"
         (- (get-doc-height) window-location)))
+
+(defn store-window-location! []
+  ;(.log js/console "%cSaving window position" "color:hotpink;font-weight:bold;" (viewport-distance-from-bottom))
+  (set! window-location (viewport-distance-from-bottom)))
 
 
 (defn step []
@@ -86,20 +90,19 @@ So let's check if the element is IN the viewport right now. If it IS, just re-re
      :component-did-mount (fn [this]
        "Slide the tool in gracefully"
        (let [dn (.getDOMNode this)]
+         (store-window-location!)
          (slide-in-tool dn)))
 
       :component-will-update (fn []
         "save the current screen position to prevent re-render jumps"
-        (.log js/console "%cSaving window position" "color:hotpink;font-weight:bold;" (viewport-distance-from-bottom))
-        (set! window-location (viewport-distance-from-bottom)))
+        (store-window-location!))
 
 
       :component-did-update (fn [this]
         (let [element (.getDOMNode this)]
-          (if (not (in-view? element))
-            (stable-viewport)
-            (.log js/console "is in view" (get-tool-name element)))))
-
+          (if (not (in-view? (.querySelector js/document ".next-steps")))
+            "stabilise viewport to prevent UI jumps."
+            (stable-viewport))))
 
       :reagent-render (fn [step-data]
                         (.debug js/console "Loading Step:" (clj->js step-data))
