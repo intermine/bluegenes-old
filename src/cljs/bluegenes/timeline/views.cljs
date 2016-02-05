@@ -7,6 +7,7 @@
             [bluegenes.utils :as utils]
             [cljs.contrib.pprint :refer [pprint]]))
 
+(def window-location (reagent/atom 0))
 
 ; TODO: The following three functions are passed to tools as a way to communicate
 ; with the rest of the application. Move them to a different namespace.
@@ -39,6 +40,41 @@
   (.add (.-classList dom-node) "growingUp")
   (.setTimeout js/window #(remove-slider-classes dom-node) 2000))
 
+(defn get-tool-name [element]
+  "temp debug method to get a tool name from the html element"
+  (.-innerHTML (.querySelector element "a")))
+
+(defn get-doc-height []
+  "return the height of the entire html document including what's offscreen.
+   With thanks to http://stackoverflow.com/questions/1145850/how-to-get-height-of-entire-document-with-javascript"
+  (let [body (.-body js/document)
+        html (.-documentElement js/document)]
+    (max
+      (.-scrollHeight body)
+      (.-offsetHeight body)
+      (.-clientHeight html)
+      (.-scrollHeight html)
+      (.-offsetHeight html))))
+
+(defn viewport-distance-from-bottom []
+  (- (get-doc-height) (aget js/document "body" "scrollTop")))
+
+(defn in-view? [element]
+  "Is the element in question in the viewport? cljs version of http://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport?lq=1"
+  (let [viewport (.getBoundingClientRect element)]
+    (and
+      (>= (.-top viewport) 0)
+      (>= (.-left viewport) 0)
+      (<= (.-bottom viewport (or (.-innerHeight js/window) (aget js/document "documentElement" "clientHeight"))))
+      (<= (.-right viewport  (or (.-innerHeight js/window) (aget js/document "documentElement" "clientWidth")))))))
+
+(defn stable-viewport []
+  "Tools re-rendering above the current viewport can result in the content jumping.
+So let's check if the element is IN the viewport right now. If it IS, just re-render. If not, count the distance from the bottom and re-focus the tool there."
+  (.log js/console "%csetting scrolltop to" "background:turquoise;font-weight:bold;" (- (viewport-distance-from-bottom) window-location) "docheight: " (get-doc-height) "windowlocation" window-location)
+  (aset js/document "body" "scrollTop"
+        (- (get-doc-height) window-location)))
+
 
 (defn step []
   "A generic component that houses a step in the history. Using the supplied tool name,
@@ -51,6 +87,19 @@
        "Slide the tool in gracefully"
        (let [dn (.getDOMNode this)]
          (slide-in-tool dn)))
+
+      :component-will-update (fn []
+        "save the current screen position to prevent re-render jumps"
+        (.log js/console "%cSaving window position" "color:hotpink;font-weight:bold;" (viewport-distance-from-bottom))
+        (set! window-location (viewport-distance-from-bottom)))
+
+
+      :component-did-update (fn [this]
+        (let [element (.getDOMNode this)]
+          (if (not (in-view? element))
+            (stable-viewport)
+            (.log js/console "is in view" (get-tool-name element)))))
+
 
       :reagent-render (fn [step-data]
                         (.debug js/console "Loading Step:" (clj->js step-data))
