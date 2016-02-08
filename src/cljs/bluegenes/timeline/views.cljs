@@ -2,12 +2,9 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [json-html.core :as json-html]
-            ; [bluegenes.components.dimmer :as dimmer]
-            ; [ajax.core :refer [GET POST]]
             [bluegenes.components.nextsteps.core :as nextsteps]
             [bluegenes.utils :as utils]
             [bluegenes.components.vertical-layout-manager :as vertical]))
-
 
 (enable-console-print!)
 
@@ -18,7 +15,6 @@
   [:div.dimmer
    [:div.message
     [:div.loader]]])
-
 
 (defn position-all-tools []
   "Position tools vertically based on the size of their predecessor(s).
@@ -31,7 +27,7 @@
               (+ total (.-offsetHeight e)))
             (.-offsetHeight (first veced)) (rest veced))))
 
-(defn step-tree-subscribe [steps]
+(defn step-tree [steps]
   "Serialize the steps of a history.
   Assume that a tool with no subscription is a starting point. Then recursively
   find other steps that subscribe to the starting point. Subscriptions are
@@ -51,7 +47,6 @@
 
 (defn append-state [tool data]
   "Append a tool's state to the previous states."
-  (.log js/console "append state caled " (clj->js data) )
   (re-frame/dispatch [:append-state (keyword (:_id tool)) data]))
 
 (defn replace-state [tool data]
@@ -70,23 +65,23 @@
    :replace-state (partial replace-state step-data)
    :has-something (partial has-something step-data)})
 
-(defn single-step
+(defn step
   "Subscribe to a single step in the history and represent it visually. Also subscribes
   to an upstream step to have access to its input. "
-  [step-data]
-  (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe @step-data))])]
-    (println "single step sees" step-data)
-    (let [comms (build-comms-map @step-data)
-          global-info nil
-          tool-component (-> bluegenes.tools
-                             (aget (:tool @step-data))
-                             (aget "core")
-                             (aget "main"))]
-      [tool-component
-       (last (:state @step-data))
-       (:produced @upstream-step-data)
-       global-info
-       comms])))
+  [incd]
+  (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe incd))])]
+    (fn [step-data]
+      (let [comms (build-comms-map step-data)
+            global-info nil
+            tool-component (-> bluegenes.tools
+                               (aget (:tool step-data))
+                               (aget "core")
+                               (aget "main"))]
+        [tool-component
+         {:state (last (:state step-data))
+          :upstream-data (:produced @upstream-step-data)
+          :global-data global-info
+          :communication comms}]))))
 
 (defn step-dashboard
   "Create a dashboard with a tool inside. The dashboard includes common
@@ -95,32 +90,31 @@
   (let [step-data (re-frame/subscribe [:to-step _id])
         current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
-    (reagent/create-class
-     {:reagent-render
-      (fn []
-        [:div
-         [:div.step-container
-          [:div.step-inner
-           [:div.toolbar
-            [:ul
-             [:li {:class (if (= @current-tab nil) "active")}
-              [:a {:on-click #(swap-tab nil)}
-               (:tool @step-data)]]
-             [:li {:class (if (= @current-tab "data") "active")}
-              [:a {:data-target "test"
-                   :on-click #(swap-tab "data")}
-               "Data"]]]]
-           [:div.body
-            [:div {:className (if (= @current-tab "data") "hide")}
-             [single-step step-data]]
-            [:div {:className (if (= @current-tab nil) "hide")}
-             (json-html/edn->hiccup @step-data)]]]]])})))
+    (fn []
+      [:div
+       [:div.step-container
+        [:div.step-inner
+         [:div.toolbar
+          [:ul
+           [:li {:class (if (= @current-tab nil) "active")}
+            [:a {:on-click #(swap-tab nil)}
+             (:tool @step-data)]]
+           [:li {:class (if (= @current-tab "data") "active")}
+            [:a {:data-target "test"
+                 :on-click #(swap-tab "data")}
+             "Data"]]]]
+         [:div.body
+          [:div {:className (if (= @current-tab "data") "hide")}
+           [step @step-data]]
+          [:div {:className (if (= @current-tab nil) "hide")}
+           (json-html/edn->hiccup @step-data)]]]]])))
 
 (defn previous-steps []
-  (let [step-list (map :_id (step-tree-subscribe (deref (re-frame/subscribe [:steps]))))]
-    (into [:div]
-          (for [_id step-list]
-            (do ^{:key (str "dashboard" _id)} [step-dashboard _id])))))
+  (let [step-list (re-frame/subscribe [:steps])]
+    (fn []
+      (into [:div]
+            (for [_id (map :_id (step-tree @step-list))]
+              (do ^{:key (str "dashboard" _id)} [step-dashboard _id]))))))
 
 (defn history-details []
   "Not used as of yet."

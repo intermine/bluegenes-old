@@ -22,7 +22,6 @@
   :append-state
   trim-v
   (fn [db [step-id data]]
-    (println "appending state" step-id)
       (update-in db [:histories (:active-history db) :steps step-id :state] conj data)))
 
 (re-frame/register-handler
@@ -30,7 +29,6 @@
   trim-v
   (fn [db [step-id data]]
       (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
-
 
 (defn rid [] (str (make-random-uuid)))
 
@@ -45,8 +43,6 @@
   [db]
   (assoc-in db [:histories (:active-history db) :available-data] nil))
 
-
-
 (re-frame/register-handler
  :create-next-step
  trim-v
@@ -55,16 +51,16 @@
          source (:source last-emitted)
          data (:data last-emitted)
          uuid (keyword (rid))]
-     (clear-available-data (link-new-step-to-source (create-step db uuid {:tool        tool-name
-                                                                :uuid        uuid
-                                                                :title       "No title"
-                                                                :description "No contents."
-                                                                :has nil
-                                                                :input last-emitted
-                                                                :settled     true
-                                                                :state       []})
-                                          (:step source)
-                                          uuid)))))
+     (clear-available-data (link-new-step-to-source (create-step db uuid {:tool tool-name
+                                                                          :uuid uuid
+                                                                          :title "No title"
+                                                                          :description "No contents."
+                                                                          :has nil
+                                                                          :input last-emitted
+                                                                          :settled true
+                                                                          :state []})
+                                                    (:step source)
+                                                    uuid)))))
 
 (re-frame/register-handler
  :has-something
