@@ -114,13 +114,13 @@
                              ; Fetch templates when first mounted, once.
                              (fetch-templates-handler local-state))
 
-      :component-did-update (fn []
-                              (if-not (nil? (:query @persistent-state))
-                                (do
-                                  (.log js/console "RERUNNING")
-                                  ((:has-something comms) (replace-input-constraint (:query @local-state) (:input step-data)))
-                                  ); Run the template again
-                                ))
+      ; :component-did-update (fn []
+      ;                         (if-not (nil? (:query @persistent-state))
+      ;                           (do
+      ;                             (.log js/console "RERUNNING")
+      ;                             ((:has-something comms) (replace-input-constraint (:query @local-state) (:input step-data)))
+      ;                             ); Run the template again
+      ;                           ))
 
       :reagent-render (fn [step-data {:keys [has-something replace-state]}]
                         [:div

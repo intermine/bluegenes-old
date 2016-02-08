@@ -6,8 +6,7 @@
             ; [ajax.core :refer [GET POST]]
             [bluegenes.components.nextsteps.core :as nextsteps]
             [bluegenes.utils :as utils]
-            [bluegenes.components.vertical-layout-manager :as vertical]
-            [cljs.contrib.pprint :refer [pprint]]))
+            [bluegenes.components.vertical-layout-manager :as vertical]))
 
 
 (def window-location (reagent/atom 0))
