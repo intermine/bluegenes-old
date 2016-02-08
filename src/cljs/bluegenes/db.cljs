@@ -1,31 +1,59 @@
 (ns bluegenes.db)
 
 (def default-db
-  {:name           "βlueGenes"
+  {:name "βlueGenes"
+   :whoami {:authenticated false}
 
    :available-data {}
    :active-history nil
    :dimmer true
 
-   :mines {:flymine   {:root "www.flymine.org/query"
-                       :token nil}
+   :mines {:flymine {:root "www.flymine.org/query"
+                     :token nil}
 
            :humanmine {:root "www.humanmine.org/humanmine"
                        :token nil}
 
-           :default   {:root "www.humanmine.org/humanmine"
-                       :token nil}}
+           :default {:root "www.humanmine.org/humanmine"
+                     :token nil}}
 
-   :histories {"1d4183ab-ef64-440d-8e1d-1c27423ef395" {:uuid "1d4183ab-ef64-440d-8e1d-1c27423ef395"
-                                                       :name "Start by choosing a list."
-                                                       :slug "history-1"
-                                                       :description "Test history one."
-                                                       :starting-point "e42bdcbf-0256-410a-994f-3e45fbed3952"
-                                                       :steps {:e42bdcbf-0256-410a-994f-3e45fbed3952 {:tool        "chooselist"
-                                                                                                      :uuid        "e42bdcbf-0256-410a-994f-3e45fbed3952"
-                                                                                                      :title       "List Chooser"
-                                                                                                      :description "Select a list."
-                                                                                                      :has nil
-                                                                                                      :settled     true
-                                                                                                      :input        nil
-                                                                                                      :state       []}}}}})
+   :histories {:z {:name "Local History X"
+                   :slug "local-history-x"
+                   :description "I come from the land of clojurescript."
+                   :steps {:a {:tool "chooselist"
+                               :_id :a
+                               :title "List Chooser"
+                               :description "List Chooser Description"
+                               :state []}
+                          ;  :b {:tool "idresolver"
+                          ;      :title "Show Results"
+                          ;      :description "Show List Results"
+                          ;      :state []
+                          ;      :subscribe [:a]}
+                          ;  :c {:tool "idresolver"
+                          ;      :title "Show Results"
+                          ;      :description "Show BANANA Results"
+                          ;      :state []
+                          ;      :subscribe [:b]}
+                          ;  :c {:tool "enrichment"
+                          ;      :title "Show Enrichment"
+                          ;      :description "Show Enrichment Results"
+                          ;      :state []
+                          ;      :subscribe [:b]}
+                           }}
+               :y {:name "Local History Y"
+                   :description "I too was born in app-db."
+                   :steps {:a {:tool "idresolution"
+                               :title "List Chooser"
+                               :description "List Chooser Description"
+                               :state []}
+                           :b {:tool "showresults"
+                               :title "Show Results"
+                               :description "Show List Results"
+                               :state []
+                               :subscribe [:a]}
+                           :c {:tool "enrichment"
+                               :title "Show Enrichment"
+                               :description "Show Enrichment Results"
+                               :subscribe [:b]
+                               :state []}}}}})

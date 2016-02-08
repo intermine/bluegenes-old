@@ -4,6 +4,27 @@ A [re-frame](https://github.com/Day8/re-frame) application designed to function 
 
 ## Development Mode
 
+### Environment Variables
+
+A few environment variables are needed at runtime. Do not check these into your source code.
+
+| Environment Variable 	| Purpose 	|
+|------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| ```MONGO_URL``` 	| A MongoDB URI for storing data. Ex: ```mongodb://localhost:27017/intermine``` 	|
+| ```GOOGLE-CLIENT-ID``` 	| A Google Client ID that is used to authenticate users. A Google Project is required which can be configured at (https://console.developers.google.com/) 	|
+
+When running locally, consider creating a ```~/.lein/profiles.clj``` file with the following values:
+
+```
+{:user
+ {:env
+  {:mongo-url "mongodb://localhost:27017/monger-test"
+   :google-client-id "37046834670348634608364.googleid"}}}
+```
+
+These values will be automatically applied as environment variables to the project at runtime.
+
+
 ### Run application:
 
 ```
@@ -17,7 +38,7 @@ Figwheel will automatically push cljs changes to the browser.
 
 Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
-If you wish to use a repl from your terminal, consider installing [rlwrap](https://github.com/hanslub42/rlwrap) for a more user-friendly experience with arrow keys that work rather than generating ]]^A gobbledeygook, and run `rlwrap lein figwheel dev` rather than just `lein figwheel dev`.
+If you wish to use a repl from your terminal, consider installing [rlwrap](https://github.com/hanslub42/rlwrap) for a more user-friendly experience with arrow keys that work rather than generating ASCII codes, and run `rlwrap lein figwheel dev` rather than just `lein figwheel dev`.
 
 ### Compile Less to CSS:
 Currently this isn't built into the lein / figwheel lifecycle and needs to be done manually (this may change!).

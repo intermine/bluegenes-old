@@ -5,7 +5,7 @@
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (re-frame/register-handler
- :has-something
+ :has-something-old
  trim-v
  (fn [db [step-id data]]
    (let [notify (get-in db [:histories (:active-history db) :steps step-id :notify])]
@@ -14,6 +14,8 @@
        (update-in db [:histories (:active-history db) :steps notify] assoc :input data)
        (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
                                                                                                   :step step-id}))))))
+
+
 (re-frame/register-handler
   :append-state
   trim-v
@@ -35,8 +37,12 @@
 (defn create-step [db id new-step]
   (update-in db [:histories (:active-history db) :steps] assoc id new-step))
 
-(defn clear-data [db]
+(defn clear-available-data
+  "Clear the history of available data."
+  [db]
   (assoc-in db [:histories (:active-history db) :available-data] nil))
+
+
 
 (re-frame/register-handler
  :create-next-step
@@ -46,13 +52,67 @@
          source (:source last-emitted)
          data (:data last-emitted)
          uuid (keyword (rid))]
-     (clear-data (link-new-step-to-source (create-step db uuid {:tool        tool-name
-                                                    :uuid        uuid
-                                                    :title       "No title"
-                                                    :description "No contents."
-                                                    :has nil
-                                                    :input last-emitted
-                                                    :settled     true
-                                                    :state       []})
-                              (:step source)
-                              uuid)))))
+     (clear-available-data (link-new-step-to-source (create-step db uuid {:tool        tool-name
+                                                                :uuid        uuid
+                                                                :title       "No title"
+                                                                :description "No contents."
+                                                                :has nil
+                                                                :input last-emitted
+                                                                :settled     true
+                                                                :state       []})
+                                          (:step source)
+                                          uuid)))))
+
+(re-frame/register-handler
+ :has-something
+ trim-v
+ (fn [db [step-id data]]
+   (if (nil? (get-in db [:histories
+                         (:active-history db)
+                         :steps
+                         step-id
+                         :produced]))
+     (update-in db [:histories (:active-history db)] assoc :available-data
+                (assoc data :source {:history (:active-history db)
+                                     :step step-id}))
+     (update-in db [:histories
+                    (:active-history db)
+                    :steps
+                    step-id]
+                assoc :produced data))))
+
+
+(defn stamp-step
+  "Stamps a step with a 'produced' attribute that stores the data consumed by
+  next steps. This key becomes the input to other tools that subscribe
+  to this step."
+  [db source]
+  (.log js/console "got source" (clj->js source))
+  (update-in db [:histories
+                 (:active-history db)
+                 :steps
+                 (:step (:source source))]
+             assoc :produced {:data (:data source)
+                              :service (:service source)}))
+
+(re-frame/register-handler
+ :add-step
+ trim-v
+ (fn [db [tool-name]]
+   (.log js/console "add-step" tool-name)
+   (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
+         uuid (keyword (rid))]
+     (-> db
+         (create-step uuid {:tool tool-name
+                            :_id uuid
+                            :state []
+                            :subscribe [(:step (:source last-emitted))]})
+         (stamp-step last-emitted)
+         (clear-available-data))
+    ;  (clear-data ((create-step db uuid {:tool tool-name
+    ;                        :_id uuid
+    ;                        :state []
+    ;                        :subscribe [(:step source)]})))
+    ;  (.log js/console "source" (clj->js source))
+    ;  (.log js/console "data" (clj->js data))
+     )))

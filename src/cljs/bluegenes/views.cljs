@@ -2,6 +2,7 @@
   (:require [re-frame.core :as re-frame]
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
+            [bluegenes.components.googlesignin :as google-sign-in]
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
 
@@ -44,7 +45,12 @@
        [:ul.nav.navbar-nav
         [:li {:class (if (= panel-name "home-panel") "active")} [:a {:href "#"} "Home"]]
         [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]]
-        [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]]]]))
+        [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]
+       [:div
+        [:ul.nav.navbar-nav.pull-right
+         [:li [:a
+               [google-sign-in/main]
+               ]]]]]]]))
 
 
 (defmulti panels identity)

@@ -10,7 +10,7 @@
               false)) (seq toolmap/tools)))
 
 (defn next-step-handler [name]
-  (re-frame/dispatch [:create-next-step name]))
+  (re-frame/dispatch [:add-step name]))
 
 (defn tool-card [[name props]]
   [:div.tool-card
@@ -20,6 +20,7 @@
 
 (defn main []
   (let [available-data (re-frame/subscribe [:available-data])]
+    (.log js/console "available data is" (clj->js @available-data))
     (fn []
       [:div.next-steps
        [:div.next-steps-title "Next Steps"]
@@ -27,5 +28,5 @@
              (for [tool (filter-available-tools (:type (:data @available-data)) )]
                [tool-card tool]))
        [:div.clear-fix]
-      ;  (json-html/edn->hiccup @available-data)
+       (json-html/edn->hiccup @available-data)
        ])))
