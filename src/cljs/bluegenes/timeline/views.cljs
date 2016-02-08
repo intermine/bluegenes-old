@@ -5,7 +5,7 @@
             ; [bluegenes.components.dimmer :as dimmer]
             [bluegenes.components.nextsteps.core :as nextsteps]
             [bluegenes.utils :as utils]
-            [bluegenes.components.vertical-layout-manager :as vertical]
+            [bluegenes.components.vertical :as vertical]
             [cljs.contrib.pprint :refer [pprint]]))
 
 (def window-location (reagent/atom 0))

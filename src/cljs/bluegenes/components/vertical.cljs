@@ -1,4 +1,4 @@
-(ns bluegenes.components.vertical-layout-manager)
+(ns bluegenes.components.vertical)
 
 (def window-location (atom 0))
 
