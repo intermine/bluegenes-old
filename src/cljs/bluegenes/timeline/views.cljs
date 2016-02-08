@@ -70,54 +70,29 @@
    :replace-state (partial replace-state step-data)
    :has-something (partial has-something step-data)})
 
-(defn single-step-refactored
-  "Subscribe to a single step in the history and represent it visually. Also subscribes
-  to an upstream step to have access to its input. "
-  [_id]
-  (let [step-data           (re-frame/subscribe [:to-step _id])
-        upstream-step-data  (re-frame/subscribe [:to-step (first (:subscribe @step-data))])]
-    (reagent/create-class
-     {:reagent-render
-      (fn []
-        (let [step-data @step-data
-              upstream-step-data @upstream-step-data
-              generic-data nil
-              tool-component (-> bluegenes.tools
-                                 (aget (:tool step-data))
-                                 (aget "core")
-                                 (aget "main"))
-              comms (build-comms-map step-data)]
-          [:div.step-container
-           [:div.step-inner
-            [tool-component
-             step-data
-             upstream-step-data
-             generic-data
-             comms]]]))})))
-
 (defn single-step
   "Subscribe to a single step in the history and represent it visually. Also subscribes
   to an upstream step to have access to its input. "
   [step-data]
-  (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe step-data))])]
-    (reagent/create-class
-     {:reagent-render
-      (fn []
-        (let [comms (build-comms-map step-data)
-              tool-component (-> bluegenes.tools
-                                 (aget (:tool step-data))
-                                 (aget "core")
-                                 (aget "main"))]
-          [tool-component
-           (last (:state step-data))
-           (:produced @upstream-step-data)
-           comms]))})))
+  (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe @step-data))])]
+    (println "single step sees" step-data)
+    (let [comms (build-comms-map @step-data)
+          global-info nil
+          tool-component (-> bluegenes.tools
+                             (aget (:tool @step-data))
+                             (aget "core")
+                             (aget "main"))]
+      [tool-component
+       (last (:state @step-data))
+       (:produced @upstream-step-data)
+       global-info
+       comms])))
 
 (defn step-dashboard
   "Create a dashboard with a tool inside. The dashboard includes common
   functionality such as data tabs, notes, etc."
   [_id]
-  (let [step-data (deref (re-frame/subscribe [:to-step _id]))
+  (let [step-data (re-frame/subscribe [:to-step _id])
         current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
@@ -130,7 +105,7 @@
             [:ul
              [:li {:class (if (= @current-tab nil) "active")}
               [:a {:on-click #(swap-tab nil)}
-               (:tool step-data)]]
+               (:tool @step-data)]]
              [:li {:class (if (= @current-tab "data") "active")}
               [:a {:data-target "test"
                    :on-click #(swap-tab "data")}
@@ -139,7 +114,7 @@
             [:div {:className (if (= @current-tab "data") "hide")}
              [single-step step-data]]
             [:div {:className (if (= @current-tab nil) "hide")}
-             (json-html/edn->hiccup step-data)]]]]])})))
+             (json-html/edn->hiccup @step-data)]]]]])})))
 
 (defn previous-steps []
   (let [step-list (map :_id (step-tree-subscribe (deref (re-frame/subscribe [:steps]))))]

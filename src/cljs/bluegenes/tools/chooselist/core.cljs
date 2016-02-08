@@ -37,10 +37,11 @@
         [:td {:class "list-name"} (.-name list)]
        ])}))
 
-(defn ^:export main [step-data responders]
+(defn ^:export main [state parent-input global-info responders]
   "Output a table listing all lists in a mine."
     (reagent/create-class
-      {:reagent-render (fn [step-data]
+      {:reagent-render (fn []
+                         (println "list step data" state)
         [:div
         ; [:h2 (:description step-data) ]
           [:table {:class "list-chooser"}
@@ -51,5 +52,5 @@
               [:th "Name"]]]
            [:tbody
             (for [l @lists]
-              ^{:key (.-name l)} [list-row l responders step-data])]]])
+              ^{:key (.-name l)} [list-row l responders state])]]])
        :component-did-mount get-lists }))

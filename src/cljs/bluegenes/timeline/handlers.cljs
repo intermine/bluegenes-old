@@ -4,6 +4,8 @@
             [bluegenes.db :as db])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
+(enable-console-print!)
+
 (re-frame/register-handler
  :has-something-old
  trim-v
@@ -20,8 +22,7 @@
   :append-state
   trim-v
   (fn [db [step-id data]]
-    (.log js/console "APPENDING STATE HANDLER with id " (clj->js step-id))
-    (.log js/console "APPENDING STATE HANDLER with data " (clj->js data))
+    (println "appending state" step-id)
       (update-in db [:histories (:active-history db) :steps step-id :state] conj data)))
 
 (re-frame/register-handler
