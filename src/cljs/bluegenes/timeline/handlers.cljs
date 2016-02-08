@@ -20,6 +20,8 @@
   :append-state
   trim-v
   (fn [db [step-id data]]
+    (.log js/console "APPENDING STATE HANDLER with id " (clj->js step-id))
+    (.log js/console "APPENDING STATE HANDLER with data " (clj->js data))
       (update-in db [:histories (:active-history db) :steps step-id :state] conj data)))
 
 (re-frame/register-handler

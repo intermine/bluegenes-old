@@ -105,14 +105,16 @@
                (swap! local-state assoc :templates (js->clj response))))))
 
 
+(defn ^:export main [state parent-input]
+  (println "state is" state)
+  [:h1 "template tool"])
 
-(defn ^:export main [step-data comms]
+(defn ^:export main2 [state parent-input global-info comms]
   (let [local-state (reagent.core/atom {:templates nil})
-        persistent-state (reagent.core/atom (last (:state step-data)))]
+        persistent-state (reagent.core/atom nil)]
     (reagent/create-class
-     {:component-did-mount (fn [e]
-                             ; Fetch templates when first mounted, once.
-                             (fetch-templates-handler local-state))
+     {:component-did-mount (fn [e] (fetch-templates-handler local-state))
+      :component-will-update (fn [] (.log js/console "inside template runner, data is now" (clj->js state)))
 
       ; :component-did-update (fn []
       ;                         (if-not (nil? (:query @persistent-state))
@@ -130,7 +132,7 @@
                                                                                      persistent-state
                                                                                      (:templates @local-state)
                                                                                      (:input step-data)))}]
-                         [constraints (get-in @local-state [:query "where"])]
+                         [constraints (get-in @persistent-state [:query "where"])]
                          [run-button local-state has-something]
                          ]
                         )})))

@@ -25,11 +25,12 @@
                                :title "List Chooser"
                                :description "List Chooser Description"
                                :state []}
-                          ;  :b {:tool "idresolver"
-                          ;      :title "Show Results"
-                          ;      :description "Show List Results"
-                          ;      :state []
-                          ;      :subscribe [:a]}
+                           :b {:tool "runtemplate"
+                               :_id :b
+                               :title "Show Results"
+                               :description "Show List Results"
+                               :state []
+                               :subscribe [:a]}
                           ;  :c {:tool "idresolver"
                           ;      :title "Show Results"
                           ;      :description "Show BANANA Results"
