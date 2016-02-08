@@ -1,5 +1,7 @@
 (ns bluegenes.components.vertical-layout-manager)
 
+(def window-location (atom 0))
+
 (defn remove-slider-classes [dom-node]
   "Remove the classes used to animate the sliding container"
   (.remove (.-classList dom-node) "growingUp")
@@ -38,13 +40,14 @@
       (<= (.-bottom viewport (or (.-innerHeight js/window) (aget js/document "documentElement" "clientHeight"))))
       (<= (.-right viewport  (or (.-innerHeight js/window) (aget js/document "documentElement" "clientWidth")))))))
 
+
 (defn stable-viewport []
   "Tools re-rendering above the current viewport can result in the content jumping.
 So let's check if the element is IN the viewport right now. If it IS, just re-render. If not, count the distance from the bottom and re-focus the tool there."
-  ;(.log js/console "%csetting scrolltop to" "background:turquoise;font-weight:bold;" (- (viewport-distance-from-bottom) window-location))
+  (.log js/console "%csetting scrolltop to" "background:turquoise;font-weight:bold;" (- (get-doc-height) window-location) "doc height:" (get-doc-height) "window location:" window-location )
   (aset js/document "body" "scrollTop"
         (- (get-doc-height) window-location)))
 
 (defn store-window-location! []
-  ;(.log js/console "%cSaving window position" "color:hotpink;font-weight:bold;" (viewport-distance-from-bottom))
+  (.log js/console "%cSaving window position" "color:hotpink;font-weight:bold;" (viewport-distance-from-bottom))
   (set! window-location (viewport-distance-from-bottom)))
