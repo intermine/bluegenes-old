@@ -27,3 +27,8 @@
   :all-histories
   (fn [db]
     (reaction (:histories @db))))
+
+(re-frame/register-sub
+ :whoami
+ (fn [db]
+   (reaction (:whoami @db))))

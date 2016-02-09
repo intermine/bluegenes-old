@@ -28,5 +28,22 @@ imjs.prototype.Service.fetchTemplates = function() {};
 imjs.prototype.Service.resolveIds = function() {};
 imjs.prototype.Service.poll = function() {};
 
+getAuthResponse = function() {};
+
 var imtables = {};
 imtables.loadTable = function() {};
+
+var gapi = {};
+gapi.auth2 = function() {};
+gapi.auth2.init = function() {};
+gapi.auth2 = function() {};
+gapi.auth2.load = function() {};
+gapi.prototype.auth2.load = function() {};
+
+gapi.auth2.prototype.init = function() {};
+api.prototype.auth2.init = function() {};
+gapi.attachClickHandler = function() {};
+gapi.auth2.attachClickHandler = function() {};
+gapi.prototype.auth2.attachClickHandler = function() {};
+gapi.auth2.prototype.attachClickHandler = function() {};
+// attachClickHandler

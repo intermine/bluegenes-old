@@ -2,7 +2,8 @@
     (:require [re-frame.core :as re-frame :refer [trim-v]]
               [bluegenes.db :as db]
               [bluegenes.timeline.handlers]
-              [intermine.imjs :as imjs]))
+              [intermine.imjs :as imjs]
+              [ajax.core :refer [GET POST]]))
 
 (re-frame/register-handler
  :initialize-db
@@ -38,3 +39,40 @@
  :deactivate-dimmer
  (fn [db [_]]
    (assoc db :dimmer {:active false :message nil})))
+
+(re-frame/register-handler
+ :set-user
+ trim-v
+ (fn [db [token email name picture]]
+   (assoc-in db [:whoami]
+             {:name name
+              :email email
+              :picture picture
+              :token token
+              :authenticated true})))
+
+(re-frame/register-handler
+ :process-histories
+ trim-v
+ (fn [db response]
+   "Merge histories from the server into the existing map of histories."
+   (update-in db [:histories]
+              merge
+              (reduce
+               (fn [history-map next-history]
+                 (assoc history-map
+                        (keyword (:_id next-history))
+                        next-history))
+               {}
+               (first response)))))
+
+(re-frame/register-handler
+ :load-histories
+ trim-v
+ (fn [db]
+   "Get histories from the server."
+   (GET "/api/history"
+        :keywords? true
+        :response-format :json
+        :handler #(re-frame/dispatch [:process-histories %]))
+   db))
