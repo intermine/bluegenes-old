@@ -6,6 +6,7 @@
 
 (enable-console-print!)
 
+; TODO: This should be passed into the tool as a property.
 (def flymine (js/imjs.Service. #js {:root "www.flymine.org/query"}))
 
 (defn get-lists
@@ -20,7 +21,7 @@
                (reset! local-state (reduce
                               (fn [col next-list]
                                 (assoc col  (.-name next-list) next-list))
-                              {} im-lists))))))
+                              (sorted-map) im-lists))))))
 
 (defn is-selected [list state]
   "Returns true when a list name matches the most recent state (user chosen) list name"
