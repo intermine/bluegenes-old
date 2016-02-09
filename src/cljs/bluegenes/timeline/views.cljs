@@ -16,17 +16,6 @@
    [:div.message
     [:div.loader]]])
 
-(defn position-all-tools []
-  "Position tools vertically based on the size of their predecessor(s).
-  Combined with a CSS transition, this will produce a sliding effect when new tools
-  are added to the history."
-  (let [steps (.getElementsByClassName js/document "step-container")
-        veced (into [] (map #(.item steps %) (range (.-length steps))))]
-    (reduce (fn [total e]
-              (aset e "style" "transform" (str "translateY(" total "px)"))
-              (+ total (.-offsetHeight e)))
-            (.-offsetHeight (first veced)) (rest veced))))
-
 (defn step-tree [steps]
   "Serialize the steps of a history.
   Assume that a tool with no subscription is a starting point. Then recursively
@@ -57,7 +46,7 @@
   "Notify the world that the tool has consumable data."
   (re-frame/dispatch [:has-something (keyword (:_id tool)) data]))
 
-(defn build-comms-map
+(defn build-api-map
   "Produce a bespoke map of functions for a tool to communicate
   with the framework."
   [step-data]
@@ -71,7 +60,7 @@
   [incd]
   (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe incd))])]
     (fn [step-data]
-      (let [comms (build-comms-map step-data)
+      (let [api (build-api-map step-data)
             global-info nil
             tool-component (-> bluegenes.tools
                                (aget (:tool step-data))
@@ -81,7 +70,7 @@
          {:state (last (:state step-data))
           :upstream-data (:produced @upstream-step-data)
           :global-data global-info
-          :communication comms}]))))
+          :api api}]))))
 
 (defn step-dashboard
   "Create a dashboard with a tool inside. The dashboard includes common
