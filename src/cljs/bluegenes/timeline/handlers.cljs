@@ -4,6 +4,8 @@
             [bluegenes.db :as db])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
+(enable-console-print!)
+
 (re-frame/register-handler
  :has-something-old
  trim-v
@@ -28,7 +30,6 @@
   (fn [db [step-id data]]
       (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
 
-
 (defn rid [] (str (make-random-uuid)))
 
 (defn link-new-step-to-source [db old-step-id new-step-id]
@@ -42,8 +43,6 @@
   [db]
   (assoc-in db [:histories (:active-history db) :available-data] nil))
 
-
-
 (re-frame/register-handler
  :create-next-step
  trim-v
@@ -52,16 +51,16 @@
          source (:source last-emitted)
          data (:data last-emitted)
          uuid (keyword (rid))]
-     (clear-available-data (link-new-step-to-source (create-step db uuid {:tool        tool-name
-                                                                :uuid        uuid
-                                                                :title       "No title"
-                                                                :description "No contents."
-                                                                :has nil
-                                                                :input last-emitted
-                                                                :settled     true
-                                                                :state       []})
-                                          (:step source)
-                                          uuid)))))
+     (clear-available-data (link-new-step-to-source (create-step db uuid {:tool tool-name
+                                                                          :uuid uuid
+                                                                          :title "No title"
+                                                                          :description "No contents."
+                                                                          :has nil
+                                                                          :input last-emitted
+                                                                          :settled true
+                                                                          :state []})
+                                                    (:step source)
+                                                    uuid)))))
 
 (re-frame/register-handler
  :has-something
