@@ -84,7 +84,7 @@
       (reagent/create-class
        {:reagent-render
         (fn []
-          [:div
+          [:a
            (if (true? (:authenticated @whoami))
              [known-user whoami]
              [unknown-user])])}))))

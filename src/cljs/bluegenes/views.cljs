@@ -68,10 +68,10 @@
         [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]]
         [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]
        [:div
-        [:ul.nav.navbar-nav.pull-right
-         [:li [:a
+        [:ul.nav.navbar-nav.pull-right.signin
+         [:li
                [google-sign-in/main]
-               ]]]]]]]))
+               ]]]]]]))
 
 
 (defmulti panels identity)
