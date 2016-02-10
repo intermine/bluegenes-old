@@ -24,6 +24,15 @@
         [:a {:href (str "#/timeline/" (:slug values))} [:h3 (:name values)]]
         [:span (:description values)]])]))])
 
+(defn list-upload-section []
+  [ui-card
+   (fn []
+     [:div
+      [:h4 "I have data I want to know more about"]
+      [:p "Upload your list of identifiers (Genes, Proteins, etc.)"]
+      [:textarea {:cols 20 :rows 4}]
+      [:button "Go!"]])])
+
 (defn templates-section []
   "Outputs the templates 'answer a question' in the homepage"
   ; TODO: make this link to templates. currently not too easy as we don't have a
@@ -62,6 +71,7 @@
         [:div.cards
           [histories-section]
           [templates-section]
+          [list-upload-section]
          ]])))
 
 (defn about-panel []
