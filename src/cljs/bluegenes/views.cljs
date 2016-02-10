@@ -38,10 +38,10 @@
 (defn bubble-section []
   [ui-card
    (fn []
-     [:div
+     [:div.bubble
        [:h3 "Explore our data"]
        [:p "Start by clicking a bubble"]
-       [:img {:src "img/bubble.png"}
+       [:div [:img {:src "img/bubble.png"}]
       ]])])
 
 (defn templates-section []
