@@ -20,6 +20,7 @@
     [:div
      [:h4 "Choose a demo history below."]
      (for [[key values] @histories]
+       ^{:key key}
        [:div
         [:a {:href (str "#/timeline/" (:slug values))} [:h3 (:name values)]]
         [:span (:description values)]])]))])
@@ -45,6 +46,7 @@
       [:ul.templates
        (let [templates (re-frame/subscribe [:homepage-template-histories])]
         (for [[key values] @templates]
+          ^{:key key}
           [:li
             {:class (:type values)}
             (:description values)]
