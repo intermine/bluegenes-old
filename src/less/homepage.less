@@ -1,0 +1,51 @@
+@spacer: 2em;
+@moduleHeight: 300px;
+@moduleWidth: 200px;
+
+.homepage {
+
+  #search {
+    @inputHeight: @spacer;
+    text-align: center;
+    input, button
+     {
+      height: @inputHeight*1.5;
+      padding: 0;
+      padding-left:@spacer/4;
+      vertical-align: middle;
+      &[type="text"] {
+        min-width: 500px;
+        width: 60%;
+      }
+    }
+    button {
+      padding: 1em 5em;
+      vertical-align: middle;
+      background: @cta-color;
+      line-height: 0.3em;
+      color: @cta-color-text;
+      font-weight: bold;
+      border:0;
+      margin-left:@spacer;
+      text-shadow:1px 1px 1px rgba(0,0,0,0.1);
+      &:hover {
+        @masterColor: lighten(@cta-color,5%);
+        background:@masterColor;
+      }
+    }
+    padding-bottom:@spacer;
+  }
+
+  .cards {
+    display: flex;
+    flex-flow: row wrap;
+    align-content: stretch;
+    align-items: stretch;
+    justify-content: space-between;
+    margin-top: @spacer;
+  .step-container {
+    min-width: @moduleHeight;
+    min-height: @moduleWidth;
+    flex: 1;
+  }}
+}

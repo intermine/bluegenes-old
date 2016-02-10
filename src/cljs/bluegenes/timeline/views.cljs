@@ -8,8 +8,6 @@
 
 (enable-console-print!)
 
-(def window-location (reagent/atom 0))
-
 (defn tool-dimmer []
   "Loading screen that can be applied over a step. TODO: Move to components namespace."
   [:div.dimmer
@@ -82,7 +80,6 @@
     (fn []
       [:div
        [:div.step-container
-        [:div.step-inner
          [:div.toolbar
           [:ul
            [:li {:class (if (= @current-tab nil) "active")}
@@ -96,7 +93,7 @@
           [:div {:className (if (= @current-tab "data") "hide")}
            [step @step-data]]
           [:div {:className (if (= @current-tab nil) "hide")}
-           (json-html/edn->hiccup @step-data)]]]]])))
+           (json-html/edn->hiccup @step-data)]]]])))
 
 (defn previous-steps []
   (let [step-list (re-frame/subscribe [:steps])]

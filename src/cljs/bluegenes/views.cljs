@@ -6,22 +6,43 @@
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
 
+  (defn ui-card [contents header-text]
+    ;todo, conditional header text item (?)
+    [:div.step-container
+    [:div.body
+    [contents]]])
+
 (defn histories-section []
+  [ui-card
+  (fn []
   (let [histories (re-frame/subscribe [:all-histories])]
     [:div
      [:h4 "Choose a demo history below."]
      (for [[key values] @histories]
        [:div
         [:a {:href (str "#/timeline/" (:slug values))} [:h3 (:name values)]]
-        [:span (:description values)]])]))
+        [:span (:description values)]])]))])
+
+
+(defn searchbox []
+  [ui-card
+   (fn []
+     [:form#search
+      [:h3 "Search:"]
+      [:input {
+        :type "text"
+        :placeholder "Search for a gene, protein, disease, etc..."}]
+      [:button "Search"]])])
 
 (defn home-panel []
   (let [name (re-frame/subscribe [:name])]
     (fn []
-      [:div.step-container
-        [:div.body
-         [histories-section]]
-        ])))
+      [:main.homepage
+        [searchbox]
+        [:div.cards
+          [histories-section]
+          [histories-section]
+         ]])))
 
 (defn about-panel []
   (fn []
