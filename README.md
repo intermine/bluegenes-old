@@ -11,7 +11,7 @@ A few environment variables are needed at runtime. Do not check these into your 
 | Environment Variable 	| Purpose 	|
 |------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | ```MONGO_URL``` 	| A MongoDB URI for storing data. Ex: ```mongodb://localhost:27017/intermine``` 	|
-| ```GOOGLE-CLIENT-ID``` 	| A Google Client ID that is used to authenticate users. A Google Project is required which can be configured at (https://console.developers.google.com/) 	|
+| ```GOOGLE-CLIENT-ID``` 	| A Google Client ID that is used to authenticate users. A Google Project is required which can be configured at (https://console.developers.google.com/). [Creating a Google Developers Console project and client ID](https://developers.google.com/identity/sign-in/web/devconsole-project) walks you through the steps needed to get an ID. 	|
 
 When running locally, consider creating a ```~/.lein/profiles.clj``` file with the following values:
 
