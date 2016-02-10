@@ -185,6 +185,14 @@ body {
   }
 }
 .step-container {
+  box-sizing: border-box;
+  margin: 10px 20px;
+  .panel;
+  .panel-default;
+  img {max-width:100%;} //this resizes images to match the box
+
+  //babycard and growing up are used to transition animations on newly added
+  //DOM elements.
   &.babyCard {
     max-height: 10px;
     overflow: hidden;
@@ -196,10 +204,6 @@ body {
     animation-timing-function: cubic-bezier(0.2, 2.0, 0.2);
   }
 
-  box-sizing: border-box;
-  margin: 10px 20px;
-  .panel;
-  .panel-default;
   .body {
     .panel-body;
     position: relative;

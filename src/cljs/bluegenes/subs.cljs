@@ -34,6 +34,11 @@
     (reaction (:homepage-template-histories @db))))
 
 (re-frame/register-sub
+  :homepage-list-upload
+  (fn [db]
+    (reaction (:homepage-list-upload @db))))
+
+(re-frame/register-sub
  :whoami
  (fn [db]
    (reaction (:whoami @db))))

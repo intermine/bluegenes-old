@@ -71,4 +71,13 @@
         :description "Show all alleles for a specific Drosophila gene. Show all available information, eg mutagen, allele class and phenotype linked to each allele."
       }
     }
-   })
+    :homepage-list-upload
+    {
+      :z {:name "List Upload"
+          :slug "local-history-x"
+          :description "I come from the land of clojurescript."
+          :steps {:a
+                  {:tool "idresolver"
+                   :title "Show Results"
+                   :description "Show Results"
+                   :state []}}}}})

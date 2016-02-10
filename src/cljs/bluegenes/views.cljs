@@ -18,7 +18,7 @@
   (fn []
   (let [histories (re-frame/subscribe [:all-histories])]
     [:div
-     [:h4 "Choose a demo history below."]
+     [:h3 "Choose a demo history below."]
      (for [[key values] @histories]
        ^{:key key}
        [:div
@@ -27,12 +27,22 @@
 
 (defn list-upload-section []
   [ui-card
+  (let [list-history (re-frame/subscribe [:homepage-list-upload])]
    (fn []
-     [:div
-      [:h4 "I have data I want to know more about"]
+     [:form
+      [:h3 "I have data I want to know more about"]
       [:p "Upload your list of identifiers (Genes, Proteins, etc.)"]
       [:textarea {:cols 20 :rows 4}]
-      [:button "Go!"]])])
+      [:button "Go!"]]))])
+
+(defn bubble-section []
+  [ui-card
+   (fn []
+     [:div
+       [:h3 "Explore our data"]
+       [:p "Start by clicking a bubble"]
+       [:img {:src "img/bubble.png"}
+      ]])])
 
 (defn templates-section []
   "Outputs the templates 'answer a question' in the homepage"
@@ -40,19 +50,19 @@
   ; single gene/protein/organism entry point (I think?). Will need to add the
   ; history details to app db, too
   [ui-card
-  (fn []
-    [:div
-      [:h4 "Answer a question"]
-      [:ul.templates
-       (let [templates (re-frame/subscribe [:homepage-template-histories])]
-        (for [[key values] @templates]
-          ^{:key key}
-          [:li
-            {:class (:type values)}
-            (:description values)]
-       ))]
-     [:a "See other popular questions and template searches..."]
-     ])])
+  (let [templates (re-frame/subscribe [:homepage-template-histories])]
+    (fn []
+      [:div
+        [:h3 "Answer a question"]
+        [:ul.templates
+          (for [[key values] @templates]
+            ^{:key key}
+            [:li
+              {:class (:type values)}
+              (:description values)]
+         )]
+       [:a "See other popular questions and template searches..."]
+     ]))])
 
 (defn searchbox []
   "Outputs (currently nonfunctional) search box"
@@ -71,9 +81,10 @@
       [:main.homepage
         [searchbox]
         [:div.cards
+          [bubble-section]
           [histories-section]
-          [templates-section]
           [list-upload-section]
+          [templates-section]
          ]])))
 
 (defn about-panel []
