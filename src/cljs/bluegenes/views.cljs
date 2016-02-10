@@ -18,19 +18,19 @@
   (fn []
   (let [histories (re-frame/subscribe [:all-histories])]
     [:div
-     [:h3 "Choose a demo history below."]
+     [:h3 "Choose a starting point:"]
      (for [[key values] @histories]
        ^{:key key}
        [:div
-        [:a {:href (str "#/timeline/" (:slug values))} [:h3 (:name values)]]
+        [:a {:href (str "#/timeline/" (:slug values))} [:h4 (:name values)]]
         [:span (:description values)]])]))])
 
 (defn list-upload-section []
   [ui-card
   (let [list-history (re-frame/subscribe [:homepage-list-upload])]
    (fn []
-     [:form
-      [:h3 "I have data I want to know more about"]
+     [:form {:action "#/timeline/list-upload"}
+      [:h3 "I have data I want to know more about:"]
       [:p "Upload your list of identifiers (Genes, Proteins, etc.)"]
       [:textarea {:cols 20 :rows 4}]
       [:button "Go!"]]))])
@@ -39,7 +39,7 @@
   [ui-card
    (fn []
      [:div.bubble
-       [:h3 "Explore our data"]
+       [:h3 "Explore our data:"]
        [:p "Start by clicking a bubble"]
        [:div [:img {:src "img/bubble.png"}]
       ]])])
@@ -53,7 +53,7 @@
   (let [templates (re-frame/subscribe [:homepage-template-histories])]
     (fn []
       [:div
-        [:h3 "Answer a question"]
+        [:h3 "Answer a question:"]
         [:ul.templates
           (for [[key values] @templates]
             ^{:key key}

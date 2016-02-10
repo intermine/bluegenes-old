@@ -17,9 +17,9 @@
            :default {:root "www.humanmine.org/humanmine"
                      :token nil}}
 
-   :histories {:z {:name "Local History X"
+   :histories {:z {:name "Gene Lists"
                    :slug "local-history-x"
-                   :description "I come from the land of clojurescript."
+                   :description "Browse Intermine Gene lists.s"
                    :steps {:a {:tool "chooselist"
                                :_id :a
                                :title "List Chooser"
@@ -42,9 +42,21 @@
                           ;      :state []
                           ;      :subscribe [:b]}
                            }}
-               :y {:name "Local History Y"
+              :homepage-list-upload
+               {
+                 :name "List Upload"
+                 :slug "list-upload"
+                 :description "Upload a list of genes, proteins, etc."
+                 :steps {:a
+                   {:tool "idresolver"
+                    :_id :a
+                   :title "Show Results"
+                   :description "Show Results"
+                   :state []}}}
+              :y {:name "Local History Y"
+                   :slug "local-history-y"
                    :description "I too was born in app-db."
-                   :steps {:a {:tool "idresolution"
+                   :steps {:a {:tool "idresolver"
                                :title "List Chooser"
                                :description "List Chooser Description"
                                :state []}
@@ -71,13 +83,4 @@
         :description "Show all alleles for a specific Drosophila gene. Show all available information, eg mutagen, allele class and phenotype linked to each allele."
       }
     }
-    :homepage-list-upload
-    {
-      :z {:name "List Upload"
-          :slug "local-history-x"
-          :description "I come from the land of clojurescript."
-          :steps {:a
-                  {:tool "idresolver"
-                   :title "Show Results"
-                   :description "Show Results"
-                   :state []}}}}})
+})
