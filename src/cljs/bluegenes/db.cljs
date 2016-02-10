@@ -57,4 +57,18 @@
                                :title "Show Enrichment"
                                :description "Show Enrichment Results"
                                :subscribe [:b]
-                               :state []}}}}})
+                               :state []}}}}
+   :homepage-template-histories
+   {
+      :a { :type "Gene"
+        :description "For the selected organism retrieve all genes and their coding sequences, suitable for export as GFF3 or FASTA."
+        ;:steps {};TODO: add entry point for single gene. protein, organism?
+      }
+      :b { :type "Protein"
+        :description "Show all the proteins from a particular organism."
+      }
+      :c { :type "Gene"
+        :description "Show all alleles for a specific Drosophila gene. Show all available information, eg mutagen, allele class and phenotype linked to each allele."
+      }
+    }
+   })

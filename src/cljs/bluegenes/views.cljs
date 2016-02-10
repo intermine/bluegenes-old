@@ -7,7 +7,8 @@
   (:use [json-html.core :only [edn->hiccup]]))
 
   (defn ui-card [contents header-text]
-    ;todo, conditional header text item (?)
+    "pass homepage elements to ui-card as a function / form-2 component to wrap them in the correct boilerplate html."
+    ;TODO: conditional header text item (?)
     [:div.step-container
     [:div.body
     [contents]]])
@@ -23,8 +24,27 @@
         [:a {:href (str "#/timeline/" (:slug values))} [:h3 (:name values)]]
         [:span (:description values)]])]))])
 
+(defn templates-section []
+  "Outputs the templates 'answer a question' in the homepage"
+  ; TODO: make this link to templates. currently not too easy as we don't have a
+  ; single gene/protein/organism entry point (I think?). Will need to add the
+  ; history details to app db, too
+  [ui-card
+  (fn []
+    [:div
+      [:h4 "Answer a question"]
+      [:ul.templates
+       (let [templates (re-frame/subscribe [:homepage-template-histories])]
+        (for [[key values] @templates]
+          [:li
+            {:class (:type values)}
+            (:description values)]
+       ))]
+     [:a "See other popular questions and template searches..."]
+     ])])
 
 (defn searchbox []
+  "Outputs (currently nonfunctional) search box"
   [ui-card
    (fn []
      [:form#search
@@ -41,7 +61,7 @@
         [searchbox]
         [:div.cards
           [histories-section]
-          [histories-section]
+          [templates-section]
          ]])))
 
 (defn about-panel []

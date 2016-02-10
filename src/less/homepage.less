@@ -1,17 +1,14 @@
 @spacer: 2em;
 @moduleHeight: 300px;
 @moduleWidth: 200px;
-
 .homepage {
-
   #search {
     @inputHeight: @spacer;
     text-align: center;
-    input, button
-     {
+    input,
+    button {
       height: @inputHeight*1.5;
-      padding: 0;
-      padding-left:@spacer/4;
+      padding: 0 0 0 @spacer/4;
       vertical-align: middle;
       &[type="text"] {
         min-width: 300px;
@@ -20,26 +17,25 @@
     }
     button {
       font-family: Roboto, Helvetica, arial, sans-serif;
-      font-weight:500;
-      text-transform:uppercase;
+      font-weight: 500;
+      text-transform: uppercase;
       padding: 1em 5em;
       vertical-align: middle;
       background: @cta-color;
       line-height: 0.3em;
       color: @cta-color-text;
-      border-radius:2px;
+      border-radius: 2px;
       box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-      border:0;
-      margin-left:@spacer;
-      text-shadow:1px 1px 1px rgba(0,0,0,0.1);
+      border: 0;
+      margin-left: @spacer;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
       &:hover {
         @masterColor: lighten(@cta-color,5%);
-        background:@masterColor;
+        background: @masterColor;
       }
     }
-    padding-bottom:@spacer;
+    padding-bottom: @spacer;
   }
-
   .cards {
     display: flex;
     flex-flow: row wrap;
@@ -47,9 +43,29 @@
     align-items: stretch;
     justify-content: space-between;
     margin-top: @spacer;
-  .step-container {
-    min-width: @moduleHeight;
-    min-height: @moduleWidth;
-    flex: 1;
-  }}
+    .step-container {
+      min-width: @moduleHeight;
+      min-height: @moduleWidth;
+      flex: 1;
+      padding: @spacer/2;
+    }
+  }
+  .templates li {
+    margin: @spacer/2;
+    &.Gene:before, &.Protein:before {
+      content: "Genes";
+      padding: 2px 4px;
+      color: #fff;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+      background: @color-Gene;
+      border-radius: 2px;
+      margin-right: 0.5em;
+    }
+    &.Protein:before {
+      content: "Proteins";
+      color:rgba(0,0,0,0.87);
+      text-shadow: 1px 1px 1px rgba(255,255,255,0.1);
+      background: @color-Protein;
+    }
+  }
 }

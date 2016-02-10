@@ -29,6 +29,11 @@
     (reaction (:histories @db))))
 
 (re-frame/register-sub
+  :homepage-template-histories
+  (fn [db]
+    (reaction (:homepage-template-histories @db))))
+
+(re-frame/register-sub
  :whoami
  (fn [db]
    (reaction (:whoami @db))))
