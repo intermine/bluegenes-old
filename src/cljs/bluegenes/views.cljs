@@ -35,7 +35,7 @@
    (fn []
      [:div
       [:h3 "I have data I want to know more about:"]
-      [idresolver/main {:state "BOB"
+      [idresolver/main {:state " "
         :api api
         :upstream-data nil}]])]))
 

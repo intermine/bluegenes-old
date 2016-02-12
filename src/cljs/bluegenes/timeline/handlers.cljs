@@ -115,3 +115,16 @@
     ;  (.log js/console "source" (clj->js source))
     ;  (.log js/console "data" (clj->js data))
      )))
+
+
+ (re-frame/register-handler
+   :start-history
+   trim-v
+   (fn [db [tool data]]
+    "Start a new history in app db."
+    (let [new-id (rid)]
+      (.log js/console "dfsdfsdf sdf sdf sdf sdf" (clj->js data))
+      (assoc-in db [:histories (keyword new-id)]
+        {:steps {(keyword (rid)) data}})
+        new-id)
+    db))

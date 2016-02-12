@@ -1,12 +1,23 @@
 (ns bluegenes.timeline.api
-  (:require
-            [re-frame.core :as re-frame]))
+    (:require [re-frame.core :as re-frame])
+    (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
 
+(defn rid []
+  (.log js/console "wat")
+  (str (make-random-uuid)))
+
+
+(defn get-id [tool data]
+  "Returns the ID of a tool or starts a new history and returns the ID if it's not part of a history yet"
+  (if (some? (:_id tool))
+    (:_id tool)
+    (rid)))
+
 (defn append-state [tool data]
   "Append a tool's state to the previous states."
-  (re-frame/dispatch [:append-state (keyword (:_id tool)) data]))
+  (re-frame/dispatch [:append-state (keyword (get-id tool data)) data]))
 
 (defn replace-state [tool data]
   "Replace a tool's state with its current state."

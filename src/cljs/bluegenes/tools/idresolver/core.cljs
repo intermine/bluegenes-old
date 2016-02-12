@@ -7,7 +7,6 @@
 (def search-results (reagent.core/atom {:results nil}))
 
 (defn identifier-input [state]
-  (.log js/console "HI" (clj->js @state))
   [:textarea.form-control
     { :value @state
       :on-change (fn [val]
@@ -21,19 +20,21 @@
                             :service {:root "www.flymine.org/query"}})))
 
 (defn submit-handler [values comm]
-  (.log js/console "Submat")
+  ;let's check for a history id. if we have one, it's an existing history, if not, maybe we're on the homepage; we'll need to make a history.
   (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
-        id-promise (-> mine (.resolveIds (clj->js {:identifiers (map str/trim (str/split values ","))
-                                                   :type "Gene"
-                                                   :extra "D. melanogaster"})))]
+        id-promise (-> mine (.resolveIds (clj->js
+          {:identifiers (map str/trim (str/split values ","))
+           :type "Gene"
+           :extra "D. melanogaster"})))]
 
     (-> id-promise (.then (fn [job-id] (.poll job-id (fn [success] (results-handler success mine comm))))))))
 
-(defn submit [value api]
-  [:button.btn {:on-click (fn [e]
-                            (let [identifiers @value]
-                              ((:append-state api) {:input identifiers})
-                              (submit-handler identifiers api)))} "Submit"])
+(defn submit-button [value api]
+  [:button.btn
+    {:on-click (fn [e]
+      (let [identifiers @value]
+        ((:append-state api) {:input identifiers})
+        (submit-handler identifiers api)))} "Submit"])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
@@ -45,7 +46,7 @@
             [:label "Upload your list of identifiers (Genes, Proteins, etc.)"]
             [identifier-input local-state]]
          [:div.form-group
-          [submit local-state api]]])
+          [submit-button local-state api]]])
       :component-did-mount (fn [this]
         (identifier-input local-state))
       :component-did-update (fn [this old-props]
