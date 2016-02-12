@@ -6,9 +6,12 @@
 
 (def search-results (reagent.core/atom {:results nil}))
 
-(defn identifier-input [value]
-  [:textarea.form-control {:value @value
-           :on-change #(reset! value (-> % .-target .-value))}])
+(defn identifier-input [state]
+  (.log js/console "HI" (clj->js @state))
+  [:textarea.form-control
+    { :value @state
+      :on-change (fn [val]
+        (reset! state (-> val .-target .-value)))}])
 
 (defn results-handler [values mine comm]
   (let [matches (-> values (aget "matches") (aget "MATCH"))]
@@ -18,6 +21,7 @@
                             :service {:root "www.flymine.org/query"}})))
 
 (defn submit-handler [values comm]
+  (.log js/console "Submat")
   (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
         id-promise (-> mine (.resolveIds (clj->js {:identifiers (map str/trim (str/split values ","))
                                                    :type "Gene"
@@ -25,20 +29,24 @@
 
     (-> id-promise (.then (fn [job-id] (.poll job-id (fn [success] (results-handler success mine comm))))))))
 
-(defn submit [value comm]
+(defn submit [value api]
   [:button.btn {:on-click (fn [e]
                             (let [identifiers @value]
-                              ((:append-state comm) {:input identifiers})
-                              (submit-handler identifiers comm)))} "Submit"])
+                              ((:append-state api) {:input identifiers})
+                              (submit-handler identifiers api)))} "Submit"])
 
 (defn ^:export main []
-  (fn [input comm]
-    (let [input-atom (reagent.core/atom (-> input :state last :input))]
-      (if-not (empty? (-> input :state))
-        (submit-handler (-> input :state last :input) comm))
-    [:div
-     [:div.form-group
-      [:label "Identifiers"]
-      [identifier-input input-atom]]
-     [:div.form-group
-      [submit input-atom comm]]])))
+  (let [local-state (reagent/atom " ")]
+  (reagent/create-class
+    {:reagent-render
+      (fn [{:keys [state upstream-data api]}]
+        [:div
+          [:div
+            [:label "Upload your list of identifiers (Genes, Proteins, etc.)"]
+            [identifier-input local-state]]
+         [:div.form-group
+          [submit local-state api]]])
+      :component-did-mount (fn [this]
+        (identifier-input local-state))
+      :component-did-update (fn [this old-props]
+        (.log js/console "did update" this old-props))})))

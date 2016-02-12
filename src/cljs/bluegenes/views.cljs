@@ -2,7 +2,9 @@
   (:require [re-frame.core :as re-frame]
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
+            [bluegenes.timeline.api :as timeline-api]
             [bluegenes.components.googlesignin :as google-sign-in]
+            [bluegenes.tools.idresolver.core :as idresolver]
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
 
@@ -26,14 +28,16 @@
         [:span (:description values)]])]))])
 
 (defn list-upload-section []
+  "Nonfunctional (currently) list upload homepage widget.
+  TODO: make entries to the form carry to the linked history"
+  (let [api (timeline-api/build-api-map nil)]
   [ui-card
-  (let [list-history (re-frame/subscribe [:homepage-list-upload])]
    (fn []
-     [:form {:action "#/timeline/list-upload"}
+     [:div
       [:h3 "I have data I want to know more about:"]
-      [:p "Upload your list of identifiers (Genes, Proteins, etc.)"]
-      [:textarea {:cols 20 :rows 4}]
-      [:button "Go!"]]))])
+      [idresolver/main {:state "BOB"
+        :api api
+        :upstream-data nil}]])]))
 
 (defn bubble-section []
   [ui-card

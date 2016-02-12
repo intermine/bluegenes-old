@@ -2,6 +2,7 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [json-html.core :as json-html]
+            [bluegenes.timeline.api :as timeline-api]
             [bluegenes.components.nextsteps.core :as nextsteps]
             [bluegenes.utils :as utils]
             [bluegenes.components.vertical :as vertical]))
@@ -32,33 +33,13 @@
           (conj step-vec (id steps))
           (recur (first children) (conj step-vec (id steps))))))))
 
-(defn append-state [tool data]
-  "Append a tool's state to the previous states."
-  (re-frame/dispatch [:append-state (keyword (:_id tool)) data]))
-
-(defn replace-state [tool data]
-  "Replace a tool's state with its current state."
-  (re-frame/dispatch [:replace-state (:_id tool) data]))
-
-(defn has-something [tool data]
-  "Notify the world that the tool has consumable data."
-  (re-frame/dispatch [:has-something (keyword (:_id tool)) data]))
-
-(defn build-api-map
-  "Produce a bespoke map of functions for a tool to communicate
-  with the framework."
-  [step-data]
-  {:append-state (partial append-state step-data)
-   :replace-state (partial replace-state step-data)
-   :has-something (partial has-something step-data)})
-
 (defn step
   "Subscribe to a single step in the history and represent it visually. Also subscribes
   to an upstream step to have access to its input. "
   [incd]
   (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe incd))])]
     (fn [step-data]
-      (let [api (build-api-map step-data)
+      (let [api (timeline-api/build-api-map step-data)
             global-info nil
             tool-component (-> bluegenes.tools
                                (aget (:tool step-data))
