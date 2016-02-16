@@ -25,7 +25,7 @@
             :op "ONE OF"
             :code "A"}]})
 
-(defn table [el-id service-in query-in responder]
+(defn table [el-id service-in query-in has-something]
   (let [selector (str "#" (name el-id))
         service (clj->js service-in)
         query (clj->js query-in)]
@@ -35,14 +35,13 @@
                     (clj->js {:start 0 :size 5})
                     (clj->js {:service service :query query}))
         (.then (fn [e]
-                 (responder {:service {:root "www.flymine.org/query"}
+                 (has-something {:service {:root "www.flymine.org/query"}
                              :data {:format "query"
                                     :type (-> e .-query .-root)
                                     :value (js->clj (-> e .-query .toJSON))}}))))))
 
 (defn updater [comp]
   (let [{:keys [state upstream-data api]} (reagent/props comp)]
-    (println "updater sees" upstream-data)
     (let [query (cond
                   (= "list" (-> upstream-data :data :format))
                   (get-list-query (get-in upstream-data [:service]) (get-in upstream-data [:data]))
