@@ -9,7 +9,7 @@
 
 (def search-results (reagent.core/atom {:results nil}))
 
-(defn get-list-query [service list]
+(defn get-list-query [list]
   {:from (:type list)
    :select "*"
    :where [{:path (:type list)
@@ -17,7 +17,7 @@
             :value (:name list)
             :code "A"}]})
 
-(defn get-id-query [service list]
+(defn get-id-query [list]
   {:from (:type list)
    :select "*"
    :where [{:path "Gene.id"
@@ -44,12 +44,37 @@
   (let [{:keys [state upstream-data api]} (reagent/props comp)]
     (let [query (cond
                   (= "list" (-> upstream-data :data :format))
-                  (get-list-query (get-in upstream-data [:service]) (get-in upstream-data [:data]))
+                  (get-list-query (get-in upstream-data [:data]))
                   (= "ids" (-> upstream-data  :data :format))
-                  (get-id-query (get-in upstream-data [:service]) (get-in upstream-data [:data]))
+                  (get-id-query (get-in upstream-data [:data]))
                   (= "query" (-> upstream-data :data :format))
                   (get-in upstream-data [:data :value]))]
       (table "z" (-> upstream-data :service) query (:has-something api)))))
+
+
+(defn update-count [comp state]
+  (let [upstream-data comp]
+    (let [query (cond
+                  (= "list" (-> upstream-data :data :format))
+                  (get-list-query (get-in upstream-data [:data]))
+                  (= "ids" (-> upstream-data  :data :format))
+                  (get-id-query (get-in upstream-data [:data]))
+                  (= "query" (-> upstream-data :data :format))
+                  (get-in upstream-data [:data :value]))]
+
+      (-> (js/imjs.Service. (clj->js (:service upstream-data)))
+          (.query (clj->js query))
+          (.then (fn [q] (.count q)))
+          (.then (fn [c]
+                   (reset! state c)))))))
+
+
+(defn ^:export preview []
+  (let [state (reagent/atom 0)]
+    (fn [data]
+      (update-count data state)
+      [:h4 (str @state " rows")])))
+
 
 (defn ^:export main []
   (reagent/create-class
