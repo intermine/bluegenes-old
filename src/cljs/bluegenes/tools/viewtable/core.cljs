@@ -3,11 +3,14 @@
             [reagent.core :as reagent]
             [clojure.string :as str]
             [intermine.imtables :as imtables]
+            [reagent.impl.util :as impl :refer [extract-props]]
             [intermine.imjs :as imjs]))
 
-(def search-results (reagent.core/atom {:results nil}))
+(enable-console-print!)
 
-(defn get-list-query [service list]
+(defn get-list-query
+  "Construct a query using a collection of object ids."
+  [list]
   {:from (:type list)
    :select "*"
    :where [{:path (:type list)
@@ -15,55 +18,83 @@
             :value (:name list)
             :code "A"}]})
 
-(defn get-id-query [service list]
-  {:from "Gene"
+(defn get-id-query
+  "Construct a query using an intermine list name."
+  [list]
+  {:from (:type list)
    :select "*"
    :where [{:path "Gene.id"
-            :values (:values list)
+            :values (:value list)
             :op "ONE OF"
             :code "A"}]})
 
-(defn table [el-id service-in query-in responder]
-  (let [selector (str "#" (name el-id))
-        service (clj->js service-in)
-        query (clj->js query-in)]
-    [:h1 "disabled"]
-    (-> (.loadTable js/imtables
-                    selector
-                    (clj->js {:start 0 :size 5})
-                    (clj->js {:service service :query query}))
-        (.then (fn [e]
-                 (responder {:service {:root "www.flymine.org/query"}
-                             :data {:format "query"
-                                    :type (-> e .-query .-root)
-                                    :value (js->clj (-> e .-query .toJSON))}}))))
-    ))
+(defn normalize-input
+  "Convert a variety of inputs into an imjs compatible clojure map."
+  [input-data]
+  (cond
+    (= "list" (-> input-data :data :format))
+    (get-list-query (get-in input-data [:data]))
+    (= "ids" (-> input-data  :data :format))
+    (get-id-query (get-in input-data [:data]))
+    (= "query" (-> input-data :data :format))
+    (get-in input-data [:data :value])))
 
-(defn ^:export main []
-  (fn [input comms]
-    (.log js/console "view table loaded with input" (clj->js input))
+(defn update-count
+  "Reset an atom with the row count of an imjs query."
+  [input-data state]
+  (let [query (normalize-input input-data)]
+    (-> (js/imjs.Service. (clj->js (:service input-data)))
+        (.query (clj->js query))
+        (.then (fn [q] (.count q)))
+        (.then (fn [c]
+                 (reset! state c))))))
+
+(defn ^:export preview
+  "Render a preview of the tool."
+  []
+  (let [state (reagent/atom 0)]
+    (fn [data]
+      (update-count data state)
+      [:h4 (str @state " rows")])))
+
+(defn inner-table
+  "Renders an im-table"
+  []
+  (let [update-table (fn [comp]
+                       (let [{:keys [state upstream-data api]} (reagent/props comp)
+                             node (reagent/dom-node comp)
+                             target  (.item (.getElementsByClassName node "imtable") 0)
+                             query (normalize-input upstream-data)]
+                         (-> (.loadTable js/imtables
+                                         target
+                                         (clj->js {:start 0 :size 5})
+                                         (clj->js {:service (:service upstream-data) :query query}))
+                             (.then
+                              (fn [e]
+                                (let [clone (.clone (-> e .-query))
+                                      adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
+                                  (-> (js/imjs.Service. (clj->js (:service upstream-data)))
+                                      (.values adj)
+                                      (.then (fn [v]
+                                               ((:has-something api) {:service (:service upstream-data)
+                                                                      :data {:format "ids"
+                                                                             :type (-> e .-query .-root)
+                                                                             :value (js->clj v)}}))))))))))]
     (reagent/create-class
      {:reagent-render (fn []
                         [:div
-                         [:div {:id (str "z" (name (:_id input)))}]])
-      :component-did-mount (fn [comp]
-                             (let [input (reagent/props comp)
-                                   query (cond
-                                           (= "list" (-> input :input :data :format))
-                                           (get-list-query (get-in input [:input :service]) (get-in input [:input :data]))
-                                           (= "ids" (-> input :input :data :format))
-                                           (get-id-query (get-in input [:input :service]) (get-in input [:input :data]))
-                                           (= "query" (-> input :input :data :format))
-                                           (get-in input [:input :data :value]))]
-                               (table (str "z" (name (:_id input))) (get-in input [:input :service]) query (get comms :has-something))))
+                         [:div.imtable]])
+      :component-did-update update-table
+      :component-did-mount update-table})))
 
-      :component-did-update (fn [comp]
-                             (let [input (reagent/props comp)
-                                   query (cond
-                                           (= "list" (-> input :input :data :format))
-                                           (get-list-query (get-in input [:input :service]) (get-in input [:input :data]))
-                                           (= "ids" (-> input :input :data :format))
-                                           (get-id-query (get-in input [:input :service]) (get-in input [:input :data]))
-                                           (= "query" (-> input :input :data :format))
-                                           (get-in input [:input :data :value]))]
-                               (table (str "z" (name (:_id input))) (get-in input [:input :service]) query (get comms :has-something))))})))
+
+(defn ^:export main
+  "Render the main view of the tool."
+  []
+  (reagent/create-class
+   {:reagent-render (fn [props]
+                      [inner-table props])
+    :should-component-update (fn [this old-argv new-argv]
+                               (not (=
+                                     (dissoc (extract-props old-argv) :api)
+                                     (dissoc (extract-props new-argv) :api))))}))

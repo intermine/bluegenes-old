@@ -45,7 +45,8 @@
   then re-emit the output to the API."
   [local-state {:keys [state api]}]
   (when-let [list-details (get @local-state (:chose state))]
-    (-> {:data {:format "list"
+    (-> {:service {:root "www.flymine.org/query"}
+         :data {:format "list"
                 :type (.-type list-details)
                 :name (.-name list-details)}}
         ((:has-something api)))))
