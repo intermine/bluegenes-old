@@ -15,22 +15,35 @@
      (if-not (nil? notify)
        (update-in db [:histories (:active-history db) :steps notify] assoc :input data)
        (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
-                                                                                                  :step step-id}))))))
+        :step step-id}))))))
 
+(defn rid [] (str (make-random-uuid)))
+
+(defn new-history [db]
+  "Generates a new history and resturns this history's id"
+  (.log js/console "We're making a new history, folks")
+  (let [new-id (rid)]
+  (update-in db [:histories new-id :steps] {(keyword (rid)) "new history"})
+  new-id))
+
+(defn get-active-history [db]
+  "returns either the current active history's ID (if there is one),
+   or makes a new one and returns its ID"
+  (if (some? (:active-history db))
+    (:active-history db)
+    (new-history db)))
 
 (re-frame/register-handler
   :append-state
   trim-v
   (fn [db [step-id data]]
-      (update-in db [:histories (:active-history db) :steps step-id :state] conj data)))
+      (update-in db [:histories (get-active-history db) :steps step-id :state] conj data)))
 
 (re-frame/register-handler
   :replace-state
   trim-v
   (fn [db [step-id data]]
       (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
-
-(defn rid [] (str (make-random-uuid)))
 
 (defn link-new-step-to-source [db old-step-id new-step-id]
   (update-in db [:histories (:active-history db) :steps old-step-id] assoc :notify new-step-id))
