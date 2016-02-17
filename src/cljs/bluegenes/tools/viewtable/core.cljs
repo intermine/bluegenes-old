@@ -3,6 +3,7 @@
             [reagent.core :as reagent]
             [clojure.string :as str]
             [intermine.imtables :as imtables]
+            [reagent.impl.util :as impl :refer [extract-props]]
             [intermine.imjs :as imjs]))
 
 (enable-console-print!)
@@ -23,26 +24,9 @@
   {:from (:type list)
    :select "*"
    :where [{:path "Gene.id"
-            :values (:values list)
+            :values (:value list)
             :op "ONE OF"
             :code "A"}]})
-
-(defn table
-  "Render an im-table."
-  [el-id service-in query-in has-something]
-  (let [selector (str "#" (name el-id))
-        service (clj->js service-in)
-        query (clj->js query-in)]
-    [:h1 "disabled"]
-    (-> (.loadTable js/imtables
-                    selector
-                    (clj->js {:start 0 :size 5})
-                    (clj->js {:service service :query query}))
-        (.then (fn [e]
-                 (has-something {:service service
-                                 :data {:format "query"
-                                        :type (-> e .-query .-root)
-                                        :value (js->clj (-> e .-query .toJSON))}}))))))
 
 (defn normalize-input
   "Convert a variety of inputs into an imjs compatible clojure map."
@@ -54,14 +38,6 @@
     (get-id-query (get-in input-data [:data]))
     (= "query" (-> input-data :data :format))
     (get-in input-data [:data :value])))
-
-(defn updater
-  "(Re)render an inner im-table component."
-  [comp]
-  (let [{:keys [state upstream-data api]} (reagent/props comp)]
-    (let [query (normalize-input upstream-data)]
-      (table "z" (-> upstream-data :service) query (:has-something api)))))
-
 
 (defn update-count
   "Reset an atom with the row count of an imjs query."
@@ -81,14 +57,44 @@
       (update-count data state)
       [:h4 (str @state " rows")])))
 
+(defn inner-table
+  "Renders an im-table"
+  []
+  (let [update-table (fn [comp]
+                       (let [{:keys [state upstream-data api]} (reagent/props comp)
+                             node (reagent/dom-node comp)
+                             target  (.item (.getElementsByClassName node "imtable") 0)
+                             query (normalize-input upstream-data)]
+                         (-> (.loadTable js/imtables
+                                         target
+                                         (clj->js {:start 0 :size 5})
+                                         (clj->js {:service (:service upstream-data) :query query}))
+                             (.then
+                              (fn [e]
+                                (let [clone (.clone (-> e .-query))
+                                      adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
+                                  (-> (js/imjs.Service. (clj->js (:service upstream-data)))
+                                      (.values adj)
+                                      (.then (fn [v]
+                                               ((:has-something api) {:service (:service upstream-data)
+                                                                      :data {:format "ids"
+                                                                             :type (-> e .-query .-root)
+                                                                             :value (js->clj v)}}))))))))))]
+    (reagent/create-class
+     {:reagent-render (fn []
+                        [:div
+                         [:div.imtable]])
+      :component-did-update update-table
+      :component-did-mount update-table})))
+
 
 (defn ^:export main
   "Render the main view of the tool."
   []
   (reagent/create-class
-   {:reagent-render (fn []
-                      [:div {:id (str "z")}])
-    :component-did-mount (fn [comp]
-                           (updater comp))
-    :component-did-update (fn [comp]
-                            (updater comp))}))
+   {:reagent-render (fn [props]
+                      [inner-table props])
+    :should-component-update (fn [this old-argv new-argv]
+                               (not (=
+                                     (dissoc (extract-props old-argv) :api)
+                                     (dissoc (extract-props new-argv) :api))))}))
