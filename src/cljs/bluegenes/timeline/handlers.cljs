@@ -22,9 +22,11 @@
 (defn new-history [db]
   "Generates a new history and resturns this history's id"
   (.log js/console "We're making a new history, folks")
-  (let [new-id (rid)]
-  (update-in db [:histories new-id :steps] {(keyword (rid)) "new history"})
-  new-id))
+  (let [new-history-id (rid) new-step-id (rid)]
+    (update-in db [:histories new-history-id] {
+      :steps {(keyword new-step-id) "new history"
+      :_id new-step-id}})
+    new-history-id))
 
 (defn get-active-history [db]
   "returns either the current active history's ID (if there is one),
@@ -43,13 +45,13 @@
   :replace-state
   trim-v
   (fn [db [step-id data]]
-      (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
+      (assoc-in db [:histories (get-active-history db) :steps step-id :state] [data])))
 
 (defn link-new-step-to-source [db old-step-id new-step-id]
-  (update-in db [:histories (:active-history db) :steps old-step-id] assoc :notify new-step-id))
+  (update-in db [:histories (get-active-history db) :steps old-step-id] assoc :notify new-step-id))
 
 (defn create-step [db id new-step]
-  (update-in db [:histories (:active-history db) :steps] assoc id new-step))
+  (update-in db [:histories (get-active-history db) :steps] assoc id new-step))
 
 (defn clear-available-data
   "Clear the history of available data."
@@ -60,20 +62,21 @@
  :create-next-step
  trim-v
  (fn [db [tool-name]]
-   (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
+   (let [last-emitted (get-in db [:histories (get-active-history db) :available-data])
          source (:source last-emitted)
          data (:data last-emitted)
          uuid (keyword (rid))]
-     (clear-available-data (link-new-step-to-source (create-step db uuid {:tool tool-name
-                                                                          :uuid uuid
-                                                                          :title "No title"
-                                                                          :description "No contents."
-                                                                          :has nil
-                                                                          :input last-emitted
-                                                                          :settled true
-                                                                          :state []})
-                                                    (:step source)
-                                                    uuid)))))
+     (clear-available-data (link-new-step-to-source (create-step db uuid {
+        :tool tool-name
+        :uuid uuid
+        :title "No title"
+        :description "No contents."
+        :has nil
+        :input last-emitted
+        :settled true
+        :state []})
+        (:step source)
+        uuid)))))
 
 (re-frame/register-handler
  :has-something
