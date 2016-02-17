@@ -99,7 +99,7 @@
   (let [step-list (re-frame/subscribe [:steps])]
     (fn []
       (into [:div]
-            (for [_id (map :_id (step-tree @step-list))]
+            (for [_id (map :_id (reverse (step-tree @step-list)))]
               (do ^{:key (str "dashboard" _id)} [step-dashboard _id]))))))
 
 (defn history-details []
