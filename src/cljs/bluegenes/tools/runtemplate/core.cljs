@@ -84,10 +84,7 @@
                                           (merge (dissoc con "value" "values") (convert-input-to-constraint input))
                                           con)) %)))
 
-; (defn drop-down-handler-old [func input templates e]
-;   (let [name (-> e .-target .-value)]
-;     (func {:selected name
-;      :query (replace-input-constraint (get templates name) input)})))
+
 
 (defn fetch-templates [local-state]
   "Store Intermine's templates in our local state atom"
@@ -150,7 +147,12 @@
         local-state (reagent.core/atom {:all-templates nil
                                         :filtered-templates nil})]
     (reagent/create-class
-     {:component-did-mount
+     {:should-component-update
+      (fn [this o n]
+        (println "run template param diff"
+                 (nth (clojure.data/diff (extract-props o)
+                                         (extract-props n)) 1)))
+      :component-did-mount
       (fn [e]
         (fetch-templates local-state))
       :component-will-receive-props
