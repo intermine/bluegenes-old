@@ -33,3 +33,34 @@
   {:append-state (partial append-state step-data)
    :replace-state (partial replace-state step-data)
    :has-something (partial has-something step-data)})
+
+(defn append-state-or-new-history
+  "same as append state, but creates the history first from a homepage tool if it doesn't exist"
+  [tool data]
+  (let [active-history (re-frame/subscribe [:active-history])]
+    (if (nil? @active-history)
+      (re-frame/dispatch [:start-new-history (keyword (get-id tool)) data])
+      (append-state tool data))
+  ))
+
+(defn start-new-history [tool data]
+  (re-frame/dispatch [:start-new-history
+    (keyword (get-id tool)) data])
+  (aset js/window "location" "href" "bob"))
+
+(defn replace-state-or-new-history
+  "same as append state, but creates the history first from a homepage tool if it doesn't exist"
+  [tool data]
+  (let [active-history (re-frame/subscribe [:active-history])]
+    (if (nil? @active-history)
+      (start-new-history tool data)
+      (replace-state tool data))
+  ))
+
+ (defn build-homepage-api-map
+   "Produce a bespoke map of functions for a tool to communicate
+   with the framework."
+   [step-data]
+   {:append-state (partial append-state-or-new-history step-data)
+    :replace-state (partial replace-state-or-new-history step-data)
+    :has-something (partial has-something step-data)})

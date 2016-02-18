@@ -30,7 +30,7 @@
 (defn list-upload-section []
   "Nonfunctional (currently) list upload homepage widget.
   TODO: make entries to the form carry to the linked history"
-  (let [api (timeline-api/build-api-map nil)]
+  (let [api (timeline-api/build-homepage-api-map nil)]
   [ui-card
    (fn []
      [:div
