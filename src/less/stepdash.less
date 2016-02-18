@@ -1,0 +1,68 @@
+@collapsed-height: 75px;
+
+
+
+
+
+
+
+
+
+.step-all {
+  color: white;
+  display: flex;
+  background: #333;
+  flex-direction: column;
+
+  .categories {
+
+    display: flex;
+    flex: 1 1 auto;
+    // padding: 10px;
+
+    .category {
+
+      // background: hotpink;
+      flex: 0 0 auto;
+      padding: 5px;
+      margin: 0px;
+      font-size: 1.6em;
+      color: #bbe9f0;
+
+    &.focused {
+      // background: #525252;
+      font-weight: bold;
+      color: white;
+    }
+
+    }
+
+  }
+
+  .dash {
+    // background: hotpink;
+    // border: 1px dashed white;
+    display: flex;
+    padding: 10px;
+
+    .dash-col {
+
+      h3 {
+        border-bottom: 1px solid white;
+      }
+
+      display: flex;
+      flex-direction: column;
+      min-width: 100px;
+      flex: 0 0 auto;
+      // background: yellow;
+      // color: black;
+    }
+  }
+}
+
+
+
+.prevsteps {
+  padding-top: @collapsed-height;
+}

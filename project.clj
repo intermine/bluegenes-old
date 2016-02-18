@@ -19,6 +19,7 @@
                  [cljs-ajax "0.5.3"]
                  [com.novemberain/monger "3.0.2"]
                  [org.clojure/core.async "0.2.374"]
+                 [prismatic/dommy "1.1.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]]
 
   :source-paths ["src/clj"]
