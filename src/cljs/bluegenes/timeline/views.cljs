@@ -4,7 +4,8 @@
             [json-html.core :as json-html]
             [bluegenes.components.nextsteps.core :as nextsteps]
             [bluegenes.utils :as utils]
-            [bluegenes.components.vertical :as vertical]))
+            [bluegenes.components.vertical :as vertical]
+            [reagent.impl.util :as impl :refer [extract-props]]))
 
 (enable-console-print!)
 
@@ -55,11 +56,11 @@
 (defn step
   "Subscribe to a single step in the history and represent it visually. Also subscribes
   to an upstream step to have access to its input. "
-  [incd]
-  (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe incd))])]
+  [step-args]
+  (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe step-args))])
+        api (build-api-map step-args)]
     (fn [step-data]
-      (let [api (build-api-map step-data)
-            global-info nil
+      (let [global-info nil
             tool-component (-> bluegenes.tools
                                (aget (:tool step-data))
                                (aget "core")
@@ -77,23 +78,24 @@
   (let [step-data (re-frame/subscribe [:to-step _id])
         current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
-    (fn []
-      [:div
-       [:div.step-container
-         [:div.toolbar
-          [:ul
-           [:li {:class (if (= @current-tab nil) "active")}
-            [:a {:on-click #(swap-tab nil)}
-             (:tool @step-data)]]
-           [:li {:class (if (= @current-tab "data") "active")}
-            [:a {:data-target "test"
-                 :on-click #(swap-tab "data")}
-             "Data"]]]]
-         [:div.body
-          [:div {:className (if (= @current-tab "data") "hide")}
-           [step @step-data]]
-          [:div {:className (if (= @current-tab nil) "hide")}
-           (json-html/edn->hiccup @step-data)]]]])))
+    (reagent/create-class
+     {:reagent-render (fn [_id]
+                        [:div
+                         [:div.step-container
+                          [:div.toolbar
+                           [:ul
+                            [:li {:class (if (= @current-tab nil) "active")}
+                             [:a {:on-click #(swap-tab nil)}
+                              (:tool @step-data)]]
+                            [:li {:class (if (= @current-tab "data") "active")}
+                             [:a {:data-target "test"
+                                  :on-click #(swap-tab "data")}
+                              "Data"]]]]
+                          [:div.body
+                           [:div {:className (if (= @current-tab "data") "hide")}
+                            [step @step-data]]
+                           [:div {:className (if (= @current-tab nil) "hide")}
+                            (json-html/edn->hiccup @step-data)]]]])})))
 
 (defn previous-steps []
   (let [step-list (re-frame/subscribe [:steps])]
