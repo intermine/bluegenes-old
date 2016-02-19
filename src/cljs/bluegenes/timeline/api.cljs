@@ -40,8 +40,7 @@
   (let [active-history (re-frame/subscribe [:active-history])]
     (if (nil? @active-history)
       (re-frame/dispatch [:start-new-history tool data])
-      (append-state tool data))
-  ))
+      (append-state tool data))))
 
 
 (defn replace-state-or-new-history

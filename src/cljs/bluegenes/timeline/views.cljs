@@ -26,15 +26,11 @@
                         (filter (fn [[step value]]
                                   (not (nil? (some #{parent-id} (:subscribe value)))))
                                 steps))]
-    (println "STarting point id, dude:" starting-point-id)
     (loop [id starting-point-id
            step-vec []]
       (let [[children] (find-children id)]
         (if (nil? children)
-          (do
-            (println "ID IS:" id)
-            (println "Is it a keyword?:" (keyword? id))
-            (conj step-vec (id steps)))
+          (conj step-vec (id steps))
           (recur (first children) (conj step-vec (id steps))))))))
 
 (defn step
@@ -43,7 +39,6 @@
   [incd]
   (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe incd))])]
     (fn [step-data]
-      (.log js/console "%cstep data" "color:hotpink;font-weight:bold;" (clj->js step-data))
       (let [api (timeline-api/build-api-map step-data)
             global-info nil
             tool-component (-> bluegenes.tools
@@ -83,7 +78,6 @@
 
 (defn previous-steps []
   (let [step-list (re-frame/subscribe [:steps])]
-    (println "Step LIST:" @step-list)
     (fn []
       (into [:div]
             (for [_id (map :_id (reverse (step-tree @step-list)))]
