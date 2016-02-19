@@ -1,7 +1,8 @@
 (ns bluegenes.timeline.handlers
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame :refer [debug trim-v]]
-            [bluegenes.db :as db])
+            [bluegenes.db :as db]
+            [secretary.core :as secretary])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
@@ -120,9 +121,18 @@
  (re-frame/register-handler
    :start-new-history
    trim-v
-   (fn [db [data]]
+   (fn [db [tool data]]
     "Start a new history in app db."
     (let [new-step-id (rid) new-history-id (rid)]
-      (-> (update-in db [:histories new-history-id :steps new-step-id :state] conj data)
-          (assoc :active-history new-history-id))
+      ;(aset js/window "location" "href" (str "/#timeline/" new-history-id))
+      (-> db (assoc :active-history (keyword new-history-id))
+          (create-step (keyword new-step-id)
+            {:_id (keyword new-step-id)
+             :state [data]
+             :tool (:name tool)
+             })
+          (update-in [:histories (keyword new-history-id)] merge
+                     {:slug new-history-id
+                      :description (:name tool)
+                      :name (:name tool)}))
       )))
