@@ -7,10 +7,11 @@
 (def search-results (reagent.core/atom {:results nil}))
 
 (defn identifier-input [state]
+  (fn []
   [:textarea.form-control
     { :value @state
       :on-change (fn [val]
-        (reset! state (-> val .-target .-value)))}])
+        (reset! state (-> val .-target .-value)))}]))
 
 (defn results-handler [values mine comm]
   (let [matches (-> values (aget "matches") (aget "MATCH"))]
@@ -40,7 +41,7 @@
   (let [local-state (reagent/atom " ")]
   (reagent/create-class
     {:reagent-render
-      (fn [{:keys [state upstream-data api]}]
+      (fn render [{:keys [state upstream-data api]}]
         [:div
           [:div
             [:label "Upload your list of identifiers (Genes, Proteins, etc.)"]
@@ -48,6 +49,7 @@
          [:div.form-group
           [submit-button local-state api]]])
       :component-did-mount (fn [this]
-        (identifier-input local-state))
+        (let [passed-in-state (:state (reagent/props this))]
+          (reset! local-state (:input passed-in-state))))
       :component-did-update (fn [this old-props]
         (.log js/console "did update" this old-props))})))
