@@ -1,8 +1,11 @@
 (ns bluegenes.tools.runtemplate.core
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [re-frame.core :as re-frame]
+            [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [reagent.core :as reagent]
             [reagent.impl.util :as impl :refer [extract-props]]
             [clojure.string :as str]
+            [ajax.core :refer [GET POST]]
             [intermine.imjs :as imjs]))
 
 
@@ -86,6 +89,16 @@
 
 
 
+(defn fetch-templates-chan []
+  "Fetch templates from Intermine and return them over a channel"
+  (let [templates-chan (chan)]
+    (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
+        (.fetchTemplates)
+        (.then (fn [response]
+                 (go (>! templates-chan (js->clj response))))))
+    templates-chan))
+
+
 (defn fetch-templates [local-state]
   "Store Intermine's templates in our local state atom"
   (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
@@ -131,6 +144,54 @@
 (defn save-query [api templates e]
   (-> {:query (get templates (.. e -target -value))}
       ((:append-state api))))
+
+
+(defn get-row-count
+  "Reset an atom with the row count of an imjs query."
+  [query]
+  (println "GETTING ROW COUNT")
+  (let [c (chan)]
+    (-> (js/imjs.Service. (clj->js #js{:root "www.flymine.org/query"}))
+        (.query (clj->js query))
+        (.then (fn [q] (.count q)))
+        (.then (fn [ct]
+                 (go (>! c ct)))))
+    c))
+
+(defn ^:export preview []
+  (let [local-state (reagent/atom {:template-counts {}
+                                   :all-templates nil
+                                   :filtered-templates nil})]
+    (reagent/create-class
+     {:component-did-mount (fn [this]
+                             (go
+                              (let [templates (<! (fetch-templates-chan))
+                                    filtered-templates (valid-templates "Gene" templates)]
+
+                                (swap! local-state merge
+                                       {:all-templates templates
+                                        :filtered-templates filtered-templates})
+
+                                (doall (for [[name template] (take 100 filtered-templates)]
+                                  (go
+                                   (let [count (<! (get-row-count template))]
+                                     (swap! local-state assoc-in
+                                      [:template-counts name :count] count))))))))
+      :reagent-render (fn []
+                        ; (println "known templates" (:all-templates @local-state))
+                        [:div
+                        ;  (println "LOCAL STATE" @local-state)
+                         [:h4 "Templates"]
+                          (for [[name data] (take 100 (:template-counts @local-state))]
+                            (let [t (get-in @local-state [:all-templates name "title"])
+                                  adjusted-title (clojure.string/join " " (rest (clojure.string/split t #"-->")))]
+                              [:div (str
+                                    adjusted-title
+                                    " (" (:count data) " rows)")]))])})))
+
+
+
+
 
 (defn replace-constraints [query cons replace]
    (swap! query update-in ["where"] (fn [constraints]

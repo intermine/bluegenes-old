@@ -9980,6 +9980,7 @@ hr.on-light {
   padding: 10px;
 }
 .step-all .dash .dash-col {
+  margin: 10px;
   display: flex;
   flex-direction: column;
   min-width: 100px;

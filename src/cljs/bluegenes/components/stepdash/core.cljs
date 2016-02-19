@@ -9,20 +9,14 @@
 
 (def data-categories ["Genes" "Proteins" "Homology" "Pathways" "Annotation" ])
 
-(defn long-content []
-  (fn []
-    (into [:ul] (map (fn [] [:li (str (rand-int 100))]) (range 20)))))
-
-
-
-
-
-
-
 (def menu-state (reagent/atom {:open false
                                :category nil}))
 
-
+(defn filter-available-tools [datatype]
+  (filter (fn [[tool-name tool-data]]
+            (if (= (-> tool-data :accepts :type) datatype)
+              true
+              false)) (seq toolmap/tools)))
 
 
 (defn atom-viewer []
@@ -35,13 +29,40 @@
    [:span "Exons"]
    [:span "Introns"]])
 
-(defn dash []
-  (fn []
-    [:div.dash
-     [mock-category]
-    ;  [:h1 "sup. ¯\\_(ツ)_/¯"]
-    ;  [:h4 "from category " (str (:category @menu-state))]
-     ]))
+
+(defn preview-container [name props]
+  (println "inspecting" name)
+  (let [available-data (re-frame/subscribe [:available-data])
+        tool (-> bluegenes.tools
+                 (aget name)
+                 (aget "core")
+                 (aget "preview"))]
+
+    (fn []
+      (println "Loading preview")
+      [:div.dash-col
+      ;  {:on-click (fn [] (next-step-handler name))}
+       [:div.title (:title props)]
+       [:div.body
+        (if-not (nil? tool)
+          ^{:key name} [tool (merge @available-data {:category (:category @menu-state)})]
+          name)]])))
+
+
+
+(defn dash
+  "Show all tools relevant to the current category."
+  []
+  (let [available-data (re-frame/subscribe [:available-data])
+        category (:category @menu-state)]
+    (fn []
+      [:div.dash
+       (for [tool (filter-available-tools (:type (:data @available-data)) )]
+                (let [[id] tool]
+                  (println "passing id" id)
+                  [preview-container id tool] ))
+      ;  [:h4 "from category " (str (:category @menu-state))]
+       ])))
 
 (defn category [data]
   (fn []
@@ -53,7 +74,7 @@
 (defn categories [& [{:keys [fixed items]}]]
   (fn []
     [:div.categories {:class (if fixed "fixed")}
-     (map (fn [d] [category d]) items)
+     (map (fn [d] ^{:key d} [category d]) items)
     ;  [atom-viewer]
      ]))
 
@@ -77,4 +98,8 @@
 (defn main []
   (let [available-data (re-frame/subscribe [:available-data])]
     (fn []
+      ; (println "HELLO" (filter-available-tools (:type (:data @available-data))))
+      ; (doall (for [tool (filter-available-tools (:type (:data @available-data)) )]
+      ;   (let [[id] tool]
+      ;     (println "CAN RUN" tool) )))
       [step-dash])))
