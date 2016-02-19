@@ -124,7 +124,7 @@
    (fn [db [tool data]]
     "Start a new history in app db."
     (let [new-step-id (rid) new-history-id (rid)]
-      ;(aset js/window "location" "href" (str "/#timeline/" new-history-id))
+      (aset js/window "location" "href" (str "/#timeline/" new-history-id))
       (-> db (assoc :active-history (keyword new-history-id))
           (create-step (keyword new-step-id)
             {:_id (keyword new-step-id)
