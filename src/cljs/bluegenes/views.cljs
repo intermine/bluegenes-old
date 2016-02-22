@@ -17,7 +17,7 @@
 
 (defn histories-section []
   [ui-card
-  (fn []
+  (fn history-card []
   (let [histories (re-frame/subscribe [:all-histories])]
     [:div
      [:h3 "Choose a starting point:"]
@@ -28,9 +28,8 @@
         [:span (:description values)]])]))])
 
 (defn list-upload-section []
-  "Nonfunctional (currently) list upload homepage widget.
-  TODO: make entries to the form carry to the linked history"
-  (let [api (timeline-api/build-api-map nil)]
+  "Nonfunctional (currently) list upload homepage widget"
+  (let [api (timeline-api/build-homepage-api-map {:name "idresolver"})]
   [ui-card
    (fn []
      [:div

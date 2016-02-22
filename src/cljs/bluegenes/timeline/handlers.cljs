@@ -1,7 +1,8 @@
 (ns bluegenes.timeline.handlers
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame :refer [debug trim-v]]
-            [bluegenes.db :as db])
+            [bluegenes.db :as db]
+            [secretary.core :as secretary])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
@@ -19,39 +20,23 @@
 
 (defn rid [] (str (make-random-uuid)))
 
-(defn new-history [db]
-  "Generates a new history and resturns this history's id"
-  (.log js/console "We're making a new history, folks")
-  (let [new-history-id (rid) new-step-id (rid)]
-    (update-in db [:histories new-history-id] {
-      :steps {(keyword new-step-id) "new history"
-      :_id new-step-id}})
-    new-history-id))
-
-(defn get-active-history [db]
-  "returns either the current active history's ID (if there is one),
-   or makes a new one and returns its ID"
-  (if (some? (:active-history db))
-    (:active-history db)
-    (new-history db)))
-
 (re-frame/register-handler
   :append-state
   trim-v
   (fn [db [step-id data]]
-      (update-in db [:histories (get-active-history db) :steps step-id :state] conj data)))
+      (update-in db [:histories (:active-history db) :steps step-id :state] conj data)))
 
 (re-frame/register-handler
   :replace-state
   trim-v
   (fn [db [step-id data]]
-      (assoc-in db [:histories (get-active-history db) :steps step-id :state] [data])))
+      (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
 
 (defn link-new-step-to-source [db old-step-id new-step-id]
-  (update-in db [:histories (get-active-history db) :steps old-step-id] assoc :notify new-step-id))
+  (update-in db [:histories (:active-history db) :steps old-step-id] assoc :notify new-step-id))
 
 (defn create-step [db id new-step]
-  (update-in db [:histories (get-active-history db) :steps] assoc id new-step))
+  (update-in db [:histories (:active-history db) :steps] assoc id new-step))
 
 (defn clear-available-data
   "Clear the history of available data."
@@ -62,7 +47,7 @@
  :create-next-step
  trim-v
  (fn [db [tool-name]]
-   (let [last-emitted (get-in db [:histories (get-active-history db) :available-data])
+   (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
          source (:source last-emitted)
          data (:data last-emitted)
          uuid (keyword (rid))]
@@ -134,13 +119,20 @@
 
 
  (re-frame/register-handler
-   :start-history
+   :start-new-history
    trim-v
    (fn [db [tool data]]
     "Start a new history in app db."
-    (let [new-id (rid)]
-      (.log js/console "dfsdfsdf sdf sdf sdf sdf" (clj->js data))
-      (assoc-in db [:histories (keyword new-id)]
-        {:steps {(keyword (rid)) data}})
-        new-id)
-    db))
+    (let [new-step-id (rid) new-history-id (rid)]
+      (aset js/window "location" "href" (str "/#timeline/" new-history-id))
+      (-> db (assoc :active-history (keyword new-history-id))
+          (create-step (keyword new-step-id)
+            {:_id (keyword new-step-id)
+             :state [data]
+             :tool (:name tool)
+             })
+          (update-in [:histories (keyword new-history-id)] merge
+                     {:slug new-history-id
+                      :description (:name tool)
+                      :name (:name tool)}))
+      )))
