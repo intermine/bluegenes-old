@@ -3,6 +3,7 @@
             [reagent.core :as reagent]
             [clojure.string :as str]
             [intermine.imjs :as imjs]))
+(enable-console-print!)
 
 (def search-results (reagent.core/atom {:results nil}))
 
@@ -14,21 +15,29 @@
         (reset! state (-> val .-target .-value)))}]))
 
 (defn results-handler [values mine comm]
+  "Emit our results once the promise comes back."
   (let [matches (-> values (aget "matches") (aget "MATCH"))]
     ((:has-something comm) {:data {:format "ids"
                                    :values (into [] (map #(aget % "id") matches))
                                    :type "Gene"}
                             :service {:root "www.flymine.org/query"}})))
 
-(defn submit-handler [values comm]
-  ;let's check for a history id. if we have one, it's an existing history, if not, maybe we're on the homepage; we'll need to make a history.
-  (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
-        id-promise (-> mine (.resolveIds (clj->js
-          {:identifiers (map str/trim (str/split values ","))
-           :type "Gene"
-           :extra "D. melanogaster"})))]
+(defn split-ids [values]
+  "separate the results from the text area into discrete identifiers"
+  (map str/trim (str/split values ",")))
 
-    (-> id-promise (.then (fn [job-id] (.poll job-id (fn [success] (results-handler success mine comm))))))))
+
+
+(defn submit-handler [values comm]
+  "Resolves IDs via IMJS promise"
+  (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
+        query {:identifiers (split-ids values)
+         :type "Gene"
+         :extra "D. melanogaster"}
+        id-promise (-> mine (.resolveIds (clj->js query)))]
+    (-> id-promise (.then
+        (fn [job-id]
+          (.poll job-id (fn [success] (results-handler success mine comm))))))))
 
 (defn id-form [local-state api]
   "Visual form component with onsubmit behaviour"

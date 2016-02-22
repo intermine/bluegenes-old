@@ -18,8 +18,11 @@
 
 (re-frame/register-handler
  :set-active-panel
+ ;"Clear active history and move to specified panel. Clearing history is
+ ;important for the homepage wadgets so they don't get associated with the wrong
+ ;history."
  (fn [db [_ active-panel & args]]
-   (assoc db :active-panel active-panel)))
+   (assoc db :active-panel active-panel :active-history nil)))
 
 (re-frame/register-handler
  :set-timeline-panel trim-v
