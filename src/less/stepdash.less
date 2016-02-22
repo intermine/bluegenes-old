@@ -1,71 +1,177 @@
 @collapsed-height: 75px;
 
-
-
-
-
-
-
-
-
 .step-all {
+  transition: all ease .5s;
   color: white;
   display: flex;
   background: #333;
   flex-direction: column;
+  overflow: hidden;
+  // animation: slideDown .2s ease-out;
+  position: absolute;
+  width: 100%;
+  z-index: 999;
+  box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.75);
+
+
+  &.open {
+    height: 320px;
+    overflow: hidden;
+  }
 
   .categories {
 
     display: flex;
     flex: 1 1 auto;
-    // padding: 10px;
+    padding: 10px;
 
     .category {
-
-      // background: hotpink;
       flex: 0 0 auto;
       padding: 5px;
-      margin: 0px;
-      font-size: 1.6em;
+      padding-right: 10px;
+      font-size: 1.3em;
       color: #bbe9f0;
 
-    &.focused {
-      // background: #525252;
-      font-weight: bold;
-      color: white;
-    }
+      &.disabled {
+        color: #757575
+      }
+
+      &.focused {
+        font-weight: bold;
+        color: white;
+      }
 
     }
 
   }
 
   .dash {
-    // background: hotpink;
-    // border: 1px dashed white;
     display: flex;
     padding: 10px;
+    opacity: 1;
+    height: 350px;
+    border-bottom: 1px solid #bbe9f0;
+
+    // -webkit-animation: fadeInFromNone 3.5s ease-out;
+    // -moz-animation: fadeInFromNone 0.5s ease-out;
+    // -o-animation: fadeInFromNone 0.5s ease-out;
+    animation: fadeInFromNone 0.2s ease-out;
+
+    &.hidden {
+      // opacity: 0;
+      transition: all ease 1s;
+      display: none;
+    }
+
+
+
 
     .dash-col {
-
-      // background: pink;
       margin: 10px;
-
-      h3 {
-        border-bottom: 1px solid white;
-      }
-
       display: flex;
       flex-direction: column;
       min-width: 100px;
       flex: 0 0 auto;
-      // background: yellow;
-      // color: black;
+
+      .indented {
+        padding-left: 15px;
+      }
+
+      .heading {
+        color: pink;
+        font-size: 1.3em;
+        padding-bottom: 3px;
+        margin-bottom: 7px;
+        border-bottom: 1px solid pink;
+      }
+      .highlighted {
+        color: pink;
+      }
+
     }
   }
 }
 
-
-
 .prevsteps {
   padding-top: @collapsed-height;
+}
+
+
+@keyframes slideDown{
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes fadeInFromNone {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+
+    1% {
+        display: block;
+        opacity: 0;
+    }
+
+    100% {
+        display: block;
+        opacity: 1;
+    }
+}
+
+@-moz-keyframes fadeInFromNone {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+
+    1% {
+        display: block;
+        opacity: 0;
+    }
+
+    100% {
+        display: block;
+        opacity: 1;
+    }
+}
+
+@-o-keyframes fadeInFromNone {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+
+    1% {
+        display: block;
+        opacity: 0;
+    }
+
+    100% {
+        display: block;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInFromNone {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+
+    1% {
+        display: block;
+        opacity: 0;
+    }
+
+    100% {
+        display: block;
+        opacity: 1;
+    }
 }

@@ -7,7 +7,7 @@
             [bluegenes.tools.viewtable.core :as viewtable]))
 
 
-(def data-categories ["Genes" "Proteins" "Homology" "Pathways" "Annotation" ])
+(def data-categories ["Genes" "Proteins" "Interactions" "Gene Ontology" "Literature" "Homology" "Pathways"])
 
 (def menu-state (reagent/atom {:open false
                                :category nil}))
@@ -31,7 +31,6 @@
 
 
 (defn preview-container [name props]
-  (println "inspecting" name)
   (let [available-data (re-frame/subscribe [:available-data])
         tool (-> bluegenes.tools
                  (aget name)
@@ -39,37 +38,39 @@
                  (aget "preview"))]
 
     (fn []
-      (println "Loading preview")
       [:div.dash-col
       ;  {:on-click (fn [] (next-step-handler name))}
        [:div.title (:title props)]
        [:div.body
         (if-not (nil? tool)
-          ^{:key name} [tool (merge @available-data {:category (:category @menu-state)})]
-          name)]])))
-
-
+          ^{:key name} [tool (merge @available-data {:category (:category @menu-state)})])]])))
 
 (defn dash
   "Show all tools relevant to the current category."
-  []
+  [visible]
   (let [available-data (re-frame/subscribe [:available-data])
         category (:category @menu-state)]
-    (fn []
-      [:div.dash
+    (fn [visible]
+      [:div.dash {:class (if-not (true? visible) "hidden")}
        (for [tool (filter-available-tools (:type (:data @available-data)) )]
                 (let [[id] tool]
-                  (println "passing id" id)
-                  [preview-container id tool] ))
+                ^{:key id} [preview-container id tool] ))
       ;  [:h4 "from category " (str (:category @menu-state))]
        ])))
 
+(defn stringify-class [& args]
+  (clojure.string/join " " args))
+
 (defn category [data]
-  (fn []
-    [:div.category
-     {:class (if (= data (:category @menu-state)) "focused")
-      :on-mouse-enter (fn [e] (swap! menu-state assoc :category data))}
-     (str data)]))
+  (let [available-data (re-frame/subscribe [:available-data])]
+    (fn []
+      [:div.category
+       {:class (stringify-class
+                (if (nil? @available-data)
+                  "disabled"
+                  (if (= data (:category @menu-state)) "focused")))
+        :on-mouse-enter (fn [e] (swap! menu-state assoc :category data))}
+       (str data)])))
 
 (defn categories [& [{:keys [fixed items]}]]
   (fn []
@@ -79,27 +80,30 @@
      ]))
 
 (defn step-dash []
-  (let [state (reagent/atom {})]
+  (let [available-data (re-frame/subscribe [:available-data])
+        state (reagent/atom {})]
     (reagent/create-class
      {:component-did-mount (fn [this]
                              (let [el (reagent/dom-node this)]
                                (dommy/listen! el
                                               :mouseenter
-                                              #(dommy/add-class! el "focus"))
+
+                                              #(if-not (nil? @available-data)
+                                                 (swap! state assoc :visible true))
+                                              ; #(dommy/add-class! el "open")
+                                              )
                                (dommy/listen! el
                                               :mouseleave
-                                              #(dommy/remove-class! el "focus"))))
+                                              #(swap! state assoc :visible false)
+                                              ; #(dommy/remove-class! el "open")
+                                              )))
       :reagent-render (fn []
                         [:div.step-all
                          [categories {:items data-categories}]
-                         [dash]])})))
+                         [dash (:visible @state)]])})))
 
 
 (defn main []
   (let [available-data (re-frame/subscribe [:available-data])]
     (fn []
-      ; (println "HELLO" (filter-available-tools (:type (:data @available-data))))
-      ; (doall (for [tool (filter-available-tools (:type (:data @available-data)) )]
-      ;   (let [[id] tool]
-      ;     (println "CAN RUN" tool) )))
       [step-dash])))

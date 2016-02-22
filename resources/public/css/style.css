@@ -9955,21 +9955,35 @@ hr.on-light {
   border-left: solid #3F51B5 3px;
 }
 .step-all {
+  transition: all ease .5s;
   color: white;
   display: flex;
   background: #333;
   flex-direction: column;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  z-index: 999;
+  box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.75);
+}
+.step-all.open {
+  height: 320px;
+  overflow: hidden;
 }
 .step-all .categories {
   display: flex;
   flex: 1 1 auto;
+  padding: 10px;
 }
 .step-all .categories .category {
   flex: 0 0 auto;
   padding: 5px;
-  margin: 0px;
-  font-size: 1.6em;
+  padding-right: 10px;
+  font-size: 1.3em;
   color: #bbe9f0;
+}
+.step-all .categories .category.disabled {
+  color: #757575;
 }
 .step-all .categories .category.focused {
   font-weight: bold;
@@ -9978,6 +9992,14 @@ hr.on-light {
 .step-all .dash {
   display: flex;
   padding: 10px;
+  opacity: 1;
+  height: 350px;
+  border-bottom: 1px solid #bbe9f0;
+  animation: fadeInFromNone 0.2s ease-out;
+}
+.step-all .dash.hidden {
+  transition: all ease 1s;
+  display: none;
 }
 .step-all .dash .dash-col {
   margin: 10px;
@@ -9986,11 +10008,87 @@ hr.on-light {
   min-width: 100px;
   flex: 0 0 auto;
 }
-.step-all .dash .dash-col h3 {
-  border-bottom: 1px solid white;
+.step-all .dash .dash-col .indented {
+  padding-left: 15px;
+}
+.step-all .dash .dash-col .heading {
+  color: pink;
+  font-size: 1.3em;
+  padding-bottom: 3px;
+  margin-bottom: 7px;
+  border-bottom: 1px solid pink;
+}
+.step-all .dash .dash-col .highlighted {
+  color: pink;
 }
 .prevsteps {
   padding-top: 75px;
+}
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+@-moz-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+@-o-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+@keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
 }
 body {
   background: #d3d1c6;
