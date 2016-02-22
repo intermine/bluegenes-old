@@ -2,7 +2,9 @@
   (:require [re-frame.core :as re-frame]
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
+            [bluegenes.timeline.api :as timeline-api]
             [bluegenes.components.googlesignin :as google-sign-in]
+            [bluegenes.tools.idresolver.core :as idresolver]
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
 
@@ -15,7 +17,7 @@
 
 (defn histories-section []
   [ui-card
-  (fn []
+  (fn history-card []
   (let [histories (re-frame/subscribe [:all-histories])]
     [:div
      [:h3 "Choose a starting point:"]
@@ -26,14 +28,15 @@
         [:span (:description values)]])]))])
 
 (defn list-upload-section []
+  "Nonfunctional (currently) list upload homepage widget"
+  (let [api (timeline-api/build-homepage-api-map {:name "idresolver"})]
   [ui-card
-  (let [list-history (re-frame/subscribe [:homepage-list-upload])]
    (fn []
-     [:form {:action "#/timeline/list-upload"}
+     [:div
       [:h3 "I have data I want to know more about:"]
-      [:p "Upload your list of identifiers (Genes, Proteins, etc.)"]
-      [:textarea {:cols 20 :rows 4}]
-      [:button "Go!"]]))])
+      [idresolver/main {:state " "
+        :api api
+        :upstream-data nil}]])]))
 
 (defn bubble-section []
   [ui-card
