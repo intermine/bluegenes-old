@@ -30,24 +30,25 @@
 
     (-> id-promise (.then (fn [job-id] (.poll job-id (fn [success] (results-handler success mine comm))))))))
 
-(defn submit-button [value api]
-  [:button.btn
-    {:on-click (fn [e]
-      (let [identifiers @value]
+(defn id-form [local-state api]
+  "Visual form component with onsubmit behaviour"
+  [:form  {:on-submit (fn [e]
+      (.preventDefault js/e)
+      (let [identifiers @local-state]
         ((:append-state api) {:input identifiers})
-        (submit-handler identifiers api)))} "Submit"])
+        (submit-handler identifiers api)))}
+    [:div
+      [:label "Upload your list of identifiers (Genes, Proteins, etc.)"]
+      [identifier-input local-state]]
+   [:div.form-group
+    [:button "Submit"]]])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
   (reagent/create-class
     {:reagent-render
       (fn render [{:keys [state upstream-data api]}]
-        [:div
-          [:div
-            [:label "Upload your list of identifiers (Genes, Proteins, etc.)"]
-            [identifier-input local-state]]
-         [:div.form-group
-          [submit-button local-state api]]])
+        [id-form local-state api])
       :component-did-mount (fn [this]
         (let [passed-in-state (:state (reagent/props this))]
           (reset! local-state (:input passed-in-state))))
