@@ -76,18 +76,13 @@
      "op" "ONE OF"
      "hide" true
      "values" (get-in input [:data :value])
-     "fixed" true}
-
-
-     ))
+     "fixed" true}))
 
 (defn replace-input-constraint [input template]
   (update-in template ["where"] #(map (fn [con]
                                         (if (true? (= (get con "path") (get-in input [:data :type])))
                                           (merge (dissoc con "value" "values") (convert-input-to-constraint input))
                                           con)) %)))
-
-
 
 (defn fetch-templates-chan []
   "Fetch templates from Intermine and return them over a channel"
@@ -183,27 +178,39 @@
                              (go
                               (let [templates (<! (fetch-templates-chan))
                                     filtered-templates (filter-input-constraints templates "Gene")
-                                    single-constraint-templates (into {} (filter-single-constraints filtered-templates))]
+                                    ip (reagent/props this)
+                                    single-constraint-templates (into {} (filter-single-constraints filtered-templates))
+                                    adjusted-input-templates (reduce (fn [m [t-name t]]
+                                                      ;  (println "SEES T" t)
+                                                       (assoc m t-name (replace-input-constraint ip t)))
+                                                     {}
+                                                     single-constraint-templates)
+                                    ; adjusted (into {} (map (fn [[n t]] (replace-input-constraint ip t)) single-constraint-templates))
+                                    ]
 
+                                (println "IP" adjusted-input-templates)
+                                ; (println "adjusted" single-constraint-templates)
+                                (println "done")
                                 ; Update our state our initial, filtered template data
                                 (swap! local-state merge
                                        {:all-templates templates
                                         :single-constraint-templates single-constraint-templates
+                                        :adjusted-input-templates adjusted-input-templates
                                         :filtered-templates filtered-templates})
 
                                 (doall
-                                  (for [[name template] single-constraint-templates]
+                                  (for [[name template] adjusted-input-templates]
                                     (go
                                      (let [count (<! (get-row-count template))]
                                        (swap! local-state assoc-in
-                                              [:single-constraint-templates name :count] count))))))))
+                                              [:adjusted-input-templates name :count] count))))))))
 
       :reagent-render (fn []
                         [:div
                          [:div.heading "Popular Queries"]
                          (doall (for [[name data] (take 5 (filter
                                                     (fn [t] (template-has-tag? t (:category @local-state)))
-                                                    (:single-constraint-templates @local-state)))]
+                                                    (:adjusted-input-templates @local-state)))]
                            (let [t (get-in @local-state [:all-templates name "title"])
                                  adjusted-title (clojure.string/join " " (rest (clojure.string/split t #"-->")))]
                              ^{:key name} [:div.indented (str
