@@ -4,6 +4,7 @@
             [json-html.core :as json-html]
             [bluegenes.timeline.api :as timeline-api]
             [bluegenes.components.nextsteps.core :as nextsteps]
+            [bluegenes.components.stepdash.core :as stepdash]
             [bluegenes.utils :as utils]
             [bluegenes.components.vertical :as vertical]
             [reagent.impl.util :as impl :refer [extract-props]]))
@@ -81,7 +82,7 @@
 (defn previous-steps []
   (let [step-list (re-frame/subscribe [:steps])]
     (fn []
-      (into [:div]
+      (into [:div.prevsteps]
             (for [_id (map :_id (reverse (step-tree @step-list)))]
               (do ^{:key (str "dashboard" _id)} [step-dashboard _id]))))))
 
@@ -94,5 +95,6 @@
 
 (defn main-view []
     [:div
-     [nextsteps/main]
+     [stepdash/main]
+    ;  [nextsteps/main]
      [previous-steps]])

@@ -1,8 +1,11 @@
 (ns bluegenes.tools.runtemplate.core
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [re-frame.core :as re-frame]
+            [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [reagent.core :as reagent]
             [reagent.impl.util :as impl :refer [extract-props]]
             [clojure.string :as str]
+            [ajax.core :refer [GET POST]]
             [intermine.imjs :as imjs]))
 
 
@@ -17,9 +20,9 @@
   "Filter a collection of templates for a certain path type"
   (filter #(template-matches-pathtype? path %) templates))
 
-(defn valid-templates [type tpls]
+(defn filter-input-constraints [templates type]
   "Get templates that can use our input type"
-  (filter-templates-for-type type tpls))
+  (filter-templates-for-type type templates))
 
 
 
@@ -86,6 +89,16 @@
 
 
 
+(defn fetch-templates-chan []
+  "Fetch templates from Intermine and return them over a channel"
+  (let [templates-chan (chan)]
+    (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
+        (.fetchTemplates)
+        (.then (fn [response]
+                 (go (>! templates-chan (js->clj response))))))
+    templates-chan))
+
+
 (defn fetch-templates [local-state]
   "Store Intermine's templates in our local state atom"
   (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
@@ -115,7 +128,7 @@
   (swap!
    local-state
    assoc :filtered-templates
-   (valid-templates template-type all-templates)))
+   (filter-input-constraints all-templates template-type)))
 
 
 (defn on-select [templates api e]
@@ -131,6 +144,76 @@
 (defn save-query [api templates e]
   (-> {:query (get templates (.. e -target -value))}
       ((:append-state api))))
+
+(defn template-has-tag? [[name details] tag]
+  (some (fn [t] (= t (str "im:aspect:" tag))) (get details "tags")))
+
+(defn get-row-count
+  "Reset an atom with the row count of an imjs query."
+  [query]
+  (let [c (chan)]
+    (-> (js/imjs.Service. (clj->js #js{:root "www.flymine.org/query"}))
+        (.query (clj->js query))
+        (.then (fn [q] (.count q)))
+        (.then (fn [ct]
+                 (go (>! c ct)))))
+    c))
+
+
+(defn filter-single-constraints
+  "Returns templates that only have a single constraint."
+  [templates]
+  (filter (fn [[name details]]
+            (< (count (get details "where") 2))) templates))
+
+
+
+(defn ^:export preview []
+  (let [local-state (reagent/atom {:template-counts {}
+                                   :category nil
+                                   :all-templates nil
+                                   :single-constraint-templates {}
+                                   :filtered-templates nil})]
+    (reagent/create-class
+     {:component-will-update (fn [this new-props]
+                               (swap! local-state assoc
+                                      :category (:category (extract-props new-props))))
+
+      :component-did-mount (fn [this]
+                             (go
+                              (let [templates (<! (fetch-templates-chan))
+                                    filtered-templates (filter-input-constraints templates "Gene")
+                                    single-constraint-templates (into {} (filter-single-constraints filtered-templates))]
+
+                                ; Update our state our initial, filtered template data
+                                (swap! local-state merge
+                                       {:all-templates templates
+                                        :single-constraint-templates single-constraint-templates
+                                        :filtered-templates filtered-templates})
+
+                                (doall
+                                  (for [[name template] single-constraint-templates]
+                                    (go
+                                     (let [count (<! (get-row-count template))]
+                                       (swap! local-state assoc-in
+                                              [:single-constraint-templates name :count] count))))))))
+
+      :reagent-render (fn []
+                        [:div
+                         [:div.heading "Popular Queries"]
+                         (doall (for [[name data] (take 5 (filter
+                                                    (fn [t] (template-has-tag? t (:category @local-state)))
+                                                    (:single-constraint-templates @local-state)))]
+                           (let [t (get-in @local-state [:all-templates name "title"])
+                                 adjusted-title (clojure.string/join " " (rest (clojure.string/split t #"-->")))]
+                             ^{:key name} [:div.indented (str
+                                                 adjusted-title
+                                                 " (" (:count data) " rows)")])))
+                         [:div.indented.highlighted "More..."]])})))
+
+
+
+
 
 (defn replace-constraints [query cons replace]
    (swap! query update-in ["where"] (fn [constraints]

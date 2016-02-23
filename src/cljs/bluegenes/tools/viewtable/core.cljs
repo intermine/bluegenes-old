@@ -49,13 +49,13 @@
         (.then (fn [c]
                  (reset! state c))))))
 
-(defn ^:export preview
-  "Render a preview of the tool."
-  []
-  (let [state (reagent/atom 0)]
-    (fn [data]
-      (update-count data state)
-      [:h4 (str @state " rows")])))
+; (defn ^:export preview
+;   "Render a preview of the tool."
+;   []
+;   (let [state (reagent/atom 0)]
+;     (fn [data]
+;       (update-count data state)
+;       [:h4 (str @state " rows")])))
 
 (defn inner-table
   "Renders an im-table"
