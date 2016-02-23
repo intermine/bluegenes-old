@@ -87,7 +87,6 @@
   next steps. This key becomes the input to other tools that subscribe
   to this step."
   [db source]
-  (.log js/console "got source" (clj->js source))
   (update-in db [:histories
                  (:active-history db)
                  :steps

@@ -18,6 +18,8 @@
               true
               false)) (seq toolmap/tools)))
 
+(defn next-step-handler [name]
+  (re-frame/dispatch [:add-step name]))
 
 (defn atom-viewer []
   (fn []
@@ -39,7 +41,7 @@
 
     (fn []
       [:div.dash-col
-      ;  {:on-click (fn [] (next-step-handler name))}
+       {:on-click (fn [] (next-step-handler name))}
        [:div.title (:title props)]
        [:div.body
         (if-not (nil? tool)

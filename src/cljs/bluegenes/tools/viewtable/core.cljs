@@ -24,7 +24,7 @@
   {:from (:type list)
    :select "*"
    :where [{:path "Gene.id"
-            :values (:value list)
+            :values (:values list)
             :op "ONE OF"
             :code "A"}]})
 
@@ -49,13 +49,13 @@
         (.then (fn [c]
                  (reset! state c))))))
 
-; (defn ^:export preview
-;   "Render a preview of the tool."
-;   []
-;   (let [state (reagent/atom 0)]
-;     (fn [data]
-;       (update-count data state)
-;       [:h4 (str @state " rows")])))
+(defn ^:export preview
+  "Render a preview of the tool."
+  []
+  (let [state (reagent/atom 0)]
+    (fn [data]
+      (update-count data state)
+      [:h4 (str "View Table (" @state " rows.)")])))
 
 (defn inner-table
   "Renders an im-table"
@@ -79,7 +79,7 @@
                                                ((:has-something api) {:service (:service upstream-data)
                                                                       :data {:format "ids"
                                                                              :type (-> e .-query .-root)
-                                                                             :value (js->clj v)}}))))))))))]
+                                                                             :values (js->clj v)}}))))))))))]
     (reagent/create-class
      {:reagent-render (fn []
                         [:div
