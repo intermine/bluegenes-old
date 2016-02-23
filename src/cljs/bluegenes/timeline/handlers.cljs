@@ -1,7 +1,8 @@
 (ns bluegenes.timeline.handlers
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame :refer [debug trim-v]]
-            [bluegenes.db :as db])
+            [bluegenes.db :as db]
+            [secretary.core :as secretary])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
@@ -15,8 +16,9 @@
      (if-not (nil? notify)
        (update-in db [:histories (:active-history db) :steps notify] assoc :input data)
        (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
-                                                                                                  :step step-id}))))))
+        :step step-id}))))))
 
+(defn rid [] (str (make-random-uuid)))
 
 (re-frame/register-handler
   :append-state
@@ -29,8 +31,6 @@
   trim-v
   (fn [db [step-id data]]
       (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
-
-(defn rid [] (str (make-random-uuid)))
 
 (defn link-new-step-to-source [db old-step-id new-step-id]
   (update-in db [:histories (:active-history db) :steps old-step-id] assoc :notify new-step-id))
@@ -51,16 +51,17 @@
          source (:source last-emitted)
          data (:data last-emitted)
          uuid (keyword (rid))]
-     (clear-available-data (link-new-step-to-source (create-step db uuid {:tool tool-name
-                                                                          :uuid uuid
-                                                                          :title "No title"
-                                                                          :description "No contents."
-                                                                          :has nil
-                                                                          :input last-emitted
-                                                                          :settled true
-                                                                          :state []})
-                                                    (:step source)
-                                                    uuid)))))
+     (clear-available-data (link-new-step-to-source (create-step db uuid {
+        :tool tool-name
+        :uuid uuid
+        :title "No title"
+        :description "No contents."
+        :has nil
+        :input last-emitted
+        :settled true
+        :state []})
+        (:step source)
+        uuid)))))
 
 (re-frame/register-handler
  :has-something
@@ -115,3 +116,23 @@
     ;  (.log js/console "source" (clj->js source))
     ;  (.log js/console "data" (clj->js data))
      )))
+
+
+ (re-frame/register-handler
+   :start-new-history
+   trim-v
+   (fn [db [tool data]]
+    "Start a new history in app db."
+    (let [new-step-id (rid) new-history-id (rid)]
+      (aset js/window "location" "href" (str "/#timeline/" new-history-id))
+      (-> db (assoc :active-history (keyword new-history-id))
+          (create-step (keyword new-step-id)
+            {:_id (keyword new-step-id)
+             :state [data]
+             :tool (:name tool)
+             })
+          (update-in [:histories (keyword new-history-id)] merge
+                     {:slug new-history-id
+                      :description (:name tool)
+                      :name (:name tool)}))
+      )))

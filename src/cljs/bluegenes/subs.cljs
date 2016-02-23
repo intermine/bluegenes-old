@@ -14,6 +14,12 @@
    (reaction (:active-panel @db))))
 
 (re-frame/register-sub
+  :active-history
+  (fn [db _]
+    (reaction (:active-history @db))))
+
+
+(re-frame/register-sub
   :dimmer
   (fn [db _]
     (reaction (:dimmer @db))))
