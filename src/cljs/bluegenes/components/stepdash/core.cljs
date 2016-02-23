@@ -16,7 +16,7 @@
   (filter (fn [[tool-name tool-data]]
             (if (= (-> tool-data :accepts :type) datatype)
               true
-              false)) (seq toolmap/tools)))
+              false)) toolmap/tools))
 
 (defn next-step-handler [name]
   (re-frame/dispatch [:add-step name]))
@@ -54,6 +54,7 @@
         category (:category @menu-state)]
     (fn [visible]
       [:div.dash {:class (if-not (true? visible) "hidden")}
+      ;  (println "about to loop over tools" (filter-available-tools (:type (:data @available-data)) ))
        (for [tool (filter-available-tools (:type (:data @available-data)) )]
                 (let [[id] tool]
                 ^{:key id} [preview-container id tool] ))
@@ -89,7 +90,6 @@
                              (let [el (reagent/dom-node this)]
                                (dommy/listen! el
                                               :mouseenter
-
                                               #(if-not (nil? @available-data)
                                                  (swap! state assoc :visible true))
                                               ; #(dommy/add-class! el "open")

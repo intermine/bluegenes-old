@@ -55,7 +55,10 @@
   (let [state (reagent/atom 0)]
     (fn [data]
       (update-count data state)
-      [:h4 (str "View Table (" @state " rows.)")])))
+      [:div
+       [:div.heading "View Table"]
+       [:div.indented (str @state " rows.")]]
+      )))
 
 (defn inner-table
   "Renders an im-table"
