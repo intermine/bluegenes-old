@@ -60,5 +60,5 @@ RUN bower install
 
 RUN lein clean
 RUN lein foreign
-RUN lein cljsbuild once min
+RUN lein cljsbuild dev min
 CMD lein run
