@@ -54,12 +54,9 @@
         category (:category @menu-state)]
     (fn [visible]
       [:div.dash {:class (if-not (true? visible) "hidden")}
-      ;  (println "about to loop over tools" (filter-available-tools (:type (:data @available-data)) ))
        (for [tool (filter-available-tools (:type (:data @available-data)) )]
                 (let [[id] tool]
-                ^{:key id} [preview-container id tool] ))
-      ;  [:h4 "from category " (str (:category @menu-state))]
-       ])))
+                ^{:key id} [preview-container id tool]))])))
 
 (defn stringify-class [& args]
   (clojure.string/join " " args))
@@ -91,14 +88,10 @@
                                (dommy/listen! el
                                               :mouseenter
                                               #(if-not (nil? @available-data)
-                                                 (swap! state assoc :visible true))
-                                              ; #(dommy/add-class! el "open")
-                                              )
+                                                 (swap! state assoc :visible true)))
                                (dommy/listen! el
                                               :mouseleave
-                                              #(swap! state assoc :visible false)
-                                              ; #(dommy/remove-class! el "open")
-                                              )))
+                                              #(swap! state assoc :visible false))))
       :reagent-render (fn []
                         [:div.step-all
                          [categories {:items data-categories}]
