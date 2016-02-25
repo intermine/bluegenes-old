@@ -17,59 +17,44 @@
            :default {:root "www.humanmine.org/humanmine"
                      :token nil}}
 
-   :histories {:z {:name "Gene Lists"
+   :histories {:lists {:name "Gene Lists"
                    :slug "local-history-x"
                    :description "Browse Intermine Gene lists.s"
-                   :steps {:a {:tool "chooselist"
-                               :_id :a
+                   :steps {:choose-list {:tool "chooselist"
+                               :_id :choose-list
                                :title "List Chooser"
                                :description "List Chooser Description"
                                :state []}
-                          ;  :b {:tool "runtemplate"
-                          ;      :_id :b
-                          ;      :title "Show Results"
-                          ;      :description "Show List Results"
-                          ;      :state []
-                          ;      :subscribe [:a]}
-                          ;  :c {:tool "idresolver"
-                          ;      :title "Show Results"
-                          ;      :description "Show BANANA Results"
-                          ;      :state []
-                          ;      :subscribe [:b]}
-                          ;  :c {:tool "enrichment"
-                          ;      :title "Show Enrichment"
-                          ;      :description "Show Enrichment Results"
-                          ;      :state []
-                          ;      :subscribe [:b]}
                            }}
               :homepage-list-upload
                {
                  :name "List Upload"
                  :slug "list-upload"
                  :description "Upload a list of genes, proteins, etc."
-                 :steps {:a
+                 :steps {:id-resolver
                    {:tool "idresolver"
-                    :_id :a
+                    :_id :id-resolver
                    :title "Show Results"
                    :description "Show Results"
                    :state []}}}
-              :y {:name "Local History Y"
-                   :slug "local-history-y"
-                   :description "I too was born in app-db."
-                   :steps {:a {:tool "idresolver"
-                               :title "List Chooser"
-                               :description "List Chooser Description"
-                               :state []}
-                           :b {:tool "showresults"
-                               :title "Show Results"
-                               :description "Show List Results"
-                               :state []
-                               :subscribe [:a]}
-                           :c {:tool "enrichment"
-                               :title "Show Enrichment"
-                               :description "Show Enrichment Results"
-                               :subscribe [:b]
-                               :state []}}}}
+              ; :y {:name "Local History Y"
+              ;      :slug "local-history-y"
+              ;      :description "I too was born in app-db."
+              ;      :steps {:a {:tool "idresolver"
+              ;                  :title "List Chooser"
+              ;                  :description "List Chooser Description"
+              ;                  :state []}
+              ;              :b {:tool "showresults"
+              ;                  :title "Show Results"
+              ;                  :description "Show List Results"
+              ;                  :state []
+              ;                  :subscribe [:a]}
+              ;              :c {:tool "enrichment"
+              ;                  :title "Show Enrichment"
+              ;                  :description "Show Enrichment Results"
+              ;                  :subscribe [:b]
+              ;                  :state []}}}
+               }
    :homepage-template-histories
    {
       :a { :type "Gene"
