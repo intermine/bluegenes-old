@@ -11,7 +11,12 @@
 (defn results-handler [results mine comm]
   "Emit our results once the promise comes back."
   (.log js/console "%cresults" "background-color:ivory" results)
-  (reset! search-results results)
+  (reset! search-results
+    {
+    :results (.-results results)
+    :facets {
+      :organisms (js->clj (aget results "facets" "organism.shortName"))
+      :category (js->clj (aget results "facets" "Category"))}})
   )
 
 (defn submit-handler [searchterm comm]
@@ -23,9 +28,27 @@
         (fn [results]
           (results-handler results mine comm))))))
 
+(defn facet-display [facets]
+  [:div.facets
+    [:h4 "Facets"]
+      [:div
+       [:h5 "Organisms"]
+       [:ul
+        (for [[name value] (:organisms facets)]
+          ^{:key name}
+          [:li
+           [:span.count value] name])]
+       [:h5 "Categories"]
+       [:ul
+      (for [[name value] (:category facets)]
+        ^{:key name}
+        [:li
+         [:span.count value] name])]
+       ]])
+
 (defn id-form [local-state api]
   "Visual form component which handles submit and change"
-  [:div
+  [:div.search
   [:form {:on-submit (fn [e]
       (.preventDefault js/e)
       (let [searchterm @local-state]
@@ -39,8 +62,10 @@
               (reset! local-state (-> val .-target .-value)))}]
    [:div.form-group
     [:button "Submit"]]]
-   [:div.results
-    @search-results]
+    [facet-display (:facets @search-results)]
+    [:div.results
+      [:h4 "Results"]
+     [:div (:results @search-results)]]
     ])
 
 (defn ^:export main []
