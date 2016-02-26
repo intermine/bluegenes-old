@@ -37,23 +37,14 @@
                    :title "Show Results"
                    :description "Show Results"
                    :state []}}}
-              ; :y {:name "Local History Y"
-              ;      :slug "local-history-y"
-              ;      :description "I too was born in app-db."
-              ;      :steps {:a {:tool "idresolver"
-              ;                  :title "List Chooser"
-              ;                  :description "List Chooser Description"
-              ;                  :state []}
-              ;              :b {:tool "showresults"
-              ;                  :title "Show Results"
-              ;                  :description "Show List Results"
-              ;                  :state []
-              ;                  :subscribe [:a]}
-              ;              :c {:tool "enrichment"
-              ;                  :title "Show Enrichment"
-              ;                  :description "Show Enrichment Results"
-              ;                  :subscribe [:b]
-              ;                  :state []}}}
+              :search {:name "Search"
+                   :slug "search"
+                   :description "I too was born in app-db."
+                   :steps {:search-tool {:tool "search"
+                               :_id :search-tool
+                               :title "Search InterMine"
+                               :description "Search"
+                               :state []}}}
                }
    :homepage-template-histories
    {

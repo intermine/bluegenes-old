@@ -68,11 +68,10 @@
      ]))])
 
 (defn searchbox []
-  "Outputs (currently nonfunctional) search box"
+  "Outputs (currently nonfunctional) search box. TODO: replace with keyword search"
   [ui-card
    (fn []
      [:form#search
-      [:h3 "Search:"]
       [:input {
         :type "text"
         :placeholder "Search for a gene, protein, disease, etc..."}]
