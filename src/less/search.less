@@ -1,17 +1,32 @@
 .search {
+  .response {
+    display: flex;
+    .facets, .results {margin:1em;}
+    .facets {
+      flex-basis: 1;
+      min-width: 10em;
+    }
+    .results {
+      flex-basis: 4;
+    }
+  }
   ul {
-    margin-left:0;
-    padding-left:0;
-
+    margin-left: 0;
+    padding-left: 0;
   }
   li {
-    list-style-type:none;
-    list-style-position:outside;
+    list-style-type: none;
+    list-style-position: outside;
     min-width: 2.5em;
     .count {
-      margin-right:0.5em;
+      &.result-type{margin:0 0.2em 0 0;}
+      clear:left;
+      margin-right: 0.5em;
       display: block;
-      float:left;
+      float: left;
     }
+  }
+  .result-type {
+    padding:0 0.2em; border-radius:2px; display:inline-block; margin:0.2em;
   }
 }

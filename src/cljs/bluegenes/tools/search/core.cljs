@@ -13,7 +13,7 @@
   (.log js/console "%cresults" "background-color:ivory" results)
   (reset! search-results
     {
-    :results (.-results results)
+    :results  (.-results results)
     :facets {
       :organisms (js->clj (aget results "facets" "organism.shortName"))
       :category (js->clj (aget results "facets" "Category"))}})
@@ -30,7 +30,7 @@
 
 (defn facet-display [facets]
   [:div.facets
-    [:h4 "Facets"]
+    [:h4 "Filter by:"]
       [:div
        [:h5 "Organisms"]
        [:ul
@@ -43,8 +43,22 @@
       (for [[name value] (:category facets)]
         ^{:key name}
         [:li
-         [:span.count value] name])]
+         [:span.count.result-type {:class (str "type-" name)} value] name])]
        ]])
+
+(defn result-row [result]
+  [:div
+   [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
+   result])
+
+(defn results-display [resultlist]
+  [:div.results
+    [:h4 "Results"]
+   (for [result (:results resultlist)]
+     ^{:key (.-id result)}
+     [result-row result])
+   [:div]])
+
 
 (defn id-form [local-state api]
   "Visual form component which handles submit and change"
@@ -62,11 +76,9 @@
               (reset! local-state (-> val .-target .-value)))}]
    [:div.form-group
     [:button "Submit"]]]
-    [facet-display (:facets @search-results)]
-    [:div.results
-      [:h4 "Results"]
-     [:div (:results @search-results)]]
-    ])
+   [:div.response
+      [facet-display (:facets @search-results)]
+      [results-display @search-results]]])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
