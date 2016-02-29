@@ -2,7 +2,8 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [clojure.string :as str]
-            [intermine.imjs :as imjs]))
+            [intermine.imjs :as imjs]
+            [bluegenes.tools.search.filters :as filters]))
 (enable-console-print!)
 
 (def search-results (reagent.core/atom {:results nil}))
@@ -33,26 +34,6 @@
     (-> id-promise (.then
         (fn [results]
           (results-handler results mine comm))))))
-
-(defn facet-display [facets]
-  [:div.facets
-    [:h4 "Filter by:"]
-      [:div
-       [:h5 "Organisms"]
-       [:table
-        (for [[name value] (:organisms facets)]
-          ^{:key name}
-          [:tr
-           [:td.count value]
-           [:td name]])]
-       [:h5 "Categories"]
-       [:table
-      (for [[name value] (:category facets)]
-        ^{:key name}
-        [:tr
-         [:td.count.result-type {:class (str "type-" name)} value]
-         [:td name]])]
-       ]])
 
 (defmulti result-row
   "Result-row outputs nicely formatted type-specific results for common types and has a default that just outputs all non id, type, and relevance fields."
@@ -133,7 +114,7 @@
               (reset! local-state (-> val .-target .-value)))}]
     [:button "Submit"]]
    [:div.response
-      [facet-display (:facets @search-results)]
+      [filters/facet-display (:facets @search-results)]
       [results-display @search-results]]])
 
 (defn ^:export main []
