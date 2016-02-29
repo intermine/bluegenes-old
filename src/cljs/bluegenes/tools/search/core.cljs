@@ -123,8 +123,7 @@
           :value @local-state
           :on-change (fn [val]
               (reset! local-state (-> val .-target .-value)))}]
-   [:div.form-group
-    [:button "Submit"]]]
+    [:button "Submit"]]
    [:div.response
       [facet-display (:facets @search-results)]
       [results-display @search-results]]])
