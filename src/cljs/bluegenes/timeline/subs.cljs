@@ -8,6 +8,11 @@
    (reaction (get-in @db [:histories (:active-history @db) :steps]))))
 
 (re-frame/register-sub
+ :step-path
+ (fn [db [_ testvalue]]
+   (reaction (get-in @db [:histories (:active-history @db) :structure]))))
+
+(re-frame/register-sub
  :to-step
  (fn [db [_ step-id]]
    (reaction (get-in @db [:histories (:active-history @db) :steps step-id]))))

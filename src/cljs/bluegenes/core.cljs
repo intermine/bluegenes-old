@@ -12,6 +12,9 @@
               [bluegenes.tools.idresolver.core :as idresolver]
               [bluegenes.tools.viewtable.core :as viewtable]
               [bluegenes.tools.runtemplate.core :as runtemplate]
+              [bluegenes.tools.echotool.core :as echotool]
+              [bluegenes.tools.chooselistcompact.core :as chooselistcompact]
+              [bluegenes.tools.enrichment.core :as enrichment]
               [intermine.imjs :as imjs]))
 
 (enable-console-print!)

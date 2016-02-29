@@ -7,6 +7,7 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
+@import url(http://fonts.googleapis.com/css?family=Montserrat);
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
@@ -10091,6 +10092,22 @@ hr.on-light {
   }
 }
 body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  color: inherit;
+}
+.dash-wrapper > div {
+  position: relative;
+  float: left;
+  width: 33.33%;
+}
+.dash-wrapper > div:nth-child(3n+1):last-child {
+  width: 100%;
+}
+.dash-wrapper > div:nth-child(3n+2):last-child {
+  width: 66.66%;
+}
+body {
   background: #d3d1c6;
   background: white;
   background: #f7f7f7;
@@ -10238,6 +10255,9 @@ body {
 .next-steps-container .next-steps-inner .body {
   padding: 10px;
   min-height: 300px;
+}
+.step-dashboard {
+  background: orange;
 }
 .step-container {
   box-sizing: border-box;

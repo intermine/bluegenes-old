@@ -67,19 +67,12 @@
  :has-something
  trim-v
  (fn [db [step-id data]]
-   (if (nil? (get-in db [:histories
-                         (:active-history db)
-                         :steps
-                         step-id
-                         :produced]))
-     (update-in db [:histories (:active-history db)] assoc :available-data
-                (assoc data :source {:history (:active-history db)
-                                     :step step-id}))
-     (update-in db [:histories
-                    (:active-history db)
-                    :steps
-                    step-id]
-                assoc :produced data))))
+   (println "has-something handler")
+   (update-in db [:histories
+                  (:active-history db)
+                  :steps
+                  step-id]
+              assoc :produced data)))
 
 
 (defn stamp-step

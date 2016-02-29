@@ -35,6 +35,27 @@
           (conj step-vec (id steps))
           (recur (first children) (conj step-vec (id steps))))))))
 
+(defn step-graph-wip [steps]
+  "Serialize the steps of a history.
+  Assume that a tool with no subscription is a starting point. Then recursively
+  find other steps that subscribe to the starting point. Subscriptions are
+  vectors (meaning that a step can subscribe to more than one step), but for now
+  this only supports one item in the subscription (hence the 'first' function.)"
+  (let [[starting-point-id] (first (filter (fn [[step value]] (nil? (:subscribe value))) steps))
+        find-downstream (fn [parent-id]
+                        (filter (fn [[step value]]
+                                  (not (nil? (some #{parent-id} (:subscribe value)))))
+                                steps))]
+    (loop [id starting-point-id
+           step-vec []]
+      (let [downstream (find-downstream id)]
+        (println "downstream" downstream)
+        (if (nil? downstream)
+          (conj step-vec [(id steps)])
+          (recur (first downstream) (conj step-vec (id steps))))))))
+
+
+
 (defn step
   "Subscribe to a single step in the history and represent it visually. Also subscribes
   to an upstream step to have access to its input. "
@@ -53,7 +74,7 @@
           :global-data global-info
           :api api}]))))
 
-(defn step-dashboard
+(defn step-container
   "Create a dashboard with a tool inside. The dashboard includes common
   functionality such as data tabs, notes, etc."
   [_id]
@@ -79,12 +100,33 @@
                            [:div {:className (if (= @current-tab nil) "hide")}
                             (json-html/edn->hiccup @step-data)]]]])})))
 
-(defn previous-steps []
-  (let [step-list (re-frame/subscribe [:steps])]
+(defn steps-dashboard
+  "Create a dashboard with a tool inside. The dashboard includes common
+  functionality such as data tabs, notes, etc."
+  [ids]
+  (let [_ nil]
+    (reagent/create-class
+     {:reagent-render (fn [ids]
+                        [:div
+                         [:div.step-container
+                          [:div.body
+                           [:h1 "Step Dashboard"]
+                           [:div.dash-wrapper
+                           (for [id ids]
+                             ^{:key (str "step-container" id)} [step-container id])]]]])})))
+
+(defn previous-steps
+  "Iterate through the history's structure and create step containers for
+  single tools (keyword) or steps dashboards for grouped tools (vector)."
+  []
+  (let [step-path (re-frame/subscribe [:step-path])]
     (fn []
       (into [:div.prevsteps]
-            (for [_id (map :_id (reverse (step-tree @step-list)))]
-              (do ^{:key (str "dashboard" _id)} [step-dashboard _id]))))))
+            (for [id @step-path]
+              (if (vector? id)
+                ^{:key (str "group" (str id))} [steps-dashboard id]
+                ^{:key (str "step-container" id)} [step-container id]))))))
+
 
 (defn history-details []
   "Not used as of yet."

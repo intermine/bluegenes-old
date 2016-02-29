@@ -10,77 +10,55 @@
 
    :mines {:flymine {:root "www.flymine.org/query"
                      :token nil}
-
            :humanmine {:root "www.humanmine.org/humanmine"
                        :token nil}
-
            :default {:root "www.humanmine.org/humanmine"
                      :token nil}}
 
-   :histories {:z {:name "Gene Lists"
-                   :slug "local-history-x"
-                   :description "Browse Intermine Gene lists.s"
-                   :steps {:a {:tool "chooselist"
-                               :_id :a
-                               :title "List Chooser"
-                               :description "List Chooser Description"
-                               :state []}
-                          ;  :b {:tool "runtemplate"
-                          ;      :_id :b
-                          ;      :title "Show Results"
-                          ;      :description "Show List Results"
-                          ;      :state []
-                          ;      :subscribe [:a]}
-                          ;  :c {:tool "idresolver"
-                          ;      :title "Show Results"
-                          ;      :description "Show BANANA Results"
-                          ;      :state []
-                          ;      :subscribe [:b]}
-                          ;  :c {:tool "enrichment"
-                          ;      :title "Show Enrichment"
-                          ;      :description "Show Enrichment Results"
-                          ;      :state []
-                          ;      :subscribe [:b]}
-                           }}
-              :homepage-list-upload
-               {
-                 :name "List Upload"
-                 :slug "list-upload"
-                 :description "Upload a list of genes, proteins, etc."
-                 :steps {:a
-                   {:tool "idresolver"
-                    :_id :a
-                   :title "Show Results"
-                   :description "Show Results"
-                   :state []}}}
-              :y {:name "Local History Y"
+   :histories {:k {:name "Local History Y"
                    :slug "local-history-y"
                    :description "I too was born in app-db."
-                   :steps {:a {:tool "idresolver"
-                               :title "List Chooser"
-                               :description "List Chooser Description"
-                               :state []}
-                           :b {:tool "showresults"
-                               :title "Show Results"
-                               :description "Show List Results"
-                               :state []
-                               :subscribe [:a]}
-                           :c {:tool "enrichment"
-                               :title "Show Enrichment"
-                               :description "Show Enrichment Results"
-                               :subscribe [:b]
-                               :state []}}}}
-   :homepage-template-histories
-   {
-      :a { :type "Gene"
-        :description "For the selected organism retrieve all genes and their coding sequences, suitable for export as GFF3 or FASTA."
-        ;:steps {};TODO: add entry point for single gene. protein, organism?
-      }
-      :b { :type "Protein"
-        :description "Show all the proteins from a particular organism."
-      }
-      :c { :type "Gene"
-        :description "Show all alleles for a specific Drosophila gene. Show all available information, eg mutagen, allele class and phenotype linked to each allele."
-      }
-    }
-})
+                   ;  :structure [:a1 [:b1 :b2] :c1 :d1 [:e1 :e2 :e3 :e4]]
+                   :structure [:a1 [:z1 :z2 :z3]]
+
+                   :steps {:a1 {:_id :a1
+                                :tool "chooselistcompact"}
+                           :z1 {:_id :z1
+                                :tool "enrichment"
+                                :state [{:widget "go_enrichment_for_gene"
+                                         :title "GO Enrichment"}]
+                                :subscribe [:a1]}
+                           :z3 {:_id :z3
+                                :tool "enrichment"
+                                :state [{:widget "publication_enrichment"
+                                         :title "Publication Enrichment"}]
+                                :subscribe [:a1]}
+                           :z2 {:_id :z2
+                                :tool "enrichment"
+                                :state [{:widget "pathway_enrichment"
+                                         :title "Pathway Enrichment"}]
+                                :subscribe [:a1]}
+                           :b1 {:_id :b1
+                                :tool "echotool"
+                                :subscribe [:a1]}
+                           :b2 {:_id :b2
+                                :tool "echotool"
+                                :subscribe [:a1]}
+                           :c1 {:_id :c1
+                                :tool "echotool"
+                                :subscribe [:b1]}
+                           :d1 {:_id :d1
+                                :tool "echotool"
+                                :subscribe [:c1]}
+                           :e1 {:_id :e1
+                                :tool "echotool"
+                                :subscribe [:d1]}
+                           :e2 {:_id :e2
+                                :tool "echotool"
+                                :subscribe [:d1]}
+                           :e3 {:_id :e3
+                                :tool "echotool"
+                                :subscribe [:d1]}
+                           :e4 {:_id :e4
+                                :tool "echotool"
+                                :subscribe [:d1]}}}}})
