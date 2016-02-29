@@ -1,4 +1,4 @@
-(ns bluegenes.tools.search.core
+(ns bluegenes.tools.search.filters
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]))
 (enable-console-print!)
