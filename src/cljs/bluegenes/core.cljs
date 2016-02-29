@@ -11,6 +11,7 @@
               [bluegenes.tools.showlist.core :as showlist]
               [bluegenes.tools.idresolver.core :as idresolver]
               [bluegenes.tools.viewtable.core :as viewtable]
+              [bluegenes.tools.search.core :as search]
               [bluegenes.tools.runtemplate.core :as runtemplate]
               [intermine.imjs :as imjs]))
 
