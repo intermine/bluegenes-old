@@ -7,6 +7,11 @@
 
 (def search-results (reagent.core/atom {:results nil}))
 
+(defn sort-by-value [result-map]
+  (into (sorted-map-by (fn [key1 key2]
+                         (compare [(get result-map key2) key2]
+                                  [(get result-map key1) key1])))
+        result-map))
 
 (defn results-handler [results mine comm]
   "Emit our results once the promise comes back."
@@ -15,9 +20,10 @@
     {
     :results  (.-results results)
     :facets {
-      :organisms (js->clj (aget results "facets" "organism.shortName"))
-      :category (js->clj (aget results "facets" "Category"))}})
+      :organisms (sort-by-value (js->clj (aget results "facets" "organism.shortName")))
+      :category (sort-by-value (js->clj (aget results "facets" "Category")))}})
   )
+
 
 (defn submit-handler [searchterm comm]
   "Resolves IDs via IMJS promise"
@@ -33,17 +39,19 @@
     [:h4 "Filter by:"]
       [:div
        [:h5 "Organisms"]
-       [:ul
+       [:table
         (for [[name value] (:organisms facets)]
           ^{:key name}
-          [:li
-           [:span.count value] name])]
+          [:tr
+           [:td.count value]
+           [:td name]])]
        [:h5 "Categories"]
-       [:ul
+       [:table
       (for [[name value] (:category facets)]
         ^{:key name}
-        [:li
-         [:span.count.result-type {:class (str "type-" name)} value] name])]
+        [:tr
+         [:td.count.result-type {:class (str "type-" name)} value]
+         [:td name]])]
        ]])
 
 (defmulti result-row
