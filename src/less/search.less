@@ -1,13 +1,60 @@
 .search {
   .response {
     display: flex;
-    .facets, .results {margin:1em;}
+    .facets,
+    .results {
+      margin: 1em;
+    }
     .facets {
       flex-basis: 1;
       min-width: 10em;
     }
     .results {
+      & > div {
+        border-bottom: solid 1px #e4e4e4;
+        & > span,
+        & > cite {
+          margin-right: 0.3em;
+        }
+      }
       flex-basis: 4;
+      .result-type {
+        background: #f0f0f0;
+        color: rgba(0,0,0,0.87);
+        min-width: 7em;
+        text-align: right;
+        border-left: solid 3px #999;
+        &.type-Gene {
+          border-left: solid 3px @color-Gene;
+        }
+        &.type-Publication {
+          border-left: solid 3px @color-Publication;
+        }
+        &.type-Protein {
+          border-left: solid 3px @color-Protein;
+        }
+      }
+      .default-description {
+        text-transform: capitalize;
+        margin-right: 0.5em;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .default-description:after {
+        content: ": ";
+      }
+      .description,
+      .default-value {
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 350px;
+        display: inline-block;
+        text-overflow: ellipsis;
+      }
+      .name, .organism {
+        font-style: italic;
+      }
     }
   }
   ul {
@@ -19,14 +66,19 @@
     list-style-position: outside;
     min-width: 2.5em;
     .count {
-      &.result-type{margin:0 0.2em 0 0;}
-      clear:left;
+      &.result-type {
+        margin: 0 0.2em 0 0;
+      }
+      clear: left;
       margin-right: 0.5em;
       display: block;
       float: left;
     }
   }
   .result-type {
-    padding:0 0.2em; border-radius:2px; display:inline-block; margin:0.2em;
+    padding: 0 0.2em;
+    border-radius: 2px;
+    display: inline-block;
+    margin: 0.2em;
   }
 }

@@ -33,6 +33,7 @@
   color:rgba(0,0,0,0.87);
 }
 
+
 @import url(https://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic);
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,900,300italic,300,400italic);
 @import "../../bower_components/bootstrap/less/bootstrap";
@@ -417,3 +418,35 @@ th.jh-key {
   background:#525252;
   cursor:pointer;
 }}
+
+@spacer: 2em;
+
+  input,
+  button {
+    height: @spacer*1.5;
+    padding: 0 0 0 @spacer/4;
+    vertical-align: middle;
+    &[type="text"] {
+      min-width: 300px;
+      width: 60%;
+    }
+  }
+  button {
+    min-width: 10em;
+    font-family: Roboto, Helvetica, arial, sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    padding: 1em 5em;
+    float:right;
+    vertical-align: middle;
+    background: @cta-color;
+    line-height: 0.3em;
+    color: @cta-color-text;
+    border-radius: 2px;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    border: 0;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+    &:hover {
+      background: lighten(@cta-color,5%);
+    }
+  }
