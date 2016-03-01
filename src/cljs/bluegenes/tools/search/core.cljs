@@ -36,14 +36,21 @@
         (fn [results]
           (results-handler results mine comm))))))
 
-(defn results-display [resultlist]
+(defn is-active-result? [state result]
+  "returns true is the result should be considered 'active' - e.g. if there is no filter at all, or if the result matches the active filter type."
+    (or
+      (= (:active-filter state) (.-type result))
+      (nil? (:active-filter state))))
+
+(defn results-display [state]
   "Iterate through results and output one row per result using result-row to format"
   [:div.results
     [:h4 "Results"]
-   (for [result (:results resultlist)]
+   (for [result (:results state)]
+     (if (is-active-result? state result)
      ^{:key (.-id result)}
-     [resulthandler/result-row result])
-   [:div]])
+     [resulthandler/result-row result]))
+   ])
 
 
 (defn id-form [local-state api]
@@ -62,7 +69,7 @@
               (reset! local-state (-> val .-target .-value)))}]
     [:button "Submit"]]
    [:div.response
-      [filters/facet-display (:facets @search-results)]
+      [filters/facet-display search-results]
       [results-display @search-results]]])
 
 (defn ^:export main []
