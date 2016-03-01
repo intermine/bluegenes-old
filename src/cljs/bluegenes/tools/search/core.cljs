@@ -42,10 +42,14 @@
       (= (:active-filter state) (.-type result))
       (nil? (:active-filter state))))
 
+(defn results-count [results]
+  (let [result-count (count (:results results))]
+    [:small " Displaying " result-count " results"]))
+
 (defn results-display [state]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
-    [:h4 "Results"]
+    [:h4 "Results"[results-count state]]
    (for [result (:results state)]
      (if (is-active-result? state result)
      ^{:key (.-id result)}
