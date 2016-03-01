@@ -32,6 +32,13 @@
   (fn [db [step-id data]]
       (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
 
+(re-frame/register-handler
+ :is-loading
+ trim-v
+ (fn [db [step-id data]]
+   (println "IS LOADING:" data)
+   (assoc-in db [:histories (:active-history db) :steps step-id :loading?] data)))
+
 (defn link-new-step-to-source [db old-step-id new-step-id]
   (update-in db [:histories (:active-history db) :steps old-step-id] assoc :notify new-step-id))
 

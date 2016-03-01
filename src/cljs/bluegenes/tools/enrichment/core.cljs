@@ -48,8 +48,8 @@
   "Table to display enrichment results"
   [rows-per-page enrichment-results]
   (fn [rows-per-page enrichment-results]
-    [:div
-    [:table
+    [:div.table-wrapper
+    [:table.table.table-striped.comp-table
      [:thead
       [:th "Description"]
       [:th "p-value"]
@@ -60,6 +60,7 @@
           (for [row (nth (partition
                           rows-per-page rows-per-page [nil] (sort-by :p-value < enrichment-results))
                          (dec (:current-page @pager)))]
+            (if-not (nil? row)
             ^{:key (:identifier row)} [:tr
                                        [:td
                                         [:span (:description row)]
@@ -68,8 +69,9 @@
                                                   (:identifier row))}
                                          (str " [" (:identifier row) "]")]]
                                        ;  [:td (:identifier row)]
-                                       [:td (:p-value row)]
-                                       [:td (:matches row)]])))]]]))
+                                       (println "type" (.. (:p-value row) (toPrecision 6) ) )
+                                       [:td (.. (:p-value row) (toPrecision 6) )]
+                                       [:td (:matches row)]]))))]]]))
 
 (defn fetch-enrichment-chan [list-name enrichment-type]
   "Fetch templates from Intermine and return them over a channel"
@@ -97,14 +99,15 @@
      {:reagent-render (fn [step-data]
                            [:div
                             [:h3 (:title (:state step-data))]
-                            (if-not (nil? (:enrichment-results @local-state))
-
-                              [paginator/main
-                               {:rows (count (:enrichment-results @local-state))
-                                :spread 5
-                                :current-page (:current-page @local-state)
-                                :rows-per-page (:rows-per-page @local-state)
-                                :on-change pagination-handler}])
+                            ; (if-not (nil? (:enrichment-results @local-state))
+                            ;
+                            ;   [paginator/main
+                            ;    {:rows (count (:enrichment-results @local-state))
+                            ;     :spread 5
+                            ;     :current-page (:current-page @local-state)
+                            ;     :rows-per-page (:rows-per-page @local-state)
+                            ;     :on-change pagination-handler}]
+                            ;   )
                             [table (:rows-per-page @local-state) (:enrichment-results @local-state)]])
       :component-will-receive-props (fn [this new-props]
                                       (let [props (extract-props new-props)

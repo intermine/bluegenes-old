@@ -35,8 +35,15 @@
                                 :subscribe [:a1]}
                            :z2 {:_id :z2
                                 :tool "enrichment"
+                                :loading? true
                                 :state [{:widget "pathway_enrichment"
                                          :title "Pathway Enrichment"}]
+                                :subscribe [:a1]}
+                           :z4 {:_id :z4
+                                :tool "enrichment"
+
+                                :state [{:widget "prot_dom_enrichment_for_gene"
+                                         :title "Protein Domain Enrichment"}]
                                 :subscribe [:a1]}
                            :b1 {:_id :b1
                                 :tool "echotool"

@@ -98,7 +98,8 @@
                            [:div {:className (if (= @current-tab "data") "hide")}
                             [step @step-data]]
                            [:div {:className (if (= @current-tab nil) "hide")}
-                            (json-html/edn->hiccup @step-data)]]]])})))
+                            (json-html/edn->hiccup @step-data)]
+                           (if (:loading? @step-data) [tool-dimmer])]]])})))
 
 (defn steps-dashboard
   "Create a dashboard with a tool inside. The dashboard includes common
@@ -111,9 +112,10 @@
                          [:div.step-container
                           [:div.body
                            [:h1 "Step Dashboard"]
-                           [:div.dash-wrapper
+                           [:div.fl-row
                            (for [id ids]
-                             ^{:key (str "step-container" id)} [step-container id])]]]])})))
+                             [:div.fl-cell ^{:key (str "step-container" id)} [step-container id]]
+                             )]]]])})))
 
 (defn previous-steps
   "Iterate through the history's structure and create step containers for

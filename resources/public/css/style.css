@@ -10107,6 +10107,21 @@ body {
 .dash-wrapper > div:nth-child(3n+2):last-child {
   width: 66.66%;
 }
+.comp-table {
+  font-size: 12px;
+  width: 100% !important;
+}
+.fl-row {
+  display: flex;
+  background: white;
+}
+.fl-row .fl-cell {
+  flex: 1 0;
+}
+.table-wrapper {
+  height: 300px;
+  overflow-y: scroll;
+}
 body {
   background: #d3d1c6;
   background: white;
