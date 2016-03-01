@@ -49,7 +49,7 @@
       ;      [:td.count value]
       ;      [:td name]])]
        [:h5 "Categories"]
-       [:table
+       [:table [:tbody
       (for [[name value] (:category facets)]
         ^{:key name}
         [:tr {
@@ -58,4 +58,4 @@
          [:td.count.result-type {:class (str "type-" name)} value]
          [:td name (if (is-active name active)
            [remove-filter name state])]])]
-       ]])))
+       ]]])))

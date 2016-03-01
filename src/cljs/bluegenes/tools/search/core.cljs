@@ -42,9 +42,14 @@
       (= (:active-filter state) (.-type result))
       (nil? (:active-filter state))))
 
-(defn results-count [results]
-  (let [result-count (count (:results results))]
-    [:small " Displaying " result-count " results"]))
+(defn count-results [state]
+  (reduce + (vals (:category (:facets state))))
+  )
+
+(defn results-count [state]
+  (let [result-count (count (:results state))]
+    [:small " Displaying " result-count " of " (count-results state) " results"]))
+
 
 (defn results-display [state]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
