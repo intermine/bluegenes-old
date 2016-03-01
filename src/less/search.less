@@ -9,13 +9,18 @@
     clear: both;
     display: flex;
     .facets {
+      @highlight : #ddd;
       margin:1em;
-      flex-basis: 1;
-      min-width: 10em;
+      .active-filter {
+        background:@highlight;
+        border-radius:@border-radius;
+        padding:0 @spacer/4;
+      }
       .result-type {
         text-align:center;
       }
       table {
+        min-width:300px;
         border-collapse: separate;
         border-spacing: 0 0.2em;
       }
@@ -30,7 +35,7 @@
             border-bottom-right-radius: 0;
           }
           td:last-child {
-            background: #ddd;
+            background: @highlight;
             border-bottom-right-radius: @border-radius;
             border-top-right-radius: @border-radius;
           }
@@ -46,7 +51,7 @@
           margin-right: 0.3em;
         }
       }
-      flex-basis: 4;
+      flex-grow: 4;
       .result-type {
         display: inline-block;
         background: #f0f0f0;

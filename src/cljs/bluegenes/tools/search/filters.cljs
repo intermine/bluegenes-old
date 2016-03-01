@@ -13,30 +13,32 @@
   "returns whether a given filter is active"
   (= name active))
 
-(defn display-active-filter [active-filter]
-  "Outputs which filter is active (if any)"
-  [:div (if (some? active-filter) active-filter "None")]
-)
-
 (defn remove-filter [filter-name state]
   (fn [filter-name state]
     [:a
     {:aria-label (str "Remove " filter-name " filter")
-     :on-click (fn [e]
-        (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
-        (swap! state dissoc :active-filter)
-        (.log js/console "Boogie")
+    :on-click (fn [e]
+      (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
+      (swap! state dissoc :active-filter)
+      (.log js/console "Boogie")
       )}
-    [:span.close "×"]])) ;;that's a cute little &times; to us HTML folk
+      [:span.close "×"]])) ;;that's a cute little &times; to us HTML folk
+
+(defn display-active-filter [active-filter state]
+  "Outputs which filter is active (if any)"
+  [:div.active
+   [:h5 "Active filters: "]
+    (if (some? active-filter)
+      [:div.active-filter active-filter [remove-filter active-filter state]]
+      [:div "None"])])
+
 
 (defn facet-display [state]
   (let [facets (:facets @state) active (:active-filter @state)]
   (if (some? facets)
   [:div.facets
     [:h4 "Filter by:"]
-      [:div
-       [:h5 "Active filters: "]
-       [display-active-filter active]]
+      [display-active-filter active state]
       [:div
        ;;TODO: Re-implement this filter when we implement RESTful server-side filters
       ;  [:h5 "Organisms"]
