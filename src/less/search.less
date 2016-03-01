@@ -4,14 +4,12 @@
     float: left;
     margin-right: 1em;
   }
+  .close {margin:0 0.2em;}
   .response {
     clear: both;
     display: flex;
-    .facets,
-    .results {
-      margin: 1em;
-    }
     .facets {
+      margin:1em;
       flex-basis: 1;
       min-width: 10em;
       .result-type {
@@ -32,7 +30,7 @@
             border-bottom-right-radius: 0;
           }
           td:last-child {
-            background: #ccc;
+            background: #ddd;
             border-bottom-right-radius: @border-radius;
             border-top-right-radius: @border-radius;
           }
@@ -40,6 +38,7 @@
       }
     }
     .results {
+      margin: @spacer/2 @spacer/2 @spacer/2 @spacer;
       & > div {
         border-bottom: solid 1px #e4e4e4;
         & > span,

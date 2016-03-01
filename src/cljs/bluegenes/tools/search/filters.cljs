@@ -22,21 +22,20 @@
   (fn [filter-name state]
     [:a
     {:aria-label (str "Remove " filter-name " filter")
-     :on-click (fn []
-        (swap! state assoc :active-filter "SDFSDFS")
-        ;(filter-by nil state)
-        ;(println state)
-        (println @state)
+     :on-click (fn [e]
+        (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
+        (swap! state dissoc :active-filter)
         (.log js/console "Boogie")
       )}
-    "X"]))
+    [:span.close "×"]])) ;;that's a cute little &times; to us HTML folk
 
 (defn facet-display [state]
   (let [facets (:facets @state) active (:active-filter @state)]
+  (if (some? facets)
   [:div.facets
-   [:div (json-html/edn->hiccup @state)]
     [:h4 "Filter by:"]
-      [:div "Active filters: "
+      [:div
+       [:h5 "Active filters: "]
        [display-active-filter active]]
       [:div
        ;;TODO: Re-implement this filter when we implement RESTful server-side filters
@@ -57,4 +56,4 @@
          [:td.count.result-type {:class (str "type-" name)} value]
          [:td name (if (is-active name active)
            [remove-filter name state])]])]
-       ]]))
+       ]])))
