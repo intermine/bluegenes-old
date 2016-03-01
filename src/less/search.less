@@ -1,7 +1,11 @@
 .search {
-  button,input {float:left;margin-right:1em;}
+  button,
+  input {
+    float: left;
+    margin-right: 1em;
+  }
   .response {
-    clear:both;
+    clear: both;
     display: flex;
     .facets,
     .results {
@@ -10,6 +14,30 @@
     .facets {
       flex-basis: 1;
       min-width: 10em;
+      .result-type {
+        text-align:center;
+      }
+      table {
+        border-collapse: separate;
+        border-spacing: 0 0.2em;
+      }
+      tr {
+        td:last-child {padding-left:@spacer/4;}
+        margin-top: 0.2em;
+        &.active {
+          td:first-child {
+            border-top-left-radius: @border-radius;
+            border-bottom-left-radius: @border-radius;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+          }
+          td:last-child {
+            background: #ccc;
+            border-bottom-right-radius: @border-radius;
+            border-top-right-radius: @border-radius;
+          }
+        }
+      }
     }
     .results {
       & > div {
@@ -21,6 +49,7 @@
       }
       flex-basis: 4;
       .result-type {
+        display: inline-block;
         background: #f0f0f0;
         color: rgba(0,0,0,0.87);
         min-width: 7em;
@@ -54,7 +83,8 @@
         display: inline-block;
         text-overflow: ellipsis;
       }
-      .name, .organism {
+      .name,
+      .organism {
         font-style: italic;
       }
     }
@@ -79,8 +109,7 @@
   }
   .result-type {
     padding: 0 0.2em;
-    border-radius: 2px;
-    display: inline-block;
+    border-radius: @border-radius;
     margin: 0.2em;
   }
 }

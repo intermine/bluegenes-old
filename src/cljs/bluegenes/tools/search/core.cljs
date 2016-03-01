@@ -43,7 +43,7 @@
       (nil? (:active-filter state))))
 
 (defn results-display [state]
-  "Iterate through results and output one row per result using result-row to format"
+  "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
     [:h4 "Results"]
    (for [result (:results state)]
