@@ -36,7 +36,6 @@
  :is-loading
  trim-v
  (fn [db [step-id data]]
-   (println "IS LOADING:" data)
    (assoc-in db [:histories (:active-history db) :steps step-id :loading?] data)))
 
 (defn link-new-step-to-source [db old-step-id new-step-id]

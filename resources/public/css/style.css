@@ -10115,12 +10115,49 @@ body {
   display: flex;
   background: white;
 }
+.fl-row:not(:last-child) {
+  border-bottom: 1px solid #BBE9F0;
+}
 .fl-row .fl-cell {
   flex: 1 0;
+  padding: 10px;
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+99&0.65+0,0+20 */
+}
+.fl-row .fl-cell:not(:last-child) {
+  border-right: 1px solid #BBE9F0;
 }
 .table-wrapper {
   height: 300px;
   overflow-y: scroll;
+}
+@-webkit-keyframes yellow-fade {
+  0% {
+    background: yellow;
+  }
+  100% {
+    background: none;
+  }
+}
+@keyframes yellow-fade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.highlight {
+  -webkit-animation: yellow-fade 2s ease-in 1;
+  animation: yellow-fade 2s ease-in 1;
+}
+input,
+button,
+select,
+textarea {
+  width: 100%;
+}
+.form-group .form-control {
+  font-size: 12px;
 }
 body {
   background: #d3d1c6;
@@ -10154,10 +10191,11 @@ body {
   height: 100%;
   text-align: center;
   background-color: #000;
-  -moz-opacity: 0.5;
-  opacity: 0.6;
+  opacity: 0.9;
+  opacity: 1;
   z-index: 9999;
-  background: #A9A9A9;
+  background: #2D2D2D;
+  background: white;
 }
 .dimmer div.message {
   padding: 5px;
@@ -10165,7 +10203,7 @@ body {
   color: #000;
   color: #bbe9f0;
   position: relative;
-  top: 50%;
+  top: 30%;
 }
 .hide {
   display: none;
@@ -10175,10 +10213,10 @@ body {
   font-size: 10px;
   position: relative;
   text-indent: -9999em;
-  border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-left: 1.1em solid #ffffff;
+  border-top: 0.7em solid rgba(0, 0, 0, 0.1);
+  border-right: 0.7em solid rgba(0, 0, 0, 0.1);
+  border-bottom: 0.7em solid rgba(0, 0, 0, 0.1);
+  border-left: 0.7em solid rgba(0, 0, 0, 0.5);
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);
@@ -10188,8 +10226,8 @@ body {
 .loader,
 .loader:after {
   border-radius: 50%;
-  width: 10em;
-  height: 10em;
+  width: 5em;
+  height: 5em;
 }
 @-webkit-keyframes load8 {
   0% {

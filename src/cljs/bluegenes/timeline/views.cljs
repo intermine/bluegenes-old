@@ -15,6 +15,7 @@
   "Loading screen that can be applied over a step. TODO: Move to components namespace."
   [:div.dimmer
    [:div.message
+
     [:div.loader]]])
 
 (defn step-tree [steps]
@@ -75,31 +76,31 @@
           :api api}]))))
 
 (defn step-container
-  "Create a dashboard with a tool inside. The dashboard includes common
+  "Create a container with a tool inside. The container includes common
   functionality such as data tabs, notes, etc."
-  [_id]
+  [_id & [in-grid]]
   (let [step-data (re-frame/subscribe [:to-step _id])
         current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
      {:reagent-render (fn [_id]
-                        [:div
-                         [:div.step-container
-                          [:div.toolbar
-                           [:ul
-                            [:li {:class (if (= @current-tab nil) "active")}
-                             [:a {:on-click #(swap-tab nil)}
-                              (:tool @step-data)]]
-                            [:li {:class (if (= @current-tab "data") "active")}
-                             [:a {:data-target "test"
-                                  :on-click #(swap-tab "data")}
-                              "Data"]]]]
-                          [:div.body
-                           [:div {:className (if (= @current-tab "data") "hide")}
-                            [step @step-data]]
-                           [:div {:className (if (= @current-tab nil) "hide")}
-                            (json-html/edn->hiccup @step-data)]
-                           (if (:loading? @step-data) [tool-dimmer])]]])})))
+       [:div
+        {:class (if-not in-grid "step-container")}
+        ; [:div.toolbar
+        ;  [:ul
+        ;   [:li {:class (if (= @current-tab nil) "active")}
+        ;    [:a {:on-click #(swap-tab nil)}
+        ;     (:tool @step-data)]]
+        ;   [:li {:class (if (= @current-tab "data") "active")}
+        ;    [:a {:data-target "test"
+        ;         :on-click #(swap-tab "data")}
+        ;     "Data"]]]]
+        [:div.body
+         [:div {:className (if (= @current-tab "data") "hide")}
+          [step @step-data]]
+         [:div {:className (if (= @current-tab nil) "hide")}
+          (json-html/edn->hiccup @step-data)]
+         (if (:loading? @step-data) [tool-dimmer])]])})))
 
 (defn steps-dashboard
   "Create a dashboard with a tool inside. The dashboard includes common
@@ -111,11 +112,13 @@
                         [:div
                          [:div.step-container
                           [:div.body
-                           [:h1 "Step Dashboard"]
+                          ;  [:h1 "Step Dashboard"]
+                           (for [rows (partition-all 3 ids)]
                            [:div.fl-row
-                           (for [id ids]
-                             [:div.fl-cell ^{:key (str "step-container" id)} [step-container id]]
-                             )]]]])})))
+                            (for [id rows]
+                              [:div.fl-cell ^{:key (str "step-container" id)} [step-container id true]]
+                              )
+                            ])]]])})))
 
 (defn previous-steps
   "Iterate through the history's structure and create step containers for
