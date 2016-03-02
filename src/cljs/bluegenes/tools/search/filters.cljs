@@ -13,30 +13,32 @@
   "returns whether a given filter is active"
   (= name active))
 
-(defn display-active-filter [active-filter]
-  "Outputs which filter is active (if any)"
-  [:div (if (some? active-filter) active-filter "None")]
-)
-
 (defn remove-filter [filter-name state]
+  "the little x in the corner that allows you to remove filters, and its behaviour"
   (fn [filter-name state]
     [:a
-    {:aria-label (str "Remove " filter-name " filter")
-     :on-click (fn [e]
-        (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
-        (swap! state dissoc :active-filter)
-        (.log js/console "Boogie")
-      )}
-    [:span.close "×"]])) ;;that's a cute little &times; to us HTML folk
+    {:aria-label (str "Remove " filter-name " filter") ;;we need this to stop screen readers from reading the 'x' symbol out loud as though it was meaningful text
+    :on-click (fn [e]
+      (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
+      (swap! state dissoc :active-filter))}
+      [:span.close "×"]])) ;;that's a cute little &times; to us HTML folk
+
+(defn display-active-filter [active-filter state]
+  "Outputs which filter is active (if any)"
+  [:div.active
+   [:h5 "Active filters: "]
+    (if (some? active-filter)
+      [:div.active-filter active-filter [remove-filter active-filter state]]
+      [:div "None"])])
+
 
 (defn facet-display [state]
+  "Visual component which outputs the category filters."
   (let [facets (:facets @state) active (:active-filter @state)]
   (if (some? facets)
   [:div.facets
     [:h4 "Filter by:"]
-      [:div
-       [:h5 "Active filters: "]
-       [display-active-filter active]]
+      [display-active-filter active state]
       [:div
        ;;TODO: Re-implement this filter when we implement RESTful server-side filters
       ;  [:h5 "Organisms"]
@@ -47,7 +49,7 @@
       ;      [:td.count value]
       ;      [:td name]])]
        [:h5 "Categories"]
-       [:table
+       [:table [:tbody
       (for [[name value] (:category facets)]
         ^{:key name}
         [:tr {
@@ -56,4 +58,4 @@
          [:td.count.result-type {:class (str "type-" name)} value]
          [:td name (if (is-active name active)
            [remove-filter name state])]])]
-       ]])))
+       ]]])))
