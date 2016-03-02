@@ -17,59 +17,55 @@
   (swap! state assoc :selected-result result)
   )
 
+(defn row-structure [result state contents]
+  "This method abstracts away most of the common components for all the result-row baby methods."
+  [:div.result {
+    :on-click (fn [] (set-selected! result state))
+    :class (if (is-selected? result (:selected-result @state)) "selected")}
+    [result-selection-control result state]
+    [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
+    (contents)]
+  )
 
 (defmulti result-row
   "Result-row outputs nicely formatted type-specific results for common types and has a default that just outputs all non id, type, and relevance fields."
   (fn [result state] (.-type result)))
 
-  (defmethod result-row "Gene" [result state]
-    (let [details (.-fields result)]
-      [:div {
-        :on-click (fn [] (set-selected! result state))}
-       [result-selection-control result state]
-        [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
+(defmethod result-row "Gene" [result state]
+  (let [details (.-fields result)]
+    [row-structure result state (fn []
+      [:div.details
         [:span.organism (aget details "organism.name")]
         [:span " Symbol: " (.-symbol details) ]
-        [:span.ids " Identifiers: " (.-primaryIdentifier details) ", " (.-secondaryIdentifier details)]
-       ]))
+        [:span.ids " Identifiers: " (.-primaryIdentifier details) ", " (.-secondaryIdentifier details)]])]))
 
- (defmethod result-row "Protein" [result state]
-   (let [details (js->clj (.-fields result))]
-     [:div {
-       :on-click (fn [] (set-selected! result state))}
-      [result-selection-control result state]
-       [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
-       [:span.organism (get details "organism.name")]
-       [:span " Accession: " (get details "symbol" "unknown") ]
-       [:span.ids " Identifiers: " (get details "primaryIdentifier" "unknown")]
-      ]))
+(defmethod result-row "Protein" [result state]
+ (let [details (js->clj (.-fields result))]
+   [row-structure result state (fn []
+     [:div.details
+        [:span.organism (get details "organism.name")]
+        [:span " Accession: " (get details "symbol" "unknown") ]
+        [:span.ids " Identifiers: " (get details "primaryIdentifier" "unknown")]])]))
 
 
-  (defmethod result-row "Publication" [result state]
-    (let [details (.-fields result)]
-      [:div {
-        :on-click (fn [] (set-selected! result state))}
-        [result-selection-control result state]
-        [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
-        [:span "Author: " (.-firstAuthor details)]
-        [:cite " \"" (.-title details) "\""]
-        [:span.journal " (" (.-journal details) " pp. " (.-pages details)] ")"
-       ]))
+(defmethod result-row "Publication" [result state]
+  (let [details (.-fields result)]
+  [row-structure result state (fn []
+    [:div.details
+      [:span "Author: " (.-firstAuthor details)]
+      [:cite " \"" (.-title details) "\""]
+      [:span.journal " (" (.-journal details) " pp. " (.-pages details)] ")"])]))
 
 (defmethod result-row "Author" [result state]
- [:div {
-   :on-click (fn [] (set-selected! result state))}
-  [result-selection-control result state]
-  [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
-    (aget result "fields" "name")])
+  [row-structure result state (fn []
+    [:div.details
+      (aget result "fields" "name")])])
 
 (defmethod result-row :default [result state]
   "format a row in a readable way when no other templates apply. Adds 'name: description' default first rows if present."
   (let [details (js->clj (.-fields result))]
-    [:div {
-      :on-click (fn [] (set-selected! result state))}
-     [result-selection-control result state]
-    [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
+  [row-structure result state (fn []
+    [:div.details
     (if (contains? details "name")
       [:span.name (get details "name")])
     (if (contains? details "description")
@@ -78,4 +74,4 @@
        (if (and (not= k "name") (not= k "description"))
        ^{:key k}
        [:span [:span.default-description k] [:span.default-value value]]))
-  ]))
+  ])]))

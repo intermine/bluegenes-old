@@ -44,17 +44,26 @@
     }
     .results {
       margin: @spacer/2 @spacer/2 @spacer/2 @spacer;
-      & > div {
+      .result {
+        input[type=radio] {margin: 0 @spacer/2;}
         border-bottom: solid 1px #e4e4e4;
-        & > span,
-        & > cite {
+         span,
+         cite {
           margin-right: 0.3em;
         }
+        &:nth-child(even) {background:#f6f6f6;}
+        &:hover {
+          background:#FFFDE7;
+        }
+        &.selected {
+          background:#FFECB3
+        }
+        .details {display:inline;}
       }
       flex-grow: 4;
       .result-type {
         display: inline-block;
-        background: #f0f0f0;
+        background: rgba(235,235,235,0.87);
         color: rgba(0,0,0,0.87);
         min-width: 7em;
         text-align: right;

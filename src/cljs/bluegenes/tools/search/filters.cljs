@@ -19,9 +19,7 @@
     {:aria-label (str "Remove " filter-name " filter")
     :on-click (fn [e]
       (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
-      (swap! state dissoc :active-filter)
-      (.log js/console "Boogie")
-      )}
+      (swap! state dissoc :active-filter))}
       [:span.close "×"]])) ;;that's a cute little &times; to us HTML folk
 
 (defn display-active-filter [active-filter state]
