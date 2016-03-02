@@ -115,7 +115,7 @@
        [:div
         [:ul.nav.navbar-nav.pull-right.signin
          [:li
-               [google-sign-in/main]
+              ;  [google-sign-in/main]
                ]]]]]]))
 
 
