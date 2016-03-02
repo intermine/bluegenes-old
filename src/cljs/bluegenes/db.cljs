@@ -15,11 +15,6 @@
            :default {:root "www.humanmine.org/humanmine"
                      :token nil}}
 
-
-  ;  :histories {}
-
-  ;  }
-
    :histories {:k {:name "Local History K"
                    :slug "local-history-k"
                    :description "I too was born in app-db."
