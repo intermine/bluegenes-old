@@ -51,7 +51,7 @@
     [:small " Displaying " result-count " of " (count-results state) " results"]))
 
 
-(defn results-display [state]
+(defn results-display [state api]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
     [:h4 "Results"[results-count @state]]
@@ -59,7 +59,7 @@
      (doall (for [result (:results @state)]
        (if (is-active-result? state result)
        ^{:key (.-id result)}
-       [resulthandler/result-row result state])))
+       [resulthandler/result-row {:result result :state state :api api}])))
 
    ]])
 
@@ -81,7 +81,7 @@
     [:button "Submit"]]
    [:div.response
       [filters/facet-display search-results]
-      [results-display search-results]]])
+      [results-display search-results api]]])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
