@@ -59,7 +59,7 @@ RUN echo '{ "allow_root": true }' > /usr/src/app/.bowerrc
 
 RUN bower install
 
-RUN lessc /usr/src/app/src/less/style.css /usr/src/app/resources/public/css/style.css
+RUN lessc /usr/src/app/src/less/style.less /usr/src/app/resources/public/css/style.css
 
 RUN lein clean
 RUN lein foreign
