@@ -1,22 +1,13 @@
 (ns bluegenes.utils.imcljs
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs-http.client :as http]
-            [cljs.core.async :refer [put! chan <! >! timeout close!]]))
-
-
-
-; {:service {:root "http://www.flymine.org/query/"
-;            :token "ABCDEF"}}
-; {:list "list1"
-;  :widget "publication"
-;  :maxp 0.05
-;  :format "json"
-;  :correction "Holm-Bonferroni"}
+            [cljs.core.async :refer [put! chan <! >! timeout close!]]
+            [intermine.imjs :as imjs]))
 
 (defn enrichment
   "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
   [ {{:keys [root token]} :service} {:keys [list widget maxp correction]}]
-  (go (let [response (<! (http/get (str root "/service/list/enrichment")
+  (go (let [response (<! (http/get (str "http://" root "/service/list/enrichment")
                                    {:with-credentials? false
                                     :keywordize-keys? true
                                     :query-params {:list list
@@ -25,3 +16,20 @@
                                                    :format "json"
                                                    :correction correction}}))]
         (-> response :body))))
+
+
+(defn query
+  "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
+  [service query-map]
+  (println "query sees maps" query-map)
+  (let [c (chan)]
+    (println "in the let" (clj->js service))
+    (-> (js/imjs.Service. (clj->js (:service service)))
+        (.rows (clj->js query-map))
+        (.then (fn [rows]
+                 (println "got the rows" rows)
+                 (go (>! c (js->clj rows :keywordize-keys true))))
+               (fn [error]
+                 (println "got error" error)
+                 )))
+    c))

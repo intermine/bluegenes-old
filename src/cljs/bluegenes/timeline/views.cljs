@@ -83,24 +83,29 @@
         current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
-     {:reagent-render (fn [_id]
-       [:div
-        {:class (if-not in-grid "step-container")}
-        ; [:div.toolbar
-        ;  [:ul
-        ;   [:li {:class (if (= @current-tab nil) "active")}
-        ;    [:a {:on-click #(swap-tab nil)}
-        ;     (:tool @step-data)]]
-        ;   [:li {:class (if (= @current-tab "data") "active")}
-        ;    [:a {:data-target "test"
-        ;         :on-click #(swap-tab "data")}
-        ;     "Data"]]]]
-        [:div.body
-         [:div {:className (if (= @current-tab "data") "hide")}
-          [step @step-data]]
-         [:div {:className (if (= @current-tab nil) "hide")}
-          (json-html/edn->hiccup @step-data)]
-         (if (:loading? @step-data) [tool-dimmer])]])})))
+     {:component-did-mount (fn [this]
+                             (let [node (reagent/dom-node this)]
+                             (if (:scroll-to? @step-data)
+                               (do
+                                 (.animate (js/$ "body") #js{:scrollTop (-> (js/$ node) .offset .-top)} 500 "swing")))))
+      :reagent-render (fn [_id]
+                        [:div
+                         {:class (if-not in-grid "step-container")}
+                         ; [:div.toolbar
+                         ;  [:ul
+                         ;   [:li {:class (if (= @current-tab nil) "active")}
+                         ;    [:a {:on-click #(swap-tab nil)}
+                         ;     (:tool @step-data)]]
+                         ;   [:li {:class (if (= @current-tab "data") "active")}
+                         ;    [:a {:data-target "test"
+                         ;         :on-click #(swap-tab "data")}
+                         ;     "Data"]]]]
+                         [:div.body
+                          [:div {:className (if (= @current-tab "data") "hide")}
+                           [step @step-data]]
+                          [:div {:className (if (= @current-tab nil) "hide")}
+                           (json-html/edn->hiccup @step-data)]
+                          (if (:loading? @step-data) [tool-dimmer])]])})))
 
 (defn steps-dashboard
   "Create a dashboard with a tool inside. The dashboard includes common
@@ -115,8 +120,9 @@
                           ;  [:h1 "Step Dashboard"]
                            (for [rows (partition-all 3 ids)]
                            [:div.fl-row
+                            ^{:key (str "step-col" id)}
                             (for [id rows]
-                              [:div.fl-cell ^{:key (str "step-container" id)} [step-container id true]]
+                             ^{:key (str "step-row" id)} [:div.fl-cell ^{:key (str "step-container" id)} [step-container id true]]
                               )
                             ])]]])})))
 

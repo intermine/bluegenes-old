@@ -15,11 +15,10 @@
            :default {:root "www.humanmine.org/humanmine"
                      :token nil}}
 
-   :histories {:k {:name "Local History Y"
-                   :slug "local-history-y"
+   :histories {:k {:name "Local History K"
+                   :slug "local-history-k"
                    :description "I too was born in app-db."
-                   ;  :structure [:a1 [:b1 :b2] :c1 :d1 [:e1 :e2 :e3 :e4]]
-                   :structure [:a1 [:z1 :z2 :z3 :z4 :z5 :z6] :b1]
+                   :structure [:a1 [:z1 :z2 :z3 :z4 :z5 :z6]]
 
                    :steps {:a1 {:_id :a1
                                 :tool "chooselistcompact"}
@@ -29,7 +28,6 @@
                                 :state [{:widget "go_enrichment_for_gene"
                                          :title "GO Enrichment"}]}
                            :z2 {:_id :z2
-                                :loading? true
                                 :tool "enrichment"
                                 :subscribe [:a1]
                                 :state [{:widget "pathway_enrichment"
@@ -39,7 +37,6 @@
                                 :subscribe [:a1]
                                 :state [{:widget "publication_enrichment"
                                          :title "Publication Enrichment"}]}
-
                            :z4 {:_id :z4
                                 :tool "enrichment"
                                 :subscribe [:a1]

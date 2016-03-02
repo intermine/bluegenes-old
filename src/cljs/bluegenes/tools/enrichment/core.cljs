@@ -12,12 +12,11 @@
 (def flymine (js/imjs.Service. #js {:root "www.flymine.org/query"}))
 
 (def pager (reagent/atom {:partition 10
-                  :current-page 1}))
+                          :current-page 1}))
 
 (defn enrichment-controls []
   [:div.row
    [:div.col-xs-4
-
     [:form.form-group
      [:span "Test Correction"]
      [:select.form-control
@@ -38,52 +37,70 @@
      [:span "Background"]
      [:input.form-control {:type "text"}]]]])
 
+(defn table-header []
+  [:thead
+   [:th "Description"]
+   [:th "p-value"]
+   [:th "Matches"]])
+
+(defn ncbi-link [identifier]
+  [:a {:href
+       (str "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids="
+            identifier)}
+   (str " [" identifier "]")])
+
 (defn pagination-handler [e]
   "Update the pagination state's current page"
   (println "Pagination handler got" e)
   (swap! pager assoc :current-page e))
 
+(defn build-matches-query [query path-constraint identifier]
+  (update-in query [:where]
+             conj {:path path-constraint
+                   :op "ONE OF"
+                   :values [identifier]}))
+
+(defn table-row [row path-query-for-matches path-constraint api]
+  [:tr
+   [:td
+    [:span (:description row)]
+    [ncbi-link (:identifier row)]]
+   [:td (.. (:p-value row) (toPrecision 6) )]
+   [:td
+    {:on-click (fn []
+                 ((:has-something api) {:data {:format "query"
+                                               :value (build-matches-query path-query-for-matches path-constraint (:identifier row))}
+                                        :service {:root "http://www.flymine.org/query"}
+                                        :shortcut "viewtable"}))}
+    [:div.btn.btn-raised.btn-info (:matches row)]]])
+
+
 
 
 (defn table
   "Table to display enrichment results"
-  [rows-per-page enrichment-results]
-  (fn [rows-per-page enrichment-results]
-    ; (println "ENRICHMENT RESULTS" enrichment-results)
+  []
+  (fn [{:keys [rows-per-page
+               enrichment-results
+               path-query-for-matches
+               path-constraint]}
+       api]
     (if (empty? enrichment-results)
       (do
         [:p "No results"])
       (do
         [:div.table-wrapper
          [:table.table.table-striped.comp-table
-          [:thead
-           [:th "Description"]
-           [:th "p-value"]
-           [:th "Matches"]]
+          [table-header]
           [:tbody
            (if (> (count enrichment-results) 0)
              (do
-               (for [row (nth (partition
-                               rows-per-page rows-per-page [nil] (sort-by :p-value < enrichment-results))
-                              (dec (:current-page @pager)))]
+               (for [row (take 10 enrichment-results)]
                  (if-not (nil? row)
-                   ^{:key (:identifier row)} [:tr
-                                              [:td
-                                               [:span (:description row)]
-                                               [:a {:href
-                                                    (str "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids="
-                                                         (:identifier row))}
-                                                (str " [" (:identifier row) "]")]]
-                                              ;  [:td (:identifier row)]
-                                              ; (println "type" (.. (:p-value row) (toPrecision 6) ) )
-                                              [:td (.. (:p-value row) (toPrecision 6) )]
-                                              [:td (:matches row)]]))))]]]))))
-
-
-(defn result-counter [vals]
-  (fn [vals]
-    [:h1 (str "contains " (count vals) " values")]))
-
+                   ^{:key (:identifier row)} [table-row
+                                              row path-query-for-matches
+                                              path-constraint
+                                              api]))))]]]))))
 
 
 
@@ -100,7 +117,7 @@
         [:div
          [:h3 (:title (:state step-data))]
          [enrichment-controls]
-         [table (:rows-per-page @local-state) (:enrichment-results @local-state)]])
+         [table @local-state (:api step-data)]])
       :component-will-receive-props
       (fn [this new-props]
 
@@ -108,13 +125,18 @@
               enrichment-type (:widget (:state props))]
           ((:is-loading (:api props)) true)
           (swap! local-state assoc :enrichment-results nil)
-          (go
-           (let [res (<! (im/enrichment
-                          {:service {:root "http://www.flymine.org/query/"}}
-                          {:list (:name (:data (:upstream-data props)))
-                           :widget enrichment-type
-                           :maxp 0.05
-                           :format "json"
-                           :correction "Holm-Bonferroni"}))]
-             ((:is-loading (:api props)) false)
-             (swap! local-state assoc :enrichment-results (-> res :results))))))})))
+
+          (go (let [res (<! (im/enrichment
+                             (select-keys (:upstream-data props) [:service])
+                             {:list (:name (:data (:upstream-data props)))
+                              :widget enrichment-type
+                              :maxp 0.05
+                              :format "json"
+                              :correction "Holm-Bonferroni"}))]
+                ((:is-loading (:api props)) false)
+
+
+             (swap! local-state assoc
+                    :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
+                    :path-constraint (:pathConstraint res)
+                    :enrichment-results (-> res :results))))))})))

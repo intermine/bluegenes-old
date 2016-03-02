@@ -24,7 +24,7 @@
                                         (str (:key (:upstream-data props))
                                              " +layer"))})))
       :component-did-update (fn [this old-props]
-                              (println "echo tool updating")
+                              ; (println "echo tool updating")
                               (let [props (reagent/props this)]
                                 ; (println "SEES TOOL" (dissoc props :api))
                                 ((-> props :api :has-something)

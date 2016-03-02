@@ -69,16 +69,32 @@
         (:step source)
         uuid)))))
 
+
+(defn update-self [db data step-id]
+  (update-in db [:histories
+                 (:active-history db)
+                 :steps
+                 step-id]
+             assoc :produced data))
+
+(defn spawn-shortcut [db data subscribed-to-step-id]
+  (if (contains? data :shortcut)
+    (let [uuid (keyword (rid))]
+      (-> (create-step db uuid {:tool (:shortcut data)
+                                :_id uuid
+                                :scroll-to? true
+                                :state []
+                                :subscribe [subscribed-to-step-id]})
+          (update-in [:histories (:active-history db) :structure] conj uuid)))
+    db))
+
 (re-frame/register-handler
  :has-something
  trim-v
  (fn [db [step-id data]]
-   (println "has-something handler")
-   (update-in db [:histories
-                  (:active-history db)
-                  :steps
-                  step-id]
-              assoc :produced data)))
+   (-> db
+       (update-self data step-id)
+       (spawn-shortcut data step-id))))
 
 
 (defn stamp-step
