@@ -39,7 +39,7 @@
                    :state []}}}
               :search {:name "Search"
                    :slug "search"
-                   :description "I too was born in app-db."
+                   :description "Search for your favourite gene, protein, etc."
                    :steps {:search-tool {:tool "search"
                                :_id :search-tool
                                :title "Search InterMine"

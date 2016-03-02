@@ -1,10 +1,9 @@
 .search {
   button,
-  input {
+  input[type=text] {
     float: left;
     margin-right: 1em;
   }
-  .close {margin:0 0.2em;}
   .response {
     clear: both;
     display: flex;
@@ -35,6 +34,7 @@
             border-bottom-right-radius: 0;
           }
           td:last-child {
+            padding-right:@spacer/4;
             background: @highlight;
             border-bottom-right-radius: @border-radius;
             border-top-right-radius: @border-radius;

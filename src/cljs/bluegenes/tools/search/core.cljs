@@ -39,8 +39,8 @@
 (defn is-active-result? [state result]
   "returns true is the result should be considered 'active' - e.g. if there is no filter at all, or if the result matches the active filter type."
     (or
-      (= (:active-filter state) (.-type result))
-      (nil? (:active-filter state))))
+      (= (:active-filter @state) (.-type result))
+      (nil? (:active-filter @state))))
 
 (defn count-results [state]
   (reduce + (vals (:category (:facets state))))
@@ -54,15 +54,17 @@
 (defn results-display [state]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
-    [:h4 "Results"[results-count state]]
-   (for [result (:results state)]
-     (if (is-active-result? state result)
-     ^{:key (.-id result)}
-     [resulthandler/result-row result]))
-   ])
+    [:h4 "Results"[results-count @state]]
+    [:form
+     (doall (for [result (:results @state)]
+       (if (is-active-result? state result)
+       ^{:key (.-id result)}
+       [resulthandler/result-row result state])))
+
+   ]])
 
 
-(defn id-form [local-state api]
+(defn search-form [local-state api]
   "Visual form component which handles submit and change"
   [:div.search
   [:form {:on-submit (fn [e]
@@ -79,14 +81,14 @@
     [:button "Submit"]]
    [:div.response
       [filters/facet-display search-results]
-      [results-display @search-results]]])
+      [results-display search-results]]])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
   (reagent/create-class
     {:reagent-render
       (fn render [{:keys [state upstream-data api]}]
-        [id-form local-state api])
+        [search-form local-state api])
       :component-did-mount (fn [this]
         (let [passed-in-state (:state (reagent/props this))]
           (reset! local-state (:input passed-in-state))))
