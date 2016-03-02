@@ -4,11 +4,8 @@
 @rgba-primary-2: rgba(195,191,174,1);
 @rgba-primary-3: rgba(175,170,147,1);
 @rgba-primary-4: rgba(160,153,125,1);
-
-
-@cta-color:#4CAF50;
+@cta-color: #4CAF50;
 @cta-color-text: #fff;
-
 @selectedColor: #3F51B5;
 @selectedColorText: #fff;
 //define master colours for popular data types. Try to draw from 500 colours
@@ -16,6 +13,22 @@
 //visually distinct. They should be used ONLY for data type tagging, not general theming
 @color-Gene: #8BC34A;
 @color-Protein: #FFC107;
+@color-Publication: #2196F3;
+@border-radius: 2px;
+.result-type {
+  background-color: #ccc;
+  color: rgba(0,0,0,0.87);
+  &.type-Gene {
+    background: @color-Gene;
+    color: #fff;
+  }
+  &.type-Publication {
+    background: @color-Publication;
+  }
+  &.type-Protein {
+    background: @color-Protein;
+  }
+}
 @import url(https://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic);
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,900,300italic,300,400italic);
 @import "../../bower_components/bootstrap/less/bootstrap";
@@ -25,6 +38,7 @@
 //tool import:
 @import "list-chooser";
 @import "stepdash";
+@import "search";
 body {
   background: @rgba-primary-0;
   background: white;
@@ -117,7 +131,6 @@ body {
     transform: rotate(360deg);
   }
 }
-
 //'fade', belowm is used to slide in a component from the top.
 // We allow it to size from 0 to auto in a newly created element using max-height and animations. Thanks, https://www.christianheilmann.com/2015/08/30/quicky-fading-in-a-newly-created-element-using-css/
 // and
@@ -130,7 +143,6 @@ body {
     max-height: 3000px;
   }
 }
-
 .tool-card-container {
   display: flex;
 }
@@ -190,8 +202,10 @@ body {
   margin: 10px 20px;
   .panel;
   .panel-default;
-  img {max-width:75%;} //this resizes images to match the box
-
+  img {
+    max-width: 75%;
+  }
+  //this resizes images to match the box
   //babycard and growing up are used to transition animations on newly added
   //DOM elements.
   &.babyCard {
@@ -204,7 +218,6 @@ body {
     animation: fade 3s;
     animation-timing-function: cubic-bezier(0.2, 2.0, 0.2);
   }
-
   .body {
     .panel-body;
     position: relative;
@@ -374,8 +387,6 @@ th.jh-key {
 #custom-bootstrap-menu.navbar-default .navbar-toggle:focus .icon-bar {
   background-color: #333333;
 }
-
-
 .whoami {
   text-align: right;
   .name {
@@ -390,12 +401,42 @@ th.jh-key {
     color: white;
   }
 }
-
 //the sign in curser is a text-select cursor by default for some reason.
 //users need to know it's a clickable link.
-.signin li div{
-  padding:20px 15px;
+.signin li div {
+  padding: 20px 15px;
   &:hover {
-  background:#525252;
-  cursor:pointer;
-}}
+    background: #525252;
+    cursor: pointer;
+  }
+}
+@spacer: 2em;
+input,
+button {
+  height: @spacer*1.5;
+  padding: 0 0 0 @spacer/4;
+  vertical-align: middle;
+  &[type="text"] {
+    min-width: 300px;
+    width: 60%;
+  }
+}
+button {
+  min-width: 10em;
+  font-family: Roboto, Helvetica, arial, sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 1em 5em;
+  float: right;
+  vertical-align: middle;
+  background: @cta-color;
+  line-height: 0.3em;
+  color: @cta-color-text;
+  border-radius: @border-radius;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  border: 0;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+  &:hover {
+    background: lighten(@cta-color,5%);
+  }
+}

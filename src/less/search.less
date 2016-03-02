@@ -1,0 +1,114 @@
+.search {
+  button,
+  input {
+    float: left;
+    margin-right: 1em;
+  }
+  .close {margin:0 0.2em;}
+  .response {
+    clear: both;
+    display: flex;
+    .facets {
+      margin:1em;
+      flex-basis: 1;
+      min-width: 10em;
+      .result-type {
+        text-align:center;
+      }
+      table {
+        border-collapse: separate;
+        border-spacing: 0 0.2em;
+      }
+      tr {
+        td:last-child {padding-left:@spacer/4;}
+        margin-top: 0.2em;
+        &.active {
+          td:first-child {
+            border-top-left-radius: @border-radius;
+            border-bottom-left-radius: @border-radius;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+          }
+          td:last-child {
+            background: #ddd;
+            border-bottom-right-radius: @border-radius;
+            border-top-right-radius: @border-radius;
+          }
+        }
+      }
+    }
+    .results {
+      margin: @spacer/2 @spacer/2 @spacer/2 @spacer;
+      & > div {
+        border-bottom: solid 1px #e4e4e4;
+        & > span,
+        & > cite {
+          margin-right: 0.3em;
+        }
+      }
+      flex-basis: 4;
+      .result-type {
+        display: inline-block;
+        background: #f0f0f0;
+        color: rgba(0,0,0,0.87);
+        min-width: 7em;
+        text-align: right;
+        border-left: solid 3px #999;
+        &.type-Gene {
+          border-left: solid 3px @color-Gene;
+        }
+        &.type-Publication {
+          border-left: solid 3px @color-Publication;
+        }
+        &.type-Protein {
+          border-left: solid 3px @color-Protein;
+        }
+      }
+      .default-description {
+        text-transform: capitalize;
+        margin-right: 0.5em;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .default-description:after {
+        content: ": ";
+      }
+      .description,
+      .default-value {
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 350px;
+        display: inline-block;
+        text-overflow: ellipsis;
+      }
+      .name,
+      .organism {
+        font-style: italic;
+      }
+    }
+  }
+  ul {
+    margin-left: 0;
+    padding-left: 0;
+  }
+  li {
+    list-style-type: none;
+    list-style-position: outside;
+    min-width: 2.5em;
+    .count {
+      &.result-type {
+        margin: 0 0.2em 0 0;
+      }
+      clear: left;
+      margin-right: 0.5em;
+      display: block;
+      float: left;
+    }
+  }
+  .result-type {
+    padding: 0 0.2em;
+    border-radius: @border-radius;
+    margin: 0.2em;
+  }
+}

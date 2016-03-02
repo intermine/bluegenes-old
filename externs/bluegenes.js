@@ -30,6 +30,7 @@ imjs.prototype.Service.fetchLists = function() {};
 imjs.prototype.Service.fetchTemplates = function() {};
 imjs.prototype.Service.resolveIds = function() {};
 imjs.prototype.Service.poll = function() {};
+imjs.prototype.Service.search = function() {};
 imjs.prototype.Service.query.count = function() {};
 
 getAuthResponse = function() {};
