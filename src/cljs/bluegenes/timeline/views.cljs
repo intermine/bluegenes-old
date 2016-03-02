@@ -15,6 +15,7 @@
   "Loading screen that can be applied over a step. TODO: Move to components namespace."
   [:div.dimmer
    [:div.message
+
     [:div.loader]]])
 
 (defn step-tree [steps]
@@ -35,6 +36,27 @@
           (conj step-vec (id steps))
           (recur (first children) (conj step-vec (id steps))))))))
 
+(defn step-graph-wip [steps]
+  "Serialize the steps of a history.
+  Assume that a tool with no subscription is a starting point. Then recursively
+  find other steps that subscribe to the starting point. Subscriptions are
+  vectors (meaning that a step can subscribe to more than one step), but for now
+  this only supports one item in the subscription (hence the 'first' function.)"
+  (let [[starting-point-id] (first (filter (fn [[step value]] (nil? (:subscribe value))) steps))
+        find-downstream (fn [parent-id]
+                        (filter (fn [[step value]]
+                                  (not (nil? (some #{parent-id} (:subscribe value)))))
+                                steps))]
+    (loop [id starting-point-id
+           step-vec []]
+      (let [downstream (find-downstream id)]
+        (println "downstream" downstream)
+        (if (nil? downstream)
+          (conj step-vec [(id steps)])
+          (recur (first downstream) (conj step-vec (id steps))))))))
+
+
+
 (defn step
   "Subscribe to a single step in the history and represent it visually. Also subscribes
   to an upstream step to have access to its input. "
@@ -53,38 +75,69 @@
           :global-data global-info
           :api api}]))))
 
-(defn step-dashboard
-  "Create a dashboard with a tool inside. The dashboard includes common
+(defn step-container
+  "Create a container with a tool inside. The container includes common
   functionality such as data tabs, notes, etc."
-  [_id]
+  [_id & [in-grid]]
   (let [step-data (re-frame/subscribe [:to-step _id])
         current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
-     {:reagent-render (fn [_id]
+     {:component-did-mount (fn [this]
+                             (let [node (reagent/dom-node this)]
+                             (if (:scroll-to? @step-data)
+                               (do
+                                 (.animate (js/$ "body") #js{:scrollTop (-> (js/$ node) .offset .-top)} 500 "swing")))))
+      :reagent-render (fn [_id]
+                        [:div
+                         {:class (if-not in-grid "step-container")}
+                         ; [:div.toolbar
+                         ;  [:ul
+                         ;   [:li {:class (if (= @current-tab nil) "active")}
+                         ;    [:a {:on-click #(swap-tab nil)}
+                         ;     (:tool @step-data)]]
+                         ;   [:li {:class (if (= @current-tab "data") "active")}
+                         ;    [:a {:data-target "test"
+                         ;         :on-click #(swap-tab "data")}
+                         ;     "Data"]]]]
+                         [:div.body
+                          [:div {:className (if (= @current-tab "data") "hide")}
+                           [step @step-data]]
+                          [:div {:className (if (= @current-tab nil) "hide")}
+                           (json-html/edn->hiccup @step-data)]
+                          (if (:loading? @step-data) [tool-dimmer])]])})))
+
+(defn steps-dashboard
+  "Create a dashboard with a tool inside. The dashboard includes common
+  functionality such as data tabs, notes, etc."
+  [ids]
+  (let [_ nil]
+    (reagent/create-class
+     {:reagent-render (fn [ids]
                         [:div
                          [:div.step-container
-                          [:div.toolbar
-                           [:ul
-                            [:li {:class (if (= @current-tab nil) "active")}
-                             [:a {:on-click #(swap-tab nil)}
-                              (:tool @step-data)]]
-                            [:li {:class (if (= @current-tab "data") "active")}
-                             [:a {:data-target "test"
-                                  :on-click #(swap-tab "data")}
-                              "Data"]]]]
                           [:div.body
-                           [:div {:className (if (= @current-tab "data") "hide")}
-                            [step @step-data]]
-                           [:div {:className (if (= @current-tab nil) "hide")}
-                            (json-html/edn->hiccup @step-data)]]]])})))
+                          ;  [:h1 "Step Dashboard"]
+                           (for [rows (partition-all 3 ids)]
+                           [:div.fl-row
+                            ^{:key (str "step-col" id)}
+                            (for [id rows]
+                             ^{:key (str "step-row" id)} [:div.fl-cell ^{:key (str "step-container" id)} [step-container id true]]
+                              )
+                            ])]]])})))
 
-(defn previous-steps []
-  (let [step-list (re-frame/subscribe [:steps])]
+(defn previous-steps
+  "Iterate through the history's structure and create step containers for
+  single tools (keyword) or steps dashboards for grouped tools (vector)."
+  []
+  (let [step-path (re-frame/subscribe [:step-path])]
     (fn []
       (into [:div.prevsteps]
-            (for [_id (map :_id (reverse (step-tree @step-list)))]
-              (do ^{:key (str "dashboard" _id)} [step-dashboard _id]))))))
+            (for [id @step-path]
+              (if (vector? id)
+                ^{:key (str "group" (str id))} [steps-dashboard id]
+                ^{:key (str "step-container" id)} [step-container id]))))))
+
 
 (defn history-details []
   "Not used as of yet."

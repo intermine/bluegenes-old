@@ -24,7 +24,12 @@
 
 (defn has-something [tool data]
   "Notify the world that the tool has consumable data."
+  ; (println "HAS-SOMETHING sees" tool)
   (re-frame/dispatch [:has-something (keyword (get-id tool)) data]))
+
+(defn is-loading [tool data]
+  "Replace a tool's state with its current state."
+  (re-frame/dispatch [:is-loading (get-id tool) data]))
 
 (defn build-api-map
   "Produce a bespoke map of functions for a tool to communicate
@@ -32,7 +37,8 @@
   [step-data]
   {:append-state (partial append-state step-data)
    :replace-state (partial replace-state step-data)
-   :has-something (partial has-something step-data)})
+   :has-something (partial has-something step-data)
+   :is-loading (partial is-loading step-data)})
 
 (defn append-state-or-new-history
   "same as append state, but creates the history first from a homepage tool if it doesn't exist"

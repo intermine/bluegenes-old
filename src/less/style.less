@@ -39,6 +39,9 @@
 @import "list-chooser";
 @import "stepdash";
 @import "search";
+@import "dashboard";
+
+
 body {
   background: @rgba-primary-0;
   background: white;
@@ -73,10 +76,11 @@ body {
   text-align: center;
   background-color: #000;
   // filter: alpha(opacity=50);
-  -moz-opacity: 0.5;
-  opacity: 0.6;
+  opacity: 0.9;
+  opacity: 1;
   z-index: 9999;
-  background: #A9A9A9;
+  background: #2D2D2D;
+  background: white;
 }
 .dimmer div.message {
   padding: 5px;
@@ -84,21 +88,22 @@ body {
   color: #000;
   color: #bbe9f0;
   position: relative;
-  top: 50%;
+  top: 30%;
 }
 .hide {
   display: none;
 }
-@spinner-color: #bbe9f0;
+@spinner-color: rgba(0,0,0,0.1);
+@spinner-highlight: rgba(0,0,0,0.5);
 .loader {
   margin: auto;
   font-size: 10px;
   position: relative;
   text-indent: -9999em;
-  border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-left: 1.1em solid #ffffff;
+  border-top: 0.7em solid @spinner-color;
+  border-right: 0.7em solid @spinner-color;
+  border-bottom: 0.7em solid @spinner-color;
+  border-left: 0.7em solid @spinner-highlight;
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);
@@ -108,8 +113,8 @@ body {
 .loader,
 .loader:after {
   border-radius: 50%;
-  width: 10em;
-  height: 10em;
+  width: 5em;
+  height: 5em;
 }
 @-webkit-keyframes load8 {
   0% {
@@ -197,6 +202,12 @@ body {
     }
   }
 }
+
+
+.step-dashboard {
+  background: orange;
+}
+
 .step-container {
   box-sizing: border-box;
   margin: 10px 20px;
