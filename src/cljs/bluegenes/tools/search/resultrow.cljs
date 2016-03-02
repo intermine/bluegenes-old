@@ -4,18 +4,20 @@
 (enable-console-print!)
 
 (defn is-selected? [result selected-result]
+  "returns true if 'result' is selected"
   (= selected-result result))
 
 (defn result-selection-control [result state]
-  [:input {:type "radio"
-           :name "keyword-search" ;;todo, dynamic names. would we ever really have two keyword searches on one page though? That seems like madness!
-           :checked (is-selected? result (:selected-result @state))
-           }]
-  )
+  "UI control suggesting to the user that there is only one result selectable at any one time; there's no actual form functionality here."
+  [ :input {
+      :type "radio"
+      :name "keyword-search" ;;todo, dynamic names. would we ever really have two keyword searches on one page though? That seems like madness!
+      :checked (is-selected? result (:selected-result @state))}])
 
 (defn set-selected! [row-data]
+  "sets the selected result in the local state atom and emits that we 'have' this item to next steps / the next tool"
   (swap! (:state row-data) assoc :selected-result (:result row-data))
-  ;;here: has something
+  ;;Todo: remove this dirty hard coding of the service URL
   ((:has-something (:api row-data))
    {:service {:root "www.flymine.org/query"}
        :data {

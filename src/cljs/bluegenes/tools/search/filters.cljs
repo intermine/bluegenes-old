@@ -14,9 +14,10 @@
   (= name active))
 
 (defn remove-filter [filter-name state]
+  "the little x in the corner that allows you to remove filters, and its behaviour"
   (fn [filter-name state]
     [:a
-    {:aria-label (str "Remove " filter-name " filter")
+    {:aria-label (str "Remove " filter-name " filter") ;;we need this to stop screen readers from reading the 'x' symbol out loud as though it was meaningful text
     :on-click (fn [e]
       (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
       (swap! state dissoc :active-filter))}
@@ -32,6 +33,7 @@
 
 
 (defn facet-display [state]
+  "Visual component which outputs the category filters."
   (let [facets (:facets @state) active (:active-filter @state)]
   (if (some? facets)
   [:div.facets

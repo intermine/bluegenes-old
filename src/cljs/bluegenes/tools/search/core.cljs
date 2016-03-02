@@ -10,6 +10,7 @@
 (def search-results (reagent.core/atom {:results nil}))
 
 (defn sort-by-value [result-map]
+  "Sort map results by their values. Used to order the category maps correctly"
   (into (sorted-map-by (fn [key1 key2]
                          (compare [(get result-map key2) key2]
                                   [(get result-map key1) key1])))
@@ -17,7 +18,6 @@
 
 (defn results-handler [results mine comm]
   "Emit our results once the promise comes back."
-  (.log js/console "%cresults" "background-color:ivory" results)
   (reset! search-results
     {
     :results  (.-results results)
