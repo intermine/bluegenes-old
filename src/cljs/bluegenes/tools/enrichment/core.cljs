@@ -15,27 +15,29 @@
                           :current-page 1}))
 
 (defn enrichment-controls []
+  [:div
   [:div.row
-   [:div.col-xs-4
-    [:form.form-group
+   [:div.col-xs-6
+    [:form
      [:span "Test Correction"]
      [:select.form-control
       [:option "Holms-Bonferroni"]
       [:option "Benjamini Hochberg"]
       [:option "Bonferroni"]
       [:option "None"]]]]
-   [:div.col-xs-4
-    [:form.form-group
+   [:div.col-xs-6
+    [:form
      [:span "Maximum p-value:"]
      [:select.form-control
       [:option "0.05"]
       [:option "0.10"]
-      [:option "1.0"]]]]
+      [:option "1.0"]]]]]
 
-   [:div.col-xs-4
-    [:form.form-group
+  [:div.row
+   [:div.col-xs-12
+    [:form
      [:span "Background"]
-     [:input.form-control {:type "text"}]]]])
+     [:input.form-control {:type "text"}]]]]])
 
 (defn table-header []
   [:thead
@@ -62,7 +64,7 @@
 
 (defn table-row [row path-query-for-matches path-constraint api]
   [:tr
-   [:td
+   [:td.description
     [:span (:description row)]
     [ncbi-link (:identifier row)]]
    [:td (.. (:p-value row) (toPrecision 6) )]
