@@ -22,7 +22,7 @@
    {:service {:root "www.flymine.org/query"}
        :data {
           :format "ids"
-          :values [(.-id (:result row-data))]
+          :payload [(.-id (:result row-data))]
           :type (.-type (:result row-data))}}))
 
 (defn row-structure [row-data contents]

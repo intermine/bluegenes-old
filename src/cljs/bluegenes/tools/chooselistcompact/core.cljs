@@ -31,7 +31,7 @@
     (-> {:service {:root "www.flymine.org/query"}
          :data {:format "list"
                 :type (.-type list-details)
-                :name (.-name list-details)}}
+                :payload (.-name list-details)}}
         ((:has-something api)))))
 
 (defn ^:export main []

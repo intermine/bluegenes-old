@@ -18,7 +18,7 @@
   "Emit our results once the promise comes back."
   (let [matches (-> values (aget "matches") (aget "MATCH"))]
     ((:has-something comm) {:data {:format "ids"
-                                   :values (into [] (map #(aget % "id") matches))
+                                   :payload (into [] (map #(aget % "id") matches))
                                    :type "Gene"}
                             :service {:root "www.flymine.org/query"}})))
 

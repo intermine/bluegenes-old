@@ -60,7 +60,8 @@
     {:on-click (fn []
                  (has-something {:data
                                  {:format "query"
-                                  :value (c/build-matches-query
+                                  :type path-constraint
+                                  :payload (c/build-matches-query
                                           path-query-for-matches
                                           path-constraint
                                           (:identifier row))}
@@ -115,7 +116,7 @@
           (swap! local-state assoc :enrichment-results nil)
           (go (let [res (<! (im/enrichment
                              (select-keys upstream-data [:service])
-                             {:list (:name (:data upstream-data))
+                             {:list (:payload (:data upstream-data))
                               :widget enrichment-type
                               :maxp 0.05
                               :format "json"

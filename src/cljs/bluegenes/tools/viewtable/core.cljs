@@ -10,21 +10,21 @@
 
 (defn get-list-query
   "Construct a query using a collection of object ids."
-  [list]
-  {:from (:type list)
+  [payload]
+  {:from (:type payload)
    :select "*"
-   :where [{:path (:type list)
+   :where [{:path (:type payload)
             :op "IN"
-            :value (:name list)
+            :value (:payload payload)
             :code "A"}]})
 
 (defn get-id-query
   "Construct a query using an intermine list name."
-  [list]
-  {:from (:type list)
+  [payload]
+  {:from (:type payload)
    :select "*"
    :where [{:path "Gene.id"
-            :values (:values list)
+            :values (:payload payload)
             :op "ONE OF"
             :code "A"}]})
 
@@ -37,7 +37,7 @@
     (= "ids" (-> input-data  :data :format))
     (get-id-query (get-in input-data [:data]))
     (= "query" (-> input-data :data :format))
-    (get-in input-data [:data :value])))
+    (get-in input-data [:data :payload])))
 
 (defn update-count
   "Reset an atom with the row count of an imjs query."
@@ -82,7 +82,7 @@
                                                ((:has-something api) {:service (:service upstream-data)
                                                                       :data {:format "ids"
                                                                              :type (-> e .-query .-root)
-                                                                             :values (js->clj v)}}))))))))))]
+                                                                             :payload (js->clj v)}}))))))))))]
     (reagent/create-class
      {:reagent-render (fn []
                         [:div
