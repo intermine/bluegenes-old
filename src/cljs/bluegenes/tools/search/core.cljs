@@ -8,6 +8,7 @@
 (enable-console-print!)
 
 (def search-results (reagent.core/atom {:results nil}))
+(def results-counter (reagent.core/atom {:shown-results-count 0}))
 
 (defn sort-by-value [result-map]
   "Sort map results by their values. Used to order the category maps correctly"
@@ -17,7 +18,7 @@
         result-map))
 
 (defn results-handler [results mine comm]
-  "Emit our results once the promise comes back."
+  "Store results in local state once the promise comes back."
   (reset! search-results
     {
     :results  (.-results results)
@@ -42,26 +43,33 @@
       (= (:active-filter @state) (.-type result))
       (nil? (:active-filter @state))))
 
-(defn count-results [state]
+(defn count-total-results [state]
+  "returns total number of results by summing the number of results per category. This includes any results on the server beyond the number that were returned"
   (reduce + (vals (:category (:facets state))))
   )
 
-(defn results-count [state]
-  (let [result-count (count (:results state))]
-    [:small " Displaying " result-count " of " (count-results state) " results"]))
+(defn count-current-results [state]
+  "returns number of results currently shown, taking into account result limits nd filters"
+  (count
+    (remove
+      (fn [result]
+        (not (is-active-result? state result))) (:results @state))))
 
+
+(defn results-count [state]
+  "Visual component: outputs the number of results shown."
+    [:small " Displaying " (count-current-results state) " of " (count-total-results @state) " results"])
 
 (defn results-display [state api]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
-    [:h4 "Results"[results-count @state]]
+    [:h4 "Results" [results-count state]]
     [:form
      (doall (for [result (:results @state)]
        (if (is-active-result? state result)
-       ^{:key (.-id result)}
-       [resulthandler/result-row {:result result :state state :api api}])))
-
-   ]])
+         ^{:key (.-id result)}
+         [resulthandler/result-row {:result result :state state :api api}]
+         )))]])
 
 
 (defn search-form [local-state api]

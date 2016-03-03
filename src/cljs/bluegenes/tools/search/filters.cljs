@@ -31,7 +31,6 @@
       [:div.active-filter active-filter [remove-filter active-filter state]]
       [:div "None"])])
 
-
 (defn facet-display [state]
   "Visual component which outputs the category filters."
   (let [facets (:facets @state) active (:active-filter @state)]
