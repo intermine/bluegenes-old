@@ -40,8 +40,6 @@
 @import "stepdash";
 @import "search";
 @import "dashboard";
-
-
 body {
   background: @rgba-primary-0;
   background: white;
@@ -202,12 +200,9 @@ body {
     }
   }
 }
-
-
 .step-dashboard {
   background: orange;
 }
-
 .step-container {
   box-sizing: border-box;
   margin: 10px 20px;
@@ -452,4 +447,35 @@ button {
   &:hover {
     background: lighten(@cta-color,5%);
   }
+}
+
+//IM tables pagination fixes:
+@paginationheight : 3em;
+ul.pagination {
+  margin: 0;
+  form {
+    margin: -3px 0.4em 0;
+    select {
+      text-transform: capitalize;
+    }
+  }
+}
+.im-table-pagination {
+  margin-left: 1em;
+}
+.im-table-pagination,
+.im-page-sizer {
+  display: block;
+  float: right;
+  min-height: @paginationheight;
+}
+.im-pagination-button,
+ul.pagination form {
+  float: left;
+  display: block;
+}
+.im-table-summary {
+  float: left;
+  min-height: @paginationheight;
+  line-height: @paginationheight;
 }

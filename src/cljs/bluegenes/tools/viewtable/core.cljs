@@ -64,25 +64,25 @@
   "Renders an im-table"
   []
   (let [update-table (fn [comp]
-                       (let [{:keys [state upstream-data api]} (reagent/props comp)
-                             node (reagent/dom-node comp)
-                             target  (.item (.getElementsByClassName node "imtable") 0)
-                             query (normalize-input upstream-data)]
-                         (-> (.loadTable js/imtables
-                                         target
-                                         (clj->js {:start 0 :size 5})
-                                         (clj->js {:service (:service upstream-data) :query query}))
-                             (.then
-                              (fn [e]
-                                (let [clone (.clone (-> e .-query))
-                                      adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
-                                  (-> (js/imjs.Service. (clj->js (:service upstream-data)))
-                                      (.values adj)
-                                      (.then (fn [v]
-                                               ((:has-something api) {:service (:service upstream-data)
-                                                                      :data {:format "ids"
-                                                                             :type (-> e .-query .-root)
-                                                                             :values (js->clj v)}}))))))))))]
+   (let [{:keys [state upstream-data api]} (reagent/props comp)
+         node (reagent/dom-node comp)
+         target  (.item (.getElementsByClassName node "imtable") 0)
+         query (normalize-input upstream-data)]
+     (-> (.loadTable js/imtables
+                     target
+                     (clj->js {:start 0 :size 5})
+                     (clj->js {:service (:service upstream-data) :query query}))
+         (.then
+          (fn [e]
+            (let [clone (.clone (-> e .-query))
+                  adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
+              (-> (js/imjs.Service. (clj->js (:service upstream-data)))
+                  (.values adj)
+                  (.then (fn [v]
+                           ((:has-something api) {:service (:service upstream-data)
+                                                  :data {:format "ids"
+                                                         :type (-> e .-query .-root)
+                                                         :values (js->clj v)}}))))))))))]
     (reagent/create-class
      {:reagent-render (fn []
                         [:div
