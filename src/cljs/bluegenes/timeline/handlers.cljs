@@ -69,6 +69,29 @@
         (:step source)
         uuid)))))
 
+(defn truncate-haystack
+  "Returns a trimed vector from its beginning to the location of value.
+  It supports vectors nested one deep and returns the outer most values.
+  (truncate-haystack [:a :b :c [:d :e :f :g] :h :i] :f)
+  returns [:a :b :c [:d :e :f :g]."
+  [haystack needle]
+  (loop [pos 0
+         new-haystack []]
+    (if (< pos (count haystack))
+      (let [item (nth haystack pos)]
+        (if (if (vector? item)
+              (not (nil? (some #{needle} item)))
+              (= needle item))
+          (conj new-haystack item)
+          (recur (inc pos) (conj new-haystack item))))
+      haystack)))
+
+(defn truncate-view
+  "Trims the :structure vector of a history to the current id."
+  [db step-id]
+  (let [structure (get-in db [:histories (:active-history db) :structure])]
+    (assoc-in db [:histories (:active-history db) :structure]
+              (truncate-haystack structure step-id) )))
 
 (defn update-self [db data step-id]
   (update-in db [:histories
@@ -80,12 +103,14 @@
 (defn spawn-shortcut [db data subscribed-to-step-id]
   (if (contains? data :shortcut)
     (let [uuid (keyword (rid))]
-      (-> (create-step db uuid {:tool (:shortcut data)
-                                :_id uuid
-                                :scroll-to? true
-                                :state []
-                                :subscribe [subscribed-to-step-id]})
-          (update-in [:histories (:active-history db) :structure] conj uuid)))
+      (->
+       (truncate-view db subscribed-to-step-id)
+       (create-step uuid {:tool (:shortcut data)
+                          :_id uuid
+                          :scroll-to? true
+                          :state []
+                          :subscribe [subscribed-to-step-id]})
+       (update-in [:histories (:active-history db) :structure] conj uuid)))
     db))
 
 (re-frame/register-handler
