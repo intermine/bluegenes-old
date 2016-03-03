@@ -3,7 +3,7 @@
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
             [bluegenes.timeline.api :as timeline-api]
-            [bluegenes.components.googlesignin :as google-sign-in]
+            ; [bluegenes.components.googlesignin :as google-sign-in]
             [bluegenes.tools.idresolver.core :as idresolver]
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
