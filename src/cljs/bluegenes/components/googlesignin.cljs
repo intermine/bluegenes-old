@@ -1,4 +1,4 @@
-(ns bluegenes.components.googlesignin
+(ns bluegenes.components.googlesigninz
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [ajax.core :refer [GET POST]]))

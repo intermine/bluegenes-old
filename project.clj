@@ -11,7 +11,7 @@
                  [json-html "0.3.6"]
                  [environ "1.0.0"]
                  [mount "0.1.9"]
-                 [prismatic/schema "1.0.4"]
+                 [prismatic/schema "1.0.5"]
                  [slugger "1.0.1"]
                  [reagent-forms "0.5.8"]
                  [clj-http "2.0.1"]
@@ -51,7 +51,7 @@
 
   :profiles {
              :dev {:cljsbuild {:builds
-                               {:dev {:source-paths ["src/cljs"]
+                               {:dev {:source-paths ["src/cljc" "src/cljs"]
                                       :figwheel {:on-jsload "bluegenes.core/mount-root"}
                                       :compiler {:main bluegenes.core
                                                  :output-to "resources/public/js/compiled/app.js"
@@ -62,7 +62,7 @@
                                                                  :provides ["intermine.imjs"]}
                                                                 {:file "foreign-libs/imtables.min.js"
                                                                  :provides ["intermine.imtables"]}]}}
-                                :min {:source-paths ["src/cljs"]
+                                :min {:source-paths ["src/cljc" "src/cljs"]
                                       :compiler {:main bluegenes.core
                                                  :output-to "resources/public/js/compiled/app.js"
                                                  :externs ["externs/bluegenes.js"]

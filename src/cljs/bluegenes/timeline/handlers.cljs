@@ -2,10 +2,14 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame :refer [debug trim-v]]
             [bluegenes.db :as db]
-            [secretary.core :as secretary])
+            [secretary.core :as secretary]
+            [schema.core :as s]
+            [bluegenes.schemas :as schemas]
+            [bluegenes.utils :as utils])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
+
 
 (re-frame/register-handler
  :has-something-old
@@ -69,29 +73,14 @@
         (:step source)
         uuid)))))
 
-(defn truncate-haystack
-  "Returns a trimed vector from its beginning to the location of value.
-  It supports vectors nested one deep and returns the outer most values.
-  (truncate-haystack [:a :b :c [:d :e :f :g] :h :i] :f)
-  returns [:a :b :c [:d :e :f :g]."
-  [haystack needle]
-  (loop [pos 0
-         new-haystack []]
-    (if (< pos (count haystack))
-      (let [item (nth haystack pos)]
-        (if (if (vector? item)
-              (not (nil? (some #{needle} item)))
-              (= needle item))
-          (conj new-haystack item)
-          (recur (inc pos) (conj new-haystack item))))
-      haystack)))
+
 
 (defn truncate-view
   "Trims the :structure vector of a history to the current id."
   [db step-id]
   (let [structure (get-in db [:histories (:active-history db) :structure])]
     (assoc-in db [:histories (:active-history db) :structure]
-              (truncate-haystack structure step-id) )))
+              (utils/truncate-vector-to-value structure step-id) )))
 
 (defn update-self [db data step-id]
   (update-in db [:histories
@@ -117,6 +106,7 @@
  :has-something
  trim-v
  (fn [db [step-id data]]
+   (s/validate schemas/Payload data)
    (-> db
        (update-self data step-id)
        (spawn-shortcut data step-id))))
