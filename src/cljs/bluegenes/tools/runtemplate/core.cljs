@@ -5,9 +5,7 @@
             [reagent.core :as reagent]
             [reagent.impl.util :as impl :refer [extract-props]]
             [clojure.string :as str]
-            ; [ajax.core :refer [GET POST]]
             [intermine.imjs :as imjs]))
-
 
 (defn template-matches-pathtype? [path template]
   "True if a template has a constraint with a cerain type"
@@ -23,8 +21,6 @@
 (defn filter-input-constraints [templates type]
   "Get templates that can use our input type"
   (filter-templates-for-type type templates))
-
-
 
 (defn constraint []
   (fn [con update-fn]
