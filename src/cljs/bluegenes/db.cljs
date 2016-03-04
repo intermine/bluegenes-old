@@ -105,12 +105,14 @@
                             :description "Search"
                             :state []}
                           :summary1 {
+                            :subscribe [:search-tool]
                             :tool "summary"
                             :_id :summary1
                             :title "Summary"
                             :description "Summary"
                             :state []}
                           :summary2 {
+                            :subscribe [:search-tool]
                             :tool "summary"
                             :_id :summary2
                             :title "Summary"
