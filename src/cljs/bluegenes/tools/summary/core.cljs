@@ -21,21 +21,23 @@
             :code "A"}]})
 
 (defn results-handler [results]
-  (reset! search-results results))
+  (.log js/console (clj->js results)))
+  ;(reset! search-results (first results)))
 
 (defn get-data [data]
   "Resolves IDs via IMJS promise"
   (let [service (:service data)
-        q (build-id-query (:data data))]
-          (go (let [response (<! (im/query-rows {:service service} q))]
-                (results-handler response)))))
+        d (:data data)
+        id (:values d)
+        type (:type d)]
+          (go (let
+            [response (<! (im/summary-fields {:service service} type id))]
+              (results-handler response)))))
 
 (defn summary []
    [:div
     [:h5 "Results"]
-    (for [result (first @search-results)]
-      ^{:key result}
-      [:div result])
+    (:attributes @search-results)
     ])
 
 (defn ^:export preview
