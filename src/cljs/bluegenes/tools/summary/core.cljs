@@ -21,25 +21,22 @@
             :code "A"}]})
 
 (defn results-handler [results]
-  (.log js/console "RESULTSSSS" (clj->js results) results)
   (reset! search-results results))
 
 (defn get-data [data]
   "Resolves IDs via IMJS promise"
-  (.log js/console "%cDaaaahta:" "color:cornflowerblue" (clj->js data))
   (let [service (:service data)
         q (build-id-query (:data data))]
-          (go (let [response (<! (im/query {:service service} q))]
+          (go (let [response (<! (im/query-rows {:service service} q))]
                 (results-handler response)))))
 
 (defn summary []
-  [:div "Bob"
    [:div
     [:h5 "Results"]
     (for [result (first @search-results)]
       ^{:key result}
       [:div result])
-    ]])
+    ])
 
 (defn ^:export preview
   "Render a preview of the tool."

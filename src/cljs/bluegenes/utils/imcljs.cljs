@@ -18,8 +18,8 @@
         (-> response :body))))
 
 
-(defn query
-  "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
+(defn query-rows
+  "Returns IMJS row-style result"
   [service query-map]
   (println "query sees maps" query-map)
   (let [c (chan)]
@@ -33,3 +33,19 @@
                  (println "got error" error)
                  )))
     c))
+
+  (defn query-records
+    "Returns an IMJS records-style results"
+    [service query-map]
+    (println "query sees maps" query-map)
+    (let [c (chan)]
+      (println "in the let" (clj->js service))
+      (-> (js/imjs.Service. (clj->js (:service service)))
+          (.records (clj->js query-map))
+          (.then (fn [rows]
+                   (println "got the rows" rows)
+                   (go (>! c (js->clj rows :keywordize-keys true))))
+                 (fn [error]
+                   (println "got error" error)
+                   )))
+      c))
