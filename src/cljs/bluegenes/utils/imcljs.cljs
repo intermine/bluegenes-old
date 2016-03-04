@@ -77,10 +77,15 @@
     (-> (js/imjs.Service. svc)
       (.makePath (clj->js type))
       (.then (fn [result]
+
+    (->
+      (.getDisplayName result)
+      (.then (fn [displayname]
+        (.log js/console "%c=====" "background:wheat" displayname result))))
+
          (let [q (summary-query type id (.allDescriptors result))]
           (go (let [response (<! (query-records service q))]
-            (go (>! c response))
-              ))))
+            (>! c response)))))
         (fn [error]
           (println "got error" error)
           )))

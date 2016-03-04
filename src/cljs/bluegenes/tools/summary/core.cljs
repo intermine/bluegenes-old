@@ -8,7 +8,7 @@
             [intermine.imjs :as imjs]))
 (enable-console-print!)
 
-(def search-results (reagent.core/atom "Fake Results. Don't believe in me"))
+(def search-results (reagent.core/atom {:fake "Fake Results. Don't believe in me"}))
 (def local-state (reagent.core/atom nil))
 
 (defn build-id-query [data]
@@ -21,8 +21,8 @@
             :code "A"}]})
 
 (defn results-handler [results]
-  (.log js/console (clj->js results)))
-  ;(reset! search-results (first results)))
+  (.log js/console (clj->js results))
+  (reset! search-results (first results)))
 
 (defn get-data [data]
   "Resolves IDs via IMJS promise"
@@ -37,7 +37,10 @@
 (defn summary []
    [:div
     [:h5 "Results"]
-    (:attributes @search-results)
+    (.log js/console @search-results)
+    (for [[k v] @search-results]
+      ^{:key k}
+      [:div.k [:strong (clj->js k)] [:div.v v]])
     ])
 
 (defn ^:export preview
