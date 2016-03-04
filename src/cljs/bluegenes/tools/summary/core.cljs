@@ -8,22 +8,21 @@
             [intermine.imjs :as imjs]))
 (enable-console-print!)
 
-(def search-results (reagent.core/atom {:results "Fake Results. Don't believe in me"}))
+(def search-results (reagent.core/atom "Fake Results. Don't believe in me"))
 (def local-state (reagent.core/atom nil))
 
 (defn build-id-query [data]
   "Construct a query using an intermine list name."
-  {:from "Gene"
+  {:from (:type data)
    :select "*"
-   :where [{:path "Gene.id"
+   :where [{:path (str (:type data) ".id")
             :values (:values data)
             :op "ONE OF"
             :code "A"}]})
 
 (defn results-handler [results]
-  (.log js/console "RESULTSSSS" (clj->js results))
-  (reset! search-results
-    {:results  (.-results results)}))
+  (.log js/console "RESULTSSSS" (clj->js results) results)
+  (reset! search-results results))
 
 (defn get-data [data]
   "Resolves IDs via IMJS promise"
@@ -35,10 +34,12 @@
 
 (defn summary []
   [:div "Bob"
-   @local-state
    [:div
-    [:h5 "results"]
-    @search-results]])
+    [:h5 "Results"]
+    (for [result (first @search-results)]
+      ^{:key result}
+      [:div result])
+    ]])
 
 (defn ^:export preview
   "Render a preview of the tool."
@@ -54,7 +55,8 @@
   "Render the main view of the tool."
   []
   (reagent/create-class
-   {:reagent-render (fn []
+   {:display-name "Summary"
+    :reagent-render (fn []
       [summary])
     :component-did-mount (fn [this]
         (let [passed-in-upstream (:upstream-data (reagent/props this))]
