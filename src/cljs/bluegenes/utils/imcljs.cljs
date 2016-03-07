@@ -1,6 +1,7 @@
 (ns bluegenes.utils.imcljs
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs-http.client :as http]
+            [bluegenes.utils.machinefields :as machine]
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [intermine.imjs :as imjs]))
 
@@ -21,9 +22,9 @@
 (defn query-rows
   "Returns IMJS row-style result"
   [service query-map]
-  (println "query sees maps" query-map)
+  (println "Rows query sees maps" query-map)
   (let [c (chan)]
-    (println "in the let" (clj->js service))
+    (println "Rows: in the let" (clj->js service))
     (-> (js/imjs.Service. (clj->js (:service service)))
         (.rows (clj->js query-map))
         (.then (fn [rows]
@@ -37,14 +38,12 @@
 (defn query-records
   "Returns an IMJS records-style results"
   [service query-map]
-  (.log js/console "query sees maps" (clj->js query-map))
+  (.log js/console "Records query sees maps" (clj->js query-map))
   (let [c (chan)]
-    (println "in the QSM let" (clj->js service))
     (-> (js/imjs.Service. (clj->js (:service service)))
         (.records (clj->js query-map))
-        (.then (fn [rows]
-                 (println "got the rows" rows)
-                 (go (>! c (js->clj rows :keywordize-keys true))))
+        (.then (fn [records]
+                 (go (>! c (js->clj records :keywordize-keys true))))
                (fn [error]
                  (.log js/console "got error" error)
                  )))
@@ -65,8 +64,29 @@
      :where [{
              :path (str type ".id")
              :op "="
-             :value id}]}
+             :value id}]})
+
+(defn is-good-result? [k v]
+  "Check that values are non null or machine-only names - no point getting dispaly names for them. "
+ (and (not (contains? machine/fields k)) ;;don't output user-useless results
+ (some? v)) ;;don't output null results
+ )
+
+ (defn get-display-name [service type k]
+   (go (let [response (<! (http/get (str "http://" (.-root service) "/service/model/" type "." (clj->js k)) {:with-credentials? false}))]
+   (-> response :body))))
+
+(defn get-display-names [service type response]
+  (doall (for [[k v] response]
+    (if (is-good-result? k v)
+      (go (let [display-name (<! (get-display-name service type k))]
+        (.log js/console ":) :) :)" (:name display-name))
+
+      ))
+      )
+  ))
   )
+
 
 (defn summary-fields
   "Returns summary fields of a given ID. requires service in the format {:service {:root 'http://www.someintermine.org/query' :token 'token if any'}}"
@@ -81,11 +101,14 @@
     (->
       (.getDisplayName result)
       (.then (fn [displayname]
-        (.log js/console "%c=====" "background:wheat" displayname result))))
 
          (let [q (summary-query type id (.allDescriptors result))]
           (go (let [response (<! (query-records service q))]
-            (>! c response)))))
+            (.log js/console "%cResponse:" "background:wheat" displayname (clj->js (first response)))
+
+            (get-display-names svc type (first response))
+
+            (>! c response))))))))
         (fn [error]
           (println "got error" error)
           )))
