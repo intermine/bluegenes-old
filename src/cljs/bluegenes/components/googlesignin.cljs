@@ -1,7 +1,9 @@
 (ns bluegenes.components.googlesignin
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
-            [ajax.core :refer [GET POST]]))
+            [cljs-http.client :as http]
+            [cljs.core.async :refer [<!]]))
 
 (defn handle-authentication
   "Tell re-frame that the user has logged in."
@@ -15,11 +17,8 @@
 (defn authenticate-with-server
   "Send a Google ID token to the server for validation."
   [id-token]
-  (GET (str "/api/auth/google/authenticate/" id-token)
-       {:handler-error
-        (fn [er] (.error js/console "Error authenticating Google user." er ))
-        :handler
-        handle-authentication}))
+  (go (let [res (<! (http/get (str "/api/auth/google/authenticate/" id-token)))]
+        (handle-authentication res))))
 
 (defn attach-sign-in
   "Add a click function to the sign-in button that accepts a Google user
@@ -35,16 +34,15 @@
   "Turns a DOM element into a clickable Google login button.
   First pull down the public google client-id from the server."
   [e]
-  (GET "/api/auth/google/credentials"
-       {:handler (fn [res]
-                   (let [cid (get res "client-id")]
-                     (.load js/gapi "auth2" (fn ^:export []
-                                              (let [auth2 (.init js/gapi.auth2
-                                                                 #js{
-                                                                     :scope "profile"
-                                                                     :fetch_basic_profile true
-                                                                     :client_id cid})]
-                                                (attach-sign-in e auth2))))))}))
+  (go (let [res (<! (http/get "/api/auth/google/credentials"))]
+        (let [cid (get res "client-id")]
+          (.load js/gapi "auth2" (fn ^:export []
+                                   (let [auth2 (.init js/gapi.auth2
+                                                      #js{
+                                                          :scope "profile"
+                                                          :fetch_basic_profile true
+                                                          :client_id cid})]
+                                     (attach-sign-in e auth2))))))))
 
 (defn full-name
   "Show the name of the user."

@@ -8,7 +8,6 @@
               [bluegenes.config :as config]
               [bluegenes.timeline.core]
               [bluegenes.tools.chooselist.core :as chooselist]
-              [bluegenes.tools.showlist.core :as showlist]
               [bluegenes.tools.idresolver.core :as idresolver]
               [bluegenes.tools.viewtable.core :as viewtable]
               [bluegenes.tools.search.core :as search]

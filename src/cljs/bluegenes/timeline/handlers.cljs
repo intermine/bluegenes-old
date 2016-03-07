@@ -2,10 +2,14 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame :refer [debug trim-v]]
             [bluegenes.db :as db]
-            [secretary.core :as secretary])
+            [secretary.core :as secretary]
+            [schema.core :as s]
+            [bluegenes.schemas :as schemas]
+            [bluegenes.utils :as utils])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
+
 
 (re-frame/register-handler
  :has-something-old
@@ -70,6 +74,14 @@
         uuid)))))
 
 
+
+(defn truncate-view
+  "Trims the :structure vector of a history to the current id."
+  [db step-id]
+  (let [structure (get-in db [:histories (:active-history db) :structure])]
+    (assoc-in db [:histories (:active-history db) :structure]
+              (utils/truncate-vector-to-value structure step-id) )))
+
 (defn update-self [db data step-id]
   (update-in db [:histories
                  (:active-history db)
@@ -80,18 +92,21 @@
 (defn spawn-shortcut [db data subscribed-to-step-id]
   (if (contains? data :shortcut)
     (let [uuid (keyword (rid))]
-      (-> (create-step db uuid {:tool (:shortcut data)
-                                :_id uuid
-                                :scroll-to? true
-                                :state []
-                                :subscribe [subscribed-to-step-id]})
-          (update-in [:histories (:active-history db) :structure] conj uuid)))
+      (->
+       (truncate-view db subscribed-to-step-id)
+       (create-step uuid {:tool (:shortcut data)
+                          :_id uuid
+                          :scroll-to? true
+                          :state []
+                          :subscribe [subscribed-to-step-id]})
+       (update-in [:histories (:active-history db) :structure] conj uuid)))
     db))
 
 (re-frame/register-handler
  :has-something
  trim-v
  (fn [db [step-id data]]
+   (s/validate schemas/Payload data)
    (-> db
        (update-self data step-id)
        (spawn-shortcut data step-id))))

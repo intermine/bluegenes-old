@@ -1,9 +1,11 @@
 (ns bluegenes.handlers
-    (:require [re-frame.core :as re-frame :refer [trim-v]]
-              [bluegenes.db :as db]
-              [bluegenes.timeline.handlers]
-              [intermine.imjs :as imjs]
-              [ajax.core :refer [GET POST]]))
+  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require [re-frame.core :as re-frame :refer [trim-v]]
+            [bluegenes.db :as db]
+            [bluegenes.timeline.handlers]
+            [intermine.imjs :as imjs]
+            [cljs-http.client :as http]
+            [cljs.core.async :refer [chan <!]]))
 
 (re-frame/register-handler
  :initialize-db
@@ -74,8 +76,8 @@
  trim-v
  (fn [db]
    "Get histories from the server."
-   (GET "/api/history"
-        :keywords? true
-        :response-format :json
-        :handler #(re-frame/dispatch [:process-histories %]))
+   (go (let [res (<! (http/get "/api/history"
+                               {:with-credentials? false
+                                :keywordize-keys? true}))]
+         (re-frame/dispatch [:process-histories res])))
    db))

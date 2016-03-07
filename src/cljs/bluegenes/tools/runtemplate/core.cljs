@@ -5,7 +5,7 @@
             [reagent.core :as reagent]
             [reagent.impl.util :as impl :refer [extract-props]]
             [clojure.string :as str]
-            [ajax.core :refer [GET POST]]
+            ; [ajax.core :refer [GET POST]]
             [intermine.imjs :as imjs]))
 
 
