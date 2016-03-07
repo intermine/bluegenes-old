@@ -34,14 +34,22 @@
             [response (<! (im/summary-fields {:service service} type id))]
               (results-handler response)))))
 
+(defn is-good-result? [k v]
+  (.log js/console "is good result?" k v)
+  (let [machine-fields #{:objectId}]
+    (not (contains? machine-fields k))
+    ))
+
 (defn summary []
+  "Visual output of each of the summary fields returned."
    [:div.summary-fields
     [:h5 "Results"]
     (.log js/console @search-results)
     [:dl
     (for [[k v] @search-results]
+      (if (is-good-result? k v)
       ^{:key k}
-      [:div [:dt (clj->js k)] [:dd v]])
+      [:div [:dt (clj->js k)] [:dd v]]))
     ]])
 
 (defn ^:export preview
