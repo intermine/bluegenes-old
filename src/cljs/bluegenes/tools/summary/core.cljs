@@ -35,9 +35,10 @@
               (results-handler response)))))
 
 (defn is-good-result? [k v]
-  (.log js/console "is good result?" k v)
+  (.log js/console "%c is good result? K:%s V:%s" "background:turquoise;" (clj->js k) v )
   (let [machine-fields #{:objectId}]
-    (not (contains? machine-fields k))
+    (and (not (contains? machine-fields k))
+    (some? v))
     ))
 
 (defn summary []
