@@ -8,6 +8,11 @@
 @cta-color-text: #fff;
 @selectedColor: #3F51B5;
 @selectedColorText: #fff;
+
+@stripe-color: #f6f6f6;
+
+@default-dark-text-color:rgba(0,0,0,0.87);
+
 //define master colours for popular data types. Try to draw from 500 colours
 //here: https://www.google.com/design/spec/style/color.html# to keep the colours
 //visually distinct. They should be used ONLY for data type tagging, not general theming
@@ -17,7 +22,7 @@
 @border-radius: 2px;
 .result-type {
   background-color: #ccc;
-  color: rgba(0,0,0,0.87);
+  color: @default-dark-text-color;
   &.type-Gene {
     background: @color-Gene;
     color: #fff;
@@ -39,13 +44,10 @@
 @import "list-chooser";
 @import "stepdash";
 @import "search";
+@import "summary";
 @import "dashboard";
-
-
 body {
   background: @rgba-primary-0;
-  background: white;
-  background: #f7f7f7;
   background: #D9D9D9;
   -webkit-font-smoothing: antialiased;
   font-family: 'Lora', serif;
@@ -85,7 +87,6 @@ body {
 .dimmer div.message {
   padding: 5px;
   border-radius: 5px;
-  color: #000;
   color: #bbe9f0;
   position: relative;
   top: 30%;
@@ -202,12 +203,9 @@ body {
     }
   }
 }
-
-
 .step-dashboard {
   background: orange;
 }
-
 .step-container {
   box-sizing: border-box;
   margin: 10px 20px;
@@ -236,13 +234,13 @@ body {
   }
   .toolbar {
     @toolbarColor: #eee;
-    color: rgba(0,0,0, 0.87);
+    color:  @default-dark-text-color;
     .clearfix;
     background: @toolbarColor;
     border: solid 1px @toolbarColor;
     li {
       a {
-        color: rgba(0,0,0, 0.87);
+        color:  @default-dark-text-color;
       }
       padding: 0 1em;
       min-height: 3em;
@@ -379,7 +377,7 @@ th.jh-key {
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:hover,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:focus {
-  color: rgba(0, 0, 0, 1);
+  color:  @default-dark-text-color;
   border-top: 3px solid #bbe9f0;
   color: white;
   background-color: rgba(82, 82, 82, 1);
@@ -452,4 +450,35 @@ button {
   &:hover {
     background: lighten(@cta-color,5%);
   }
+}
+
+//IM tables pagination fixes:
+@paginationheight : 3em;
+ul.pagination {
+  margin: 0;
+  form {
+    margin: -3px 0.4em 0;
+    select {
+      text-transform: capitalize;
+    }
+  }
+}
+.im-table-pagination {
+  margin-left: 1em;
+}
+.im-table-pagination,
+.im-page-sizer {
+  display: block;
+  float: right;
+  min-height: @paginationheight;
+}
+.im-pagination-button,
+ul.pagination form {
+  float: left;
+  display: block;
+}
+.im-table-summary {
+  float: left;
+  min-height: @paginationheight;
+  line-height: @paginationheight;
 }

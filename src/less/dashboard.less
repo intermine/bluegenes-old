@@ -1,94 +1,84 @@
 @import url(http://fonts.googleapis.com/css?family=Montserrat);
-
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
-  // text-align:center;
-  color:inherit;
+  color: inherit;
 }
-
-// h1 {
-//   font-size:140%;
-//   font-weight:300;
-//   margin:0;
-//   width:100%;
-//   position:absolute;
-//   top:50%;
-//   transform:translateY(-50%);
-// }
-
 .dash-wrapper > div {
-  position:relative;
+  position: relative;
   // height: 50vh;
-  float:left;
-  width:33.33%;
+  float: left;
+  width: 33.33%;
 }
-
 .dash-wrapper > div:nth-child(3n+1):last-child {
-  width:100%;
+  width: 100%;
 }
-
 .dash-wrapper > div:nth-child(3n+2):last-child {
-  width:66.66%;
+  width: 66.66%;
 }
-
-
 .comp-table {
   font-size: 12px;
   width: 100% !important;
 }
-
-.fl-row {
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+}
+.cell {
   display: flex;
   background: white;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid #BBE9F0;
+  min-width: 200px;
+  max-width: 450px;
+  flex-grow: 1;
+  display: block;
+  margin: 0 0 1em 1em;
+  border-bottom: 1px solid #BBE9F0;
+  .description {
+    max-width: 150px;
   }
-
-  .fl-cell {
-    flex: 1 0;
-    padding: 10px;
-    &:not(:last-child) {
-      border-right: 1px solid #BBE9F0;
-    }
-
-
-
-    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+99&0.65+0,0+20 */
-
-    // background: linear-gradient(180deg,  rgba(0,0,0,0.01) 0%,rgba(0,0,0,0) 20%,rgba(0,0,0,0) 99%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-
-
-    // border: 1px solid black;
+  input,
+  input[type=text],
+  button,
+  select,
+  textarea {
+    width: 100%;
+    min-width: auto;
   }
 }
-
+/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+99&0.65+0,0+20 */
+// background: linear-gradient(180deg,  rgba(0,0,0,0.01) 0%,rgba(0,0,0,0) 20%,rgba(0,0,0,0) 99%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+// border: 1px solid black;
 .table-wrapper {
   height: 300px;
   overflow-y: scroll;
 }
-
-
 @-webkit-keyframes yellow-fade {
-   0% {background: yellow;}
-   100% {background: none;}
+  0% {
+    background: yellow;
+  }
+  100% {
+    background: none;
+  }
 }
-
 @keyframes yellow-fade {
-   0% {opacity: 1;}
-   100% {opacity: 0;}
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.highlight {
+  -webkit-animation: yellow-fade 2s ease-in 1;
+  animation: yellow-fade 2s ease-in 1;
 }
 
-.highlight {
-   -webkit-animation: yellow-fade 2s ease-in 1;
-   animation: yellow-fade 2s ease-in 1;
-}
 
 // .fl-row {input, input[type=text], button, select, textarea {
 //   width: 100%;
 //   min-width:auto;
 // }}
+
 
 .form-group .form-control {
   font-size: 12px;

@@ -15,9 +15,9 @@
            :default {:root "www.humanmine.org/humanmine"
                      :token nil}}
 
-   :histories {:k {:name "Local History K"
+   :histories {:k {:name "List Analysis"
                    :slug "local-history-k"
-                   :description "I too was born in app-db."
+                   :description "Browse and analyse lists"
                    :structure [:a1 [:z1 :z2 :z3 :z4 :z5 :z6]]
 
                    :steps {:a1 {:_id :a1
@@ -97,12 +97,28 @@
                :search {:name "Search"
                         :slug "search"
                         :description "I too was born in app-db."
-                        :structure [:search-tool]
-                        :steps {:search-tool {:tool "search"
-                                              :_id :search-tool
-                                              :title "Search InterMine"
-                                              :description "Search"
-                                              :state []}}}
+                        :structure [:search-tool [:summary1 :summary2]]
+                        :steps {
+                          :search-tool {
+                            :tool "search"
+                            :_id :search-tool
+                            :title "Search InterMine"
+                            :description "Search"
+                            :state []}
+                          :summary1 {
+                            :subscribe [:search-tool]
+                            :tool "summary"
+                            :_id :summary1
+                            :title "Summary"
+                            :description "Summary"
+                            :state []}
+                          :summary2 {
+                            :subscribe [:search-tool]
+                            :tool "summary"
+                            :_id :summary2
+                            :title "Summary"
+                            :description "Summary"
+                            :state []}}}
 
                :homepage-template-histories {:a { :type "Gene"
                                                  :description "For the selected organism retrieve all genes

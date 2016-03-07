@@ -18,9 +18,10 @@
 
 (defn enrichment-controls [api-fn state]
   (fn []
+    [:div
     [:div.row
-     [:div.col-xs-4
-      [:form.form-group
+     [:div.col-xs-6
+      [:form
        [:span "Test Correction"]
        [:select.form-control
         {:value (:correction @state)
@@ -30,8 +31,8 @@
         [:option "Benjamini Hochberg"]
         [:option "Bonferroni"]
         [:option "None"]]]]
-     [:div.col-xs-4
-      [:form.form-group
+     [:div.col-xs-6
+      [:form
        [:span "Maximum p-value:"]
        [:select.form-control
        {:value (:maxp @state)
@@ -39,9 +40,10 @@
                      (api-fn (merge @state {:maxp (.. e -target -value) })))}
         [:option "0.05"]
         [:option "0.10"]
-        [:option "1.0"]]]]
+        [:option "1.0"]]]]]
 
-     [:div.col-xs-4
+    [:div.row
+     [:div.col-xs-12
       [:form.form-group
        [:span "Background"]
        [listdropdown/main {:on-change (fn [listname]
@@ -50,7 +52,8 @@
                            :service {:root "www.flymine.org/query"}}]
       ;  [:input.form-control {:type "text"}]
       ;  [listdropdown/main]
-       ]]]))
+       ]]]]))
+
 
 (defn table-header []
   [:thead
@@ -66,7 +69,7 @@
 (defn table-row [row path-query-for-matches path-constraint has-something service]
   (fn []
     [:tr
-     [:td
+     [:td.description
       [:span (:description row)]
       [:span (str " [" (:identifier row) "]")]]
      [:td (.. (:p-value row) (toPrecision 6) )]
