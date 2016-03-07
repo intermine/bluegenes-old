@@ -35,13 +35,14 @@
               (results-handler response)))))
 
 (defn summary []
-   [:div
+   [:div.summary-fields
     [:h5 "Results"]
     (.log js/console @search-results)
+    [:dl
     (for [[k v] @search-results]
       ^{:key k}
-      [:div.k [:strong (clj->js k)] [:div.v v]])
-    ])
+      [:div [:dt (clj->js k)] [:dd v]])
+    ]])
 
 (defn ^:export preview
   "Render a preview of the tool."
