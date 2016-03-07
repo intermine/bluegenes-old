@@ -8,7 +8,7 @@
             [intermine.imjs :as imjs]))
 (enable-console-print!)
 
-(def search-results (reagent.core/atom {:fake "Fake Results. Don't believe in me"}))
+(def search-results (reagent.core/atom nil))
 (def local-state (reagent.core/atom nil))
 
 (defn build-id-query [data]
@@ -28,7 +28,7 @@
   "Resolves IDs via IMJS promise"
   (let [service (:service data)
         d (:data data)
-        id (:values d)
+        id (:payload d)
         type (:type d)]
           (go (let
             [response (<! (im/summary-fields {:service service} type id))]
