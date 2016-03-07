@@ -15,30 +15,37 @@
 (defn call [f & args]
   (apply f args))
 
-(defn enrichment-controls []
-  [:div
-  [:div.row
-   [:div.col-xs-6
-    [:form
-     [:span "Test Correction"]
-     [:select.form-control
-      [:option "Holms-Bonferroni"]
-      [:option "Benjamini Hochberg"]
-      [:option "Bonferroni"]
-      [:option "None"]]]]
-   [:div.col-xs-6
-    [:form
-     [:span "Maximum p-value:"]
-     [:select.form-control
-      [:option "0.05"]
-      [:option "0.10"]
-      [:option "1.0"]]]]]
+(defn enrichment-controls [api-fn state]
+  (fn []
+    [:div
+    [:div.row
+     [:div.col-xs-6
+      [:form
+       [:span "Test Correction"]
+       [:select.form-control
+        {:value (:correction @state)
+         :on-change (fn [e]
+                      (api-fn (merge @state {:correction (.. e -target -value) })))}
+        [:option "Holms-Bonferroni"]
+        [:option "Benjamini Hochberg"]
+        [:option "Bonferroni"]
+        [:option "None"]]]]
+     [:div.col-xs-6
+      [:form
+       [:span "Maximum p-value:"]
+       [:select.form-control
+       {:value (:maxp @state)
+        :on-change (fn [e]
+                     (api-fn (merge @state {:maxp (.. e -target -value) })))}
+        [:option "0.05"]
+        [:option "0.10"]
+        [:option "1.0"]]]]]
 
-  [:div.row
-   [:div.col-xs-12
-    [:form
-     [:span "Background"]
-     [:input.form-control {:type "text"}]]]]])
+    [:div.row
+     [:div.col-xs-12
+      [:form.form-group
+       [:span "Background"]
+       [:input.form-control {:type "text"}]]]]]))
 
 (defn table-header []
   [:thead
@@ -48,28 +55,28 @@
 
 (defn pagination-handler [e]
   "Update the pagination state's current page"
-  (println "Pagination handler got" e)
   (swap! pager assoc :current-page e))
 
 
-(defn table-row [row path-query-for-matches path-constraint has-something]
-  [:tr
-   [:td.description
-    [:span (:description row)]
-    [:span (str " [" (:identifier row) "]")]]
-   [:td (.. (:p-value row) (toPrecision 6) )]
-   [:td
-    {:on-click (fn []
-                 (has-something {:data
-                                 {:format "query"
-                                  :type path-constraint
-                                  :payload (c/build-matches-query
-                                          path-query-for-matches
-                                          path-constraint
-                                          (:identifier row))}
-                                 :service {:root "http://www.flymine.org/query"}
-                                 :shortcut "viewtable"}))}
-    [:div.btn.btn-raised.btn-info (:matches row)]]])
+(defn table-row [row path-query-for-matches path-constraint has-something service]
+  (fn []
+    [:tr
+     [:td.description
+      [:span (:description row)]
+      [:span (str " [" (:identifier row) "]")]]
+     [:td (.. (:p-value row) (toPrecision 6) )]
+     [:td
+      {:on-click (fn []
+                   (has-something {:data
+                                   {:format "query"
+                                    :type path-constraint
+                                    :payload (c/build-matches-query
+                                            path-query-for-matches
+                                            path-constraint
+                                            (:identifier row))}
+                                   :service (:service service)
+                                   :shortcut "viewtable"}))}
+      [:div.btn.btn-raised.btn-info (:matches row)]]]))
 
 (defn table
   "Table to display enrichment results"
@@ -78,7 +85,8 @@
                enrichment-results
                path-query-for-matches
                path-constraint]}
-       {:keys [has-something]}]
+       {:keys [has-something]}
+       upstream-data]
     (if (empty? enrichment-results)
       (do
         [:p "No results"])
@@ -94,35 +102,44 @@
                    ^{:key (:identifier row)} [table-row
                                               row path-query-for-matches
                                               path-constraint
-                                              has-something]))))]]]))))
+                                              has-something
+                                              upstream-data]))))]]]))))
 
 
 (defn ^:export main [step-data]
   "Output a table representing all lists in a mine.
   When the component is updated then inform the API of its new value."
-  (let [local-state (reagent/atom (merge {:current-page 1
-                                          :rows-per-page 20}
-                                         (last (:state step-data))))]
+  (let [persistent-state (reagent/atom (merge {:current-page 1
+                                        :rows-per-page 20
+                                        :widget "enrichment-type"
+                                        :title "Generic Displayer"
+                                        :maxp 0.05
+                                        :format "json"
+                                        :correction "Bonferroni"} (:state step-data)))
+        local-state (reagent/atom {:current-page 1
+                                   :rows-per-page 20})]
+
     (reagent/create-class
      {:reagent-render
       (fn [step-data]
         [:div
          [:h3 (:title (:state step-data))]
-         [enrichment-controls]
-         [table @local-state (:api step-data)]])
+         [enrichment-controls (-> step-data :api :replace-state) persistent-state]
+         [table @local-state (:api step-data) (:upstream-data step-data)]])
       :component-will-receive-props
       (fn [this new-props]
         (let [{:keys [upstream-data api state]} (extract-props new-props)
               enrichment-type (:widget state)]
+          (swap! persistent-state merge state)
           (call (:is-loading api) true)
           (swap! local-state assoc :enrichment-results nil)
           (go (let [res (<! (im/enrichment
                              (select-keys upstream-data [:service])
                              {:list (:payload (:data upstream-data))
                               :widget enrichment-type
-                              :maxp 0.05
+                              :maxp (:maxp @persistent-state)
                               :format "json"
-                              :correction "Holm-Bonferroni"}))]
+                              :correction (:correction @persistent-state)}))]
                 (call (:is-loading api) false)
              (swap! local-state assoc
                     :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
