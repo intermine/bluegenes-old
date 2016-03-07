@@ -1,15 +1,19 @@
 .summary-fields {
-  dl div {
+   div {
     &:nth-child(even) {
-      background: @stripe-color;
-      dd,
-      dt {
-        float: left;
-      }
-      dt {
-        clear: left;
-        margin-right:@spacer/2
-      }
+      background-color: @stripe-color;
+    }
+    border-bottom:#eee solid 1px;
+    &:after {display:table;content:" "; clear:both;}
+    dd,
+    dt {
+      float: left;
+
+    }
+    dt {
+      clear: left;
+      margin-right:@spacer/2;
+      min-width: 6em;
     }
   }
 }
