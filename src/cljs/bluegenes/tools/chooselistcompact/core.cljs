@@ -42,6 +42,7 @@
      {:reagent-render
       (fn [{:keys [state upstream-data api]}]
         [:div
+         [:h4 "Choose a list:"]
          [:select.form-control
           {:on-change (fn [e]
                         ((:replace-state api) {:chose (.. e -target -value)}))}

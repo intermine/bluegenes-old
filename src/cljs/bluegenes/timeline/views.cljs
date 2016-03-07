@@ -87,7 +87,9 @@
                              (let [node (reagent/dom-node this)]
                              (if (:scroll-to? @step-data)
                                (do
-                                 (.animate (js/$ "body") #js{:scrollTop (-> (js/$ node) .offset .-top)} 500 "swing")))))
+                                ;when reversing:  (.animate (js/$ "body") #js{:scrollTop 0} 500 "swing")
+                                 (.animate (js/$ "body") #js{:scrollTop (-> (js/$ node) .offset .-top)} 500 "swing")
+                                 ))))
       :reagent-render (fn [_id]
                         [:div
                          {:class (if-not in-grid "step-container")}
