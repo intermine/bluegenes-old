@@ -5,6 +5,7 @@
             [cljs-http.client :as http]
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [bluegenes.components.paginator :as paginator]
+            [bluegenes.components.listdropdown :as listdropdown]
             [bluegenes.tools.enrichment.controller :as c]
             [bluegenes.utils.imcljs :as im]
             [reagent.impl.util :as impl :refer [extract-props]]))
@@ -43,7 +44,13 @@
      [:div.col-xs-4
       [:form.form-group
        [:span "Background"]
-       [:input.form-control {:type "text"}]]]]))
+       [listdropdown/main {:on-change (fn [listname]
+                                        (api-fn (merge @state {:population listname})))
+                           :title "Change"
+                           :service {:root "www.flymine.org/query"}}]
+      ;  [:input.form-control {:type "text"}]
+      ;  [listdropdown/main]
+       ]]]))
 
 (defn table-header []
   [:thead
@@ -108,12 +115,13 @@
   "Output a table representing all lists in a mine.
   When the component is updated then inform the API of its new value."
   (let [persistent-state (reagent/atom (merge {:current-page 1
-                                        :rows-per-page 20
-                                        :widget "enrichment-type"
-                                        :title "Generic Displayer"
-                                        :maxp 0.05
-                                        :format "json"
-                                        :correction "Bonferroni"} (:state step-data)))
+                                               :rows-per-page 20
+                                               :widget "enrichment-type"
+                                               :title "Generic Displayer"
+                                               :maxp 0.05
+                                               :format "json"
+                                               :population nil
+                                               :correction "Bonferroni"} (:state step-data)))
         local-state (reagent/atom {:current-page 1
                                    :rows-per-page 20})]
 
@@ -135,6 +143,7 @@
                              (select-keys upstream-data [:service])
                              {:list (:payload (:data upstream-data))
                               :widget enrichment-type
+                              :population (:population @persistent-state)
                               :maxp (:maxp @persistent-state)
                               :format "json"
                               :correction (:correction @persistent-state)}))]
