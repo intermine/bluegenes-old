@@ -26,7 +26,8 @@
                                 :tool "enrichment"
                                 :subscribe [:a1]
                                 :state [{:widget "go_enrichment_for_gene"
-                                         :title "GO Enrichment"}]}
+                                         :correction "None"
+                                         :title "Gene Ontology Enrichment"}]}
                            :z2 {:_id :z2
                                 :tool "enrichment"
                                 :subscribe [:a1]
