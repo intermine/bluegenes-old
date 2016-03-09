@@ -1,0 +1,56 @@
+div.smartbox {
+  width: 100%;
+  min-height: 200px;
+  background: #f8f5ec;
+  font-size: 1.2em;
+}
+
+div.smartbox input.freeform {
+  float: left;
+  padding: 9px 0 9px 0;
+  border: none;
+  border: 1px dotted black;
+  margin: 2px;
+  font-size: 1em;
+  background: transparent;
+  color: #2d2d2d;
+  width: 100%;
+}
+
+div.smartbox .identifier {
+  float: left;
+  padding: 6px;
+  margin: 2px;
+  border-radius: 9px;
+  transition: all 0.5s ease;
+}
+
+div.smartbox .identifier.pending {
+  background: #333;
+  color: white;
+}
+
+div.smartbox .identifier.unresolved {
+  background: red;
+  color: white;
+}
+
+div.smartbox .identifier.duplicate {
+  background: yellow;
+  color: black;
+}
+
+div.smartbox .identifier.new {
+  background: yellow;
+  color: white;
+}
+
+div.smartbox .identifier.match {
+  background: #9FCC68;
+  color: white;
+}
+
+div.smartbox .identifier.notfound {
+  background: #FF6363;
+  color: white;
+}
