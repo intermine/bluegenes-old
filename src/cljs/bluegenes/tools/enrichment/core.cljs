@@ -66,7 +66,7 @@
   (swap! pager assoc :current-page e))
 
 
-(defn table-row [row path-query-for-matches path-constraint has-something service]
+(defn table-row [row path-query path-query-for-matches path-constraint has-something service]
   (fn []
     [:tr
      [:td.description
@@ -79,7 +79,7 @@
                                    {:format "query"
                                     :type path-constraint
                                     :payload (c/build-matches-query
-                                            path-query-for-matches
+                                            path-query
                                             path-constraint
                                             (:identifier row))}
                                    :service (:service service)
@@ -91,6 +91,7 @@
   []
   (fn [{:keys [rows-per-page
                enrichment-results
+               path-query
                path-query-for-matches
                path-constraint]}
        {:keys [has-something]}
@@ -108,7 +109,9 @@
                (for [row (take 10 enrichment-results)]
                  (if-not (nil? row)
                    ^{:key (:identifier row)} [table-row
-                                              row path-query-for-matches
+                                              row
+                                              path-query
+                                              path-query-for-matches
                                               path-constraint
                                               has-something
                                               upstream-data]))))]]]))))
@@ -152,6 +155,7 @@
                               :correction (:correction @persistent-state)}))]
                 (call (:is-loading api) false)
              (swap! local-state assoc
+                    :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
                     :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
                     :path-constraint (:pathConstraint res)
                     :enrichment-results (-> res :results))))))})))

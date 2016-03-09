@@ -2,10 +2,8 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
-            [cljs.core.async :refer [put! chan <! >! timeout close!]]
+            [cljs.core.async :refer [<!]]
             [bluegenes.utils.imcljs :as im]))
-
-
 
 (defn contains-str?
   "Return true if a string contains a substring, or if either
