@@ -68,19 +68,15 @@
 
 (defn is-good-result? [k v]
   "Check that values are non null or machine-only names - no point getting dispaly names for them. "
+  ;(.log js/console "%crunning is good result" "background-color:cornflowerblue" (clj->js k) (clj->js v))
  (and (not (contains? machine/fields k)) ;;don't output user-useless results
  (some? (:val v))) ;;don't output null results
  )
 
  (defn get-display-name [service type k]
-   (go (let [response (<! (http/get (str "http://" (.-root service) "/service/model/" type "." (clj->js k)) {:with-credentials? false}))]
-   (-> response :body))))
-
-(defn get-display-names [service type response]
-  (doall (for [[k v] response]
-    (if (is-good-result? k v)
-      (go (let [display-name (<! (get-display-name service type k))]
-      ))))))
+   "Given a service URL, a type to search for, and an atribute field, return the display name."
+   (go (let [response (<! (http/get (str "http://" (:root service) "/service/model/" type "." (clj->js k)) {:with-credentials? false :keywordize-keys true}))]
+   (-> response :body :name))))
 
 (defn map-response [response]
   "formats the map response for easier updating"
@@ -104,9 +100,6 @@
          (let [q (summary-query type id (.allDescriptors result))]
           (go (let [response (first (<! (query-records service q)))
                     mapped-response (map-response response)]
-
-            (get-display-names svc type response)
-
             (>! c mapped-response))))))))
         (fn [error]
           (println "got error" error)

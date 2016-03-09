@@ -20,9 +20,15 @@
             :op "ONE OF"
             :code "A"}]})
 
-(defn results-handler [results]
-  ;(.log js/console (clj->js results))
-  (reset! search-results results))
+(defn results-handler [results service type]
+  "First, apply the results to the page, then go fetch the names of the fields and replace the unpleasant looking javascript machine names that were there."
+  (reset! search-results results)
+  (doall
+    (for [[k v] results]
+      (cond (im/is-good-result? k v)
+        (go (let [display-name (<! (im/get-display-name service type k))]
+          (swap! search-results assoc-in [k :name] display-name)))))))
+
 
 (defn get-data [data]
   "Resolves IDs via IMJS promise"
@@ -32,13 +38,12 @@
         type (:type d)]
           (go (let
             [response (<! (im/summary-fields {:service service} type id))]
-              (results-handler response)))))
+              (results-handler response service type)))))
 
 (defn summary []
   "Visual output of each of the summary fields returned."
    [:div.summary-fields
     [:h5 "Results"]
-    ;(.log js/console @search-results)
     [:dl
     (for [[k v] @search-results]
       (if (im/is-good-result? k v)
