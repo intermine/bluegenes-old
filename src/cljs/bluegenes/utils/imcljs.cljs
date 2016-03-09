@@ -69,7 +69,7 @@
 (defn is-good-result? [k v]
   "Check that values are non null or machine-only names - no point getting dispaly names for them. "
  (and (not (contains? machine/fields k)) ;;don't output user-useless results
- (some? v)) ;;don't output null results
+ (some? (:val v))) ;;don't output null results
  )
 
  (defn get-display-name [service type k]
@@ -80,20 +80,19 @@
   (doall (for [[k v] response]
     (if (is-good-result? k v)
       (go (let [display-name (<! (get-display-name service type k))]
-        (.log js/console ":) :) :)" (:name display-name))
+      ))))))
 
-      ))
-      )
-  ))
-  )
-
+(defn map-response [response]
+  "formats the map response for easier updating"
+  (reduce (fn [new-map [k v]]
+    (assoc new-map k {:name k :val v}))
+        {} response))
 
 (defn summary-fields
   "Returns summary fields of a given ID. requires service in the format {:service {:root 'http://www.someintermine.org/query' :token 'token if any'}}"
   [service type id]
   (println "summary field sees type id" type id)
   (let [c (chan) svc (clj->js (:service service))]
-    (println "in SUMMARY FIELDS the let" (clj->js service))
     (-> (js/imjs.Service. svc)
       (.makePath (clj->js type))
       (.then (fn [result]
@@ -103,12 +102,12 @@
       (.then (fn [displayname]
 
          (let [q (summary-query type id (.allDescriptors result))]
-          (go (let [response (<! (query-records service q))]
-            (.log js/console "%cResponse:" "background:wheat" displayname (clj->js (first response)))
+          (go (let [response (first (<! (query-records service q)))
+                    mapped-response (map-response response)]
 
-            (get-display-names svc type (first response))
+            (get-display-names svc type response)
 
-            (>! c response))))))))
+            (>! c mapped-response))))))))
         (fn [error]
           (println "got error" error)
           )))

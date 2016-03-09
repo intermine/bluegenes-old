@@ -3,7 +3,6 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [clojure.string :as str]
-            [bluegenes.utils.machinefields :as machine]
             [bluegenes.utils.imcljs :as im]
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [intermine.imjs :as imjs]))
@@ -23,7 +22,7 @@
 
 (defn results-handler [results]
   ;(.log js/console (clj->js results))
-  (reset! search-results (first results)))
+  (reset! search-results results))
 
 (defn get-data [data]
   "Resolves IDs via IMJS promise"
@@ -43,8 +42,8 @@
     [:dl
     (for [[k v] @search-results]
       (if (im/is-good-result? k v)
-      ^{:key k}
-      [:div [:dt (clj->js k)] [:dd v]]))
+      ^{:key (:name v)}
+      [:div [:dt (clj->js (:name v))] [:dd (:val v)]]))
     ]])
 
 (defn ^:export preview
