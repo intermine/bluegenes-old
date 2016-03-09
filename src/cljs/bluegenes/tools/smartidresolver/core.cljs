@@ -95,7 +95,7 @@
       [:input.freeform {:value @textbox-value
                         :type "text"
                         :on-change (fn [e]
-                                     (let [split-vals (clojure.string/split (.. e -target -value) #", ")]
+                                     (let [split-vals (clojure.string/split (.. e -target -value) #" ")]
                                        (if (> (count split-vals) 1)
                                          (do
                                            (swap! persistent-state

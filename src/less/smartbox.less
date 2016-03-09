@@ -1,8 +1,10 @@
 div.smartbox {
   width: 100%;
-  min-height: 200px;
+  // min-height: 200px;
   background: #f8f5ec;
   font-size: 1.2em;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 div.smartbox input.freeform {
@@ -14,15 +16,17 @@ div.smartbox input.freeform {
   font-size: 1em;
   background: transparent;
   color: #2d2d2d;
-  width: 100%;
+  flex: 1 0;
 }
 
 div.smartbox .identifier {
-  float: left;
+  // float: left;
   padding: 6px;
   margin: 2px;
   border-radius: 9px;
   transition: all 0.5s ease;
+  flex: 0 0 auto;
+  height: 50px;
 }
 
 div.smartbox .identifier.pending {
