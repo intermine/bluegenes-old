@@ -20,9 +20,15 @@
             :op "ONE OF"
             :code "A"}]})
 
-(defn results-handler [results]
-  (.log js/console (clj->js results))
-  (reset! search-results (first results)))
+(defn results-handler [results service type]
+  "First, apply the results to the page, then go fetch the names of the fields and replace the unpleasant looking javascript machine names that were there."
+  (reset! search-results results)
+  (doall
+    (for [[k v] results]
+      (cond (im/is-good-result? k v)
+        (go (let [display-name (<! (im/get-display-name service type k))]
+          (swap! search-results assoc-in [k :name] display-name)))))))
+
 
 (defn get-data [data]
   "Resolves IDs via IMJS promise"
@@ -32,24 +38,17 @@
         type (:type d)]
           (go (let
             [response (<! (im/summary-fields {:service service} type id))]
-              (results-handler response)))))
-
-(defn is-good-result? [k v]
-  (.log js/console "is good result?" k v)
-  (let [machine-fields #{:objectId}]
-    (not (contains? machine-fields k))
-    ))
+              (results-handler response service type)))))
 
 (defn summary []
   "Visual output of each of the summary fields returned."
    [:div.summary-fields
     [:h5 "Results"]
-    (.log js/console @search-results)
     [:dl
     (for [[k v] @search-results]
-      (if (is-good-result? k v)
-      ^{:key k}
-      [:div [:dt (clj->js k)] [:dd v]]))
+      (if (im/is-good-result? k v)
+      ^{:key (:name v)}
+      [:div [:dt (clj->js (:name v))] [:dd (:val v)]]))
     ]])
 
 (defn ^:export preview
@@ -72,13 +71,13 @@
     :component-did-mount (fn [this]
         (let [passed-in-upstream (:upstream-data (reagent/props this))]
           (if (some? passed-in-upstream)
-            (do (.log js/console "Passed in state" (clj->js passed-in-upstream))
+            (do
               (reset! local-state passed-in-upstream)
               (get-data @local-state)))))
     :component-did-update (fn [new-stuff old-stuff]
       (let [passed-in-upstream (:upstream-data (reagent/props new-stuff))]
         (if (some? passed-in-upstream)
-          (do (.log js/console "Passed in state" (clj->js passed-in-upstream))
+          (do ;(.log js/console "Passed in state" (clj->js passed-in-upstream))
             (reset! local-state passed-in-upstream)
             (get-data @local-state))))
       )}))
