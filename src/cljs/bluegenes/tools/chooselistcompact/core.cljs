@@ -46,7 +46,8 @@
          [:select.form-control
           {:on-change (fn [e]
                         ((:replace-state api) {:chose (.. e -target -value)}))}
-         (doall (for [[name value] @local-state]
+         [:option "Choose List"]
+          (doall (for [[name value] @local-state]
            ^{:key name} [:option name]))]])
       :component-did-mount
       (fn [this]

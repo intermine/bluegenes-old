@@ -7,15 +7,17 @@
 
 (defn enrichment
   "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
-  [ {{:keys [root token]} :service} {:keys [list widget maxp correction]}]
+  [ {{:keys [root token]} :service} {:keys [list widget maxp correction population]}]
   (go (let [response (<! (http/get (str "http://" root "/service/list/enrichment")
                                    {:with-credentials? false
                                     :keywordize-keys? true
-                                    :query-params {:list list
-                                                   :widget widget
-                                                   :maxp maxp
-                                                   :format "json"
-                                                   :correction correction}}))]
+                                    :query-params (merge {:list list
+                                                          :widget widget
+                                                          :maxp maxp
+                                                          :format "json"
+                                                          :correction correction}
+
+                                                         (if-not (nil? population) {:population population}))}))]
         (-> response :body))))
 
 
@@ -34,6 +36,16 @@
                  (println "got error" error)
                  )))
     c))
+
+
+
+(defn lists
+  "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
+  [{{:keys [root token]} :service}]
+  (go (let [response (<! (http/get (str "http://" root "/service/lists")
+                                   {:with-credentials? false
+                                    :keywordize-keys? true}))]
+        (-> response :body :lists))))
 
 (defn query-records
   "Returns an IMJS records-style results"

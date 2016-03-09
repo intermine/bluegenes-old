@@ -5,6 +5,7 @@
             [cljs-http.client :as http]
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [bluegenes.components.paginator :as paginator]
+            [bluegenes.components.listdropdown :as listdropdown]
             [bluegenes.tools.enrichment.controller :as c]
             [bluegenes.utils.imcljs :as im]
             [reagent.impl.util :as impl :refer [extract-props]]))
@@ -45,7 +46,14 @@
      [:div.col-xs-12
       [:form.form-group
        [:span "Background"]
-       [:input.form-control {:type "text"}]]]]]))
+       [listdropdown/main {:on-change (fn [listname]
+                                        (api-fn (merge @state {:population listname})))
+                           :title "Change"
+                           :service {:root "www.flymine.org/query"}}]
+      ;  [:input.form-control {:type "text"}]
+      ;  [listdropdown/main]
+       ]]]]))
+
 
 (defn table-header []
   [:thead
@@ -58,7 +66,7 @@
   (swap! pager assoc :current-page e))
 
 
-(defn table-row [row path-query-for-matches path-constraint has-something service]
+(defn table-row [row path-query path-query-for-matches path-constraint has-something service]
   (fn []
     [:tr
      [:td.description
@@ -71,7 +79,7 @@
                                    {:format "query"
                                     :type path-constraint
                                     :payload (c/build-matches-query
-                                            path-query-for-matches
+                                            path-query
                                             path-constraint
                                             (:identifier row))}
                                    :service (:service service)
@@ -83,6 +91,7 @@
   []
   (fn [{:keys [rows-per-page
                enrichment-results
+               path-query
                path-query-for-matches
                path-constraint]}
        {:keys [has-something]}
@@ -100,7 +109,9 @@
                (for [row (take 10 enrichment-results)]
                  (if-not (nil? row)
                    ^{:key (:identifier row)} [table-row
-                                              row path-query-for-matches
+                                              row
+                                              path-query
+                                              path-query-for-matches
                                               path-constraint
                                               has-something
                                               upstream-data]))))]]]))))
@@ -110,12 +121,13 @@
   "Output a table representing all lists in a mine.
   When the component is updated then inform the API of its new value."
   (let [persistent-state (reagent/atom (merge {:current-page 1
-                                        :rows-per-page 20
-                                        :widget "enrichment-type"
-                                        :title "Generic Displayer"
-                                        :maxp 0.05
-                                        :format "json"
-                                        :correction "Bonferroni"} (:state step-data)))
+                                               :rows-per-page 20
+                                               :widget "enrichment-type"
+                                               :title "Generic Displayer"
+                                               :maxp 0.05
+                                               :format "json"
+                                               :population nil
+                                               :correction "Bonferroni"} (:state step-data)))
         local-state (reagent/atom {:current-page 1
                                    :rows-per-page 20})]
 
@@ -137,11 +149,13 @@
                              (select-keys upstream-data [:service])
                              {:list (:payload (:data upstream-data))
                               :widget enrichment-type
+                              :population (:population @persistent-state)
                               :maxp (:maxp @persistent-state)
                               :format "json"
                               :correction (:correction @persistent-state)}))]
                 (call (:is-loading api) false)
              (swap! local-state assoc
+                    :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
                     :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
                     :path-constraint (:pathConstraint res)
                     :enrichment-results (-> res :results))))))})))
