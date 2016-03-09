@@ -68,18 +68,17 @@
 
 (defn is-good-result? [k v]
   "Check that values are non null or machine-only names - no point getting dispaly names for them. "
-  ;(.log js/console "%crunning is good result" "background-color:cornflowerblue" (clj->js k) (clj->js v))
  (and (not (contains? machine/fields k)) ;;don't output user-useless results
  (some? (:val v))) ;;don't output null results
  )
 
  (defn get-display-name [service type k]
-   "Given a service URL, a type to search for, and an atribute field, return the display name."
+   "Given a service URL, a type to search for, and an attribute field, return the display name."
    (go (let [response (<! (http/get (str "http://" (:root service) "/service/model/" type "." (clj->js k)) {:with-credentials? false :keywordize-keys true}))]
    (-> response :body :name))))
 
 (defn map-response [response]
-  "formats the map response for easier updating"
+  "formats the summary fields map response for easier updating"
   (reduce (fn [new-map [k v]]
     (assoc new-map k {:name k :val v}))
         {} response))
