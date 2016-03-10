@@ -26,6 +26,7 @@
   (doall
     (for [[k v] results]
       (cond (im/is-good-result? k v)
+        ;;TODO: cache this stuff. it doesn't change and doesn't need to be downloaded repeatedly
         (go (let [display-name (<! (im/get-display-name service type k))]
           (swap! search-results assoc-in [k :name] display-name)))))))
 
