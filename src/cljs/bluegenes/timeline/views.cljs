@@ -114,7 +114,6 @@
     (reagent/create-class
      {:display-name "dashboard"
       :reagent-render (fn [ids]
-        [:div
          [:div.step-container
           [:div.body.dashboard
            (for [rows (partition-all 3 ids)]
@@ -122,7 +121,7 @@
             (for [id rows]
              ^{:key (str "step-row" id)} [:div.cell ^{:key (str "step-container" id)} [step-container id true]]
               )
-            )]]])})))
+            )]])})))
 
 (defn previous-steps
   "Iterate through the history's structure and create step containers for
