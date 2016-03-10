@@ -17,7 +17,7 @@
                                   [(get result-map key1) key1])))
         result-map))
 
-(defn results-handler [results mine comm]
+(defn results-handler [results mine api]
   "Store results in local state once the promise comes back."
   (reset! search-results
     {
@@ -28,14 +28,15 @@
   )
 
 
-(defn submit-handler [searchterm comm]
+(defn submit-handler [searchterm api]
   "Resolves IDs via IMJS promise"
+  ((:append-state api) {:input searchterm})
   (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
         search {:q searchterm}
         id-promise (-> mine (.search (clj->js search)))]
     (-> id-promise (.then
         (fn [results]
-          (results-handler results mine comm))))))
+          (results-handler results mine api))))))
 
 (defn is-active-result? [state result]
   "returns true is the result should be considered 'active' - e.g. if there is no filter at all, or if the result matches the active filter type."
@@ -71,6 +72,13 @@
          [resulthandler/result-row {:result result :state state :api api}]
          )))]])
 
+(defn check-for-search-term-in-url []
+  "Splits out the search term from the URL, allowing repeatable external linking to searches"
+  (let [url (aget js/window "location" "href")
+        last-section (str/split url #"/search\?")]
+    (if (> (count last-section) 1) ;; if there's a query param, eg "someurl.com/#/timeline/search?fkh"
+      (last last-section)
+      nil)))
 
 (defn search-form [local-state api]
   "Visual form component which handles submit and change"
@@ -78,7 +86,6 @@
   [:form {:on-submit (fn [e]
       (.preventDefault js/e)
       (let [searchterm @local-state]
-        ((:append-state api) {:input searchterm})
         (submit-handler searchterm api)))}
         [:input {
           :type "text"
@@ -98,7 +105,15 @@
       (fn render [{:keys [state upstream-data api]}]
         [search-form local-state api])
       :component-did-mount (fn [this]
-        (let [passed-in-state (:state (reagent/props this))]
-          (reset! local-state (:input passed-in-state))))
+        (let [passed-in-state (:state (reagent/props this))
+              search-term (check-for-search-term-in-url)
+              api (:api (reagent/props this))]
+          (reset! local-state (:input passed-in-state))
+          ;populate the form from the url if there's a query param
+          (cond (some? search-term)
+            (do
+              (reset! local-state search-term)
+              (submit-handler search-term api)
+              ))))
       :component-did-update (fn [this old-props]
         (.log js/console "did update" this old-props))})))
