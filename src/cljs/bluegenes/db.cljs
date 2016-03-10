@@ -97,7 +97,7 @@
                :search {:name "Search"
                         :slug "search"
                         :description "I too was born in app-db."
-                        :structure [:search-tool [:summary1 :summary2]]
+                        :structure [:search-tool [:summary1]]
                         :steps {
                           :search-tool {
                             :tool "search"
@@ -112,13 +112,14 @@
                             :title "Summary"
                             :description "Summary"
                             :state []}
-                          :summary2 {
-                            :subscribe [:search-tool]
-                            :tool "summary"
-                            :_id :summary2
-                            :title "Summary"
-                            :description "Summary"
-                            :state []}}}
+                          ; :summary2 {
+                            ; :subscribe [:search-tool]
+                            ; :tool "summary"
+                            ; :_id :summary2
+                            ; :title "Summary"
+                            ; :description "Summary"
+                            ; :state []}
+                                }}
 
                :homepage-template-histories {:a { :type "Gene"
                                                  :description "For the selected organism retrieve all genes
