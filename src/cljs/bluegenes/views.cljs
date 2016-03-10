@@ -72,27 +72,27 @@
 (defn searchbox []
   "Outputs (currently nonfunctional) search box. TODO: replace with keyword search"
   [ui-card
-  (let [local-state (reagent/atom " ")]
-  (reagent/create-class {
-    :reagent-render
-   (fn []
-     [:form#search {
-        :on-submit (fn [e]
-          (.preventDefault js/e)
-          (aset js/window "location" "href"
-            (str "/#timeline/search?"
-                 (str/trim @local-state))))
-       :method "get"
-       :action "/#/timeline/search"
-       }
-      [:input {
-        :type "text"
-        :value @local-state
-        :placeholder "Search for a gene, protein, disease, etc..."
-         :on-change (fn [val]
-           (reset! local-state (-> val .-target .-value)))}]
-      [:button "Search"]
-      ])}))])
+  (let [local-state (reagent/atom nil)]
+    (reagent/create-class
+      {:reagent-render
+        (fn []
+          [:form#search {
+            :on-submit (fn [e]
+              "prevents default behaviours and navigates the user to the search page, with the search input as a query param (trimmed)"
+              (.preventDefault js/e)
+              (aset js/window "location" "href"
+                (str "/#timeline/search?"
+                     (str/trim @local-state))))
+           :method "get"
+           :action "/#/timeline/search"}
+            [:input {
+              :type "text"
+              :value (cond (some? @local-state) @local-state)
+              :placeholder "Search for a gene, protein, disease, etc..."
+              :on-change (fn [val]
+                 (reset! local-state (-> val .-target .-value)))}]
+            [:button "Search"]
+          ])}))])
 
 (defn home-panel []
   (let [name (re-frame/subscribe [:name])]

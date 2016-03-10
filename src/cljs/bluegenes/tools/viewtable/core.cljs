@@ -82,7 +82,7 @@
                            ((:has-something api) {:service (:service upstream-data)
                                                   :data {:format "ids"
                                                          :type (-> e .-query .-root)
-                                                         :values (js->clj v)}}))))))))))]
+                                                         :payload (js->clj v)}}))))))))))]
 
     (reagent/create-class
      {:reagent-render (fn []

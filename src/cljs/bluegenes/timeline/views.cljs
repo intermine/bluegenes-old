@@ -5,7 +5,7 @@
             [bluegenes.timeline.api :as timeline-api]
             [bluegenes.components.nextsteps.core :as nextsteps]
             [bluegenes.components.stepdash.core :as stepdash]
-            [bluegenes.utils :as utils]
+            [bluegenes.utils.layouthelpers :as layout]
             [bluegenes.components.vertical :as vertical]
             [reagent.impl.util :as impl :refer [extract-props]]))
 
@@ -86,10 +86,7 @@
      {:component-did-mount (fn [this]
                              (let [node (reagent/dom-node this)]
                              (if (:scroll-to? @step-data)
-                               (do
-                                ;when reversing:  (.animate (js/$ "body") #js{:scrollTop 0} 500 "swing")
-                                 (.animate (js/$ "body") #js{:scrollTop (-> (js/$ node) .offset .-top)} 500 "swing")
-                                 ))))
+                               (layout/scroll-to node))))
       :reagent-render (fn [_id]
                         [:div
                          {:class (if-not in-grid "step-container")}
@@ -117,7 +114,6 @@
     (reagent/create-class
      {:display-name "dashboard"
       :reagent-render (fn [ids]
-        [:div
          [:div.step-container
           [:div.body.dashboard
            (for [rows (partition-all 3 ids)]
@@ -125,7 +121,7 @@
             (for [id rows]
              ^{:key (str "step-row" id)} [:div.cell ^{:key (str "step-container" id)} [step-container id true]]
               )
-            )]]])})))
+            )]])})))
 
 (defn previous-steps
   "Iterate through the history's structure and create step containers for

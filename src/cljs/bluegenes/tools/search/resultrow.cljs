@@ -1,5 +1,6 @@
 (ns bluegenes.tools.search.resultrow
   (:require [re-frame.core :as re-frame]
+            [bluegenes.utils.layouthelpers :as layout]
             [reagent.core :as reagent]))
 (enable-console-print!)
 
@@ -14,9 +15,10 @@
       :name "keyword-search" ;;todo, dynamic names. would we ever really have two keyword searches on one page though? That seems like madness!
       :checked (is-selected? result (:selected-result @state))}])
 
-(defn set-selected! [row-data]
+(defn set-selected! [row-data elem]
   "sets the selected result in the local state atom and emits that we 'have' this item to next steps / the next tool"
   (swap! (:state row-data) assoc :selected-result (:result row-data))
+  (layout/scroll-to-next-step elem)
   ;;Todo: remove this dirty hard coding of the service URL
   ((:has-something (:api row-data))
    {:service {:root "www.flymine.org/query"}
@@ -29,7 +31,7 @@
   "This method abstracts away most of the common components for all the result-row baby methods."
   (let [result (:result row-data) state (:state row-data)]
   [:div.result {
-    :on-click (fn [] (set-selected! row-data))
+    :on-click (fn [this] (set-selected! row-data (.-target this)))
     :class (if (is-selected? result (:selected-result @state)) "selected")}
     [result-selection-control result state]
     [:span.result-type {:class (str "type-" (.-type result))} (.-type result)]
