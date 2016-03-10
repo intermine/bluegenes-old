@@ -1,8 +1,10 @@
 (ns bluegenes.views
   (:require [re-frame.core :as re-frame]
+            [reagent.core :as reagent]
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
             [bluegenes.timeline.api :as timeline-api]
+            [clojure.string :as str]
             ; [bluegenes.components.googlesignin :as google-sign-in]
             [bluegenes.tools.idresolver.core :as idresolver]
             [json-html.core :as json-html])
@@ -70,12 +72,27 @@
 (defn searchbox []
   "Outputs (currently nonfunctional) search box. TODO: replace with keyword search"
   [ui-card
+  (let [local-state (reagent/atom " ")]
+  (reagent/create-class {
+    :reagent-render
    (fn []
-     [:form#search
+     [:form#search {
+        :on-submit (fn [e]
+          (.preventDefault js/e)
+          (aset js/window "location" "href"
+            (str "/#timeline/search?"
+                 (str/trim @local-state))))
+       :method "get"
+       :action "/#/timeline/search"
+       }
       [:input {
         :type "text"
-        :placeholder "Search for a gene, protein, disease, etc..."}]
-      [:button "Search"]])])
+        :value @local-state
+        :placeholder "Search for a gene, protein, disease, etc..."
+         :on-change (fn [val]
+           (reset! local-state (-> val .-target .-value)))}]
+      [:button "Search"]
+      ])}))])
 
 (defn home-panel []
   (let [name (re-frame/subscribe [:name])]

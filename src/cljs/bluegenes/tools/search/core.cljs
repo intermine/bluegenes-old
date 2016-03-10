@@ -71,6 +71,14 @@
          [resulthandler/result-row {:result result :state state :api api}]
          )))]])
 
+(defn check-for-search-term-in-url []
+  "Splits out the search term from the URL, allowing repeatable external linking to searches"
+  (let [url (aget js/window "location" "href")
+        last-section (str/split url #"/search\?")]
+    (.log js/console "Last section" (clj->js (last last-section)))
+    (if (> (count last-section) 1) ;; if there's a query param, eg "someurl.com/#/timeline/search?fkh"
+      (last last-section)
+      nil)))
 
 (defn search-form [local-state api]
   "Visual form component which handles submit and change"
@@ -98,7 +106,11 @@
       (fn render [{:keys [state upstream-data api]}]
         [search-form local-state api])
       :component-did-mount (fn [this]
-        (let [passed-in-state (:state (reagent/props this))]
-          (reset! local-state (:input passed-in-state))))
+        (let [passed-in-state (:state (reagent/props this))
+              search-term (check-for-search-term-in-url)]
+          (reset! local-state (:input passed-in-state))
+          ;populate the form from the url if there's a query param
+          (cond (some? search-term)
+            (reset! local-state search-term))))
       :component-did-update (fn [this old-props]
         (.log js/console "did update" this old-props))})))
