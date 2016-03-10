@@ -83,7 +83,7 @@
 (defn search-form [local-state api]
   "Visual form component which handles submit and change"
   [:div.search
-  [:form {:on-submit (fn [e]
+  [:form.searchform {:on-submit (fn [e]
       (.preventDefault js/e)
       (let [searchterm @local-state]
         (submit-handler searchterm api)))}
