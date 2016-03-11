@@ -39,15 +39,17 @@
 ))
 
 (defn list-homologues [homologues url]
-  (into [:ul] (map (fn [homie]
+  "Visual component. Given a list of homologues as an IMJS result, output all in a list format"
+  (into [:ul.homologues] (map (fn [homie]
     [:li
      [:a {
-        :href (str url "/report.do?id=" (get-in homie [:homologue :objectId]))}
+        :href(str url "/report.do?id=" (get-in homie [:homologue :objectId]))}
       (get-identifier homie)]]) homologues)))
 
 (defn homologue-links [local-state api upstream-data]
   "Visual link show component"
-  [:div "Outbound links"
+  [:div
+   [:h5 "Outbound links"]
     (for [[k v] @search-results]
       (let [this-mine (k remote-mines)]
         ^{:key k}
@@ -67,9 +69,13 @@
         (let [passed-in-state (:state (reagent/props this))
               api (:api (reagent/props this))
               upstream (:upstream-data (reagent/props this))]
+          (.log js/console "================" (clj->js upstream))
           (reset! local-state (:input passed-in-state)
-          (load-data upstream))))
+          ;;don't load homologues for, say, publications
+          (cond (= "Gene" (get-in upstream [:data :type]))
+            (load-data upstream)))))
       :component-did-update (fn [this old-props]
         (let [upstream (:upstream-data (reagent/props this))]
+          (cond (= "Gene" (get-in upstream [:data :type]))
           (load-data upstream))
-        )})))
+          ))})))
