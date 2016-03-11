@@ -98,7 +98,6 @@
 (defn summary-fields
   "Returns summary fields of a given ID. requires service in the format {:service {:root 'http://www.someintermine.org/query' :token 'token if any'}}"
   [service type id]
-  (println "summary field sees type id" type id)
   (let [c (chan) svc (clj->js (:service service))]
     (-> (js/imjs.Service. svc)
       (.makePath (clj->js type))
@@ -116,3 +115,64 @@
           (println "got error" error)
           )))
     c))
+
+(defn get-primary-identifier
+  "Returns the primary identifier associated with a given object id. Useful for cross-mine queries, as object ids aren't consistent between different mine instances."
+  [type id service]
+    (let [c (chan) q {
+      :from type
+      :select "primaryIdentifier"
+      :where [{
+        :path (str type ".id")
+        :op "="
+        :value id}]}]
+      (go (let [response (<! (query-records service q))]
+        (>! c (:primaryIdentifier (first response)))))
+      c))
+
+(defn homologue-query [id organism]
+  {
+  :constraintLogic "A and B"
+  :from "Gene"
+  :select [
+    "homologues.homologue.primaryIdentifier"
+    "homologues.homologue.symbol"
+    "homologues.homologue.organism.shortName"
+    ]
+  :orderBy [
+      {
+      :path "primaryIdentifier"
+      :direction "ASC"
+      }
+    ]
+  :where [
+      {
+      :path "primaryIdentifier"
+      :op "="
+      :value id
+      :code "A"
+      }
+      {
+      :path "homologues.homologue.organism.shortName"
+      :op "="
+      :value organism
+      :code "B"
+      }
+    ]
+  })
+
+(defn homologues
+  "returns homologues of a given gene id from a remote mine."
+  [original-service remote-service type id organism]
+  (let [c (chan)]
+    (go (let [
+            ;;get the primary identifier from the current mine
+            primary-id (<! (get-primary-identifier type id original-service))
+            ;;build the query
+            q (homologue-query primary-id organism)
+            ;;query the remote mine for homologues
+            response (<! (query-records remote-service q))]
+            (.log js/console "%c Homologues" "border-bottom:mediumorchid dotted 3px" (clj->js response)) ;;this prints the expected response
+
+            (>! c response) ;; put the response in the channel
+    ))c))

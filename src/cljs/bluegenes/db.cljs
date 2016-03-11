@@ -97,7 +97,7 @@
                :search {:name "Search"
                         :slug "search"
                         :description "I too was born in app-db."
-                        :structure [:search-tool [:summary1]]
+                        :structure [:search-tool [:summary :outboundlinks]]
                         :steps {
                           :search-tool {
                             :tool "search"
@@ -105,20 +105,20 @@
                             :title "Search InterMine"
                             :description "Search"
                             :state []}
-                          :summary1 {
+                          :summary {
                             :subscribe [:search-tool]
                             :tool "summary"
-                            :_id :summary1
+                            :_id :summary
                             :title "Summary"
                             :description "Summary"
                             :state []}
-                          ; :summary2 {
-                            ; :subscribe [:search-tool]
-                            ; :tool "summary"
-                            ; :_id :summary2
-                            ; :title "Summary"
-                            ; :description "Summary"
-                            ; :state []}
+                          :outboundlinks {
+                            :subscribe [:search-tool]
+                            :tool "outboundlinks"
+                            :_id :outboundlinks
+                            :title "Outbound Links"
+                            :description "Outbound Links"
+                            :state []}
                                 }}
 
                :homepage-template-histories {:a { :type "Gene"
