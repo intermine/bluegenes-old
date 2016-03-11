@@ -21,14 +21,16 @@
         :organisms ["M. musculus"]}})
 
 (defn load-data [upstream-data]
-  ;(.log js/console "%c Loading data" "border-bottom:skyblue dotted 3px" (clj->js upstream-data))
+  (doall (for [[minename details] remote-mines]
+    ;(.log js/console "%c Remotes" "border-bottom:skyblue dotted 3px" (clj->js details)
+    ;)
   (go (let [
       svc (select-keys upstream-data [:service])
       id (get-in upstream-data [:data :payload 0])
       type (get-in upstream-data [:data :type])
-      homologues (<! (im/homologues svc (select-keys (:humanmine remote-mines) [:service]) type id (get-in remote-mines [:humanmine :organisms 0])))]
-        (swap! search-results assoc :humanmine (first homologues))
-    )))
+      homologues (<! (im/homologues svc (select-keys details [:service]) type id (get-in details [:organisms 0])))]
+        (swap! search-results assoc minename (first homologues))
+    )))))
 
 (defn get-identifier [homologue]
   (let [pi (get-in homologue [:Gene :primaryIdentifier])
