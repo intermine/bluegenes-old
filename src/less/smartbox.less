@@ -11,7 +11,7 @@ div.smartbox input.freeform {
   float: left;
   padding: 9px 0 9px 0;
   border: none;
-  border: 1px dotted black;
+  // border: 1px dotted black;
   margin: 2px;
   font-size: 1em;
   background: transparent;
@@ -27,10 +27,45 @@ div.smartbox .identifier {
   transition: all 0.5s ease;
   flex: 0 0 auto;
   height: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  // font-weight: bold;
+
+  div.bg {
+    position: absolute;
+    border: 1px solid red;
+  }
+  span, div {
+    padding-right: 5px;
+  }
 }
+
+div.stats {
+  display: flex;
+  align-items: center;
+
+  div.stat {
+
+    &:not(:last-child) {
+      border-right: 1px solid grey;
+    }
+    padding: 10px;
+
+
+    flex: 1 0 auto;
+    text-align: center;
+  }
+}
+
 
 div.smartbox .identifier.pending {
   background: #333;
+  color: white;
+}
+
+div.smartbox .identifier.converted {
+  background: #9FCC68;
   color: white;
 }
 
@@ -40,12 +75,12 @@ div.smartbox .identifier.unresolved {
 }
 
 div.smartbox .identifier.duplicate {
-  background: yellow;
+  background: #F9C800;
   color: black;
 }
 
 div.smartbox .identifier.new {
-  background: yellow;
+  background: grey;
   color: white;
 }
 

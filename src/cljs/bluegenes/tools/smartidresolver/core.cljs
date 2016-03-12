@@ -9,10 +9,6 @@
             [json-html.core :as json-html]
             [reagent.impl.util :as impl :refer [extract-props]]))
 
-
-(def test-identifiers [{:identifier "ABC" :status "matched"}
-                       {:identifier "XYZ" :status "matched"}])
-
 (defn strip-characters
   "Removes one or more characters from a string"
   [haystack needles]
@@ -26,51 +22,75 @@
   [f & args]
   (apply f args))
 
-(defn get-status-from-bank
-  "Lazily checks the bank of results and returns the status
-  keyword of the first record where the input is present"
-  [input bank]
-  (:status (second
-            (first
-             (filter (fn [[id values]]
-                       (not (nil? (some #{input} (:input values)))))
-                     bank)))))
+(defn swap-identifier
+  "Swap an identifier in some state for a new value.
+  Typical use case: swapping an identifier with duplicates with
+  a user selected one."
+  [state old-identifier new-value]
+  (swap! state
+         update-in [:identifiers]
+         (fn [identifiers]
+           (into []
+                 (map (fn [identifier]
+                        ; Find our match(es)
+                        (if (= (:identifier identifier) old-identifier)
+                          ; Construct a new shape for the replaced value
+                          {:identifier (:symbol (:summary new-value))
+                           :status :match
+                           :product (assoc new-value
+                                           :input [(:symbol (:summary new-value))])}
 
-(defn identifier [input bank]
-  ; (println "STATUS" (get-status-from-bank input bank))
-  [:div.identifier {:key input
-                    :class (get-status-from-bank input bank)} input])
+                          ; Or return the non-match
+                          identifier)) identifiers)))))
 
+(defn dropdown
+  "A dropdown that houses duplicate matches."
+  [input state]
+  (fn []
+    [:div.dropdown
+     [:div.dropdown-toggle {:data-toggle "dropdown"}
+      (:identifier input)]
+     [:ul.dropdown-menu
+      (doall (for [dup (:matches (:duplicates input))]
+               [:li [:a
+                     {:on-click #(swap-identifier state (:identifier input) dup)}
+                     [:div (:symbol (:summary dup))]
+                     [:div (:primaryIdentifier (:summary dup))]]]))]]))
 
-(defn route-response [response persistent-state]
+(defn identifier
+  "An element representing user input conditional upon its status."
+  [input state]
+  (cond
+    ; Matches (Good)
+    (= (:status input) :match)
+    [:div.identifier {:class (:status input)}
+     (:identifier input)]
+    ; Pending (In progress...)
+    (= (:status input) :pending)
+    [:div.identifier {:class (:status input)}
+     (:identifier input)
+     [:i.fa.fa-circle-o-notch.fa-spin]]
+    ; Duplicate (ambigious)
+    (= (:status input) :duplicate)
+    [:div.identifier {:class (:status input)}
+     [dropdown input state]
+     [:i.fa.fa-exclamation-triangle]]
+    ; Converted (hopefully good?)
+    ; TODO: is there a case when a converted type
+    ; has more than one value? If so, dropdown please.
+    (= (:status input) :converted)
+    [:div.identifier {:class (:status input)}
+     (:identifier input)
+     [:i.fa.fa-random]]
+    ; Catch the rest.
+    :else
+    [:div.identifier {:class (:status input)}
+     (:identifier input)
+     [:i.fa.fa-times]]))
 
-  (println "route response is working with" response)
-
-  (swap! persistent-state
-         update-in [:bank]
-         merge
-         (reduce (fn [total next]
-                  ;  (println "can see id" (:id next))
-                   (assoc total (keyword (str (:id next))) (assoc next :status :match)))
-                 {} (:MATCH (:matches response))))
-
-  (swap! persistent-state
-         update-in [:bank]
-         merge
-         (reduce (fn [total next]
-                   ;  (println "can see id" (:id next))
-                   (assoc total (keyword (str (:input next))) (assoc next :status :duplicate)))
-                 {} (:DUPLICATE (:matches response))))
-
-  (swap! persistent-state
-         update-in [:bank]
-         merge
-         (reduce (fn [total next]
-                   (assoc total (keyword (str next)) {:status :unresolved
-                                                      :input [next]}))
-                 {} (:unresolved response))))
-
-(defn resolve-id [identifier persistent-state]
+(defn resolve-id
+  "Resolves an ID from Intermine."
+  [identifier]
   (go (let [res (<! (im/resolve-ids
                      {:service {:root "beta.flymine.org/beta"}}
                      {:identifiers (if (string? identifier) [identifier] identifier)
@@ -78,84 +98,171 @@
                       :caseSensitive false
                       :wildCards true
                       :extra "D. melanogaster"}))]
-        (route-response (-> res :body :results) persistent-state))))
-
-(defn run-job [state]
-  (doall (for [[k v] (filter (fn [[k v]] (= (:status v) :new)) (:bank @state))]
-           (do
-             (swap! state assoc-in [:bank k :status] :pending)
-             (go (let [response (<! (resolve-id (name k) state))]
-                   nil))))))
+        (-> res :body :results))))
 
 
-(defn input-box []
+(defn parse-response
+  "Parse the ID resolution response and update the identifier in the state
+  with the results. So stateful..."
+  [state response]
+  (let [matches (:MATCH (:matches response))
+        unresolveds (:unresolved response)
+        duplicates (:DUPLICATE (:matches response))
+        converteds (:TYPE_CONVERTED (:matches response))]
+
+    ; Handle unresolved
+    (swap! state
+           update-in [:identifiers]
+           (fn [identifiers]
+             (into [] (map (fn [identifier]
+                             (if (some #{(:identifier identifier)} unresolveds)
+                               (assoc identifier :status :unresolved)
+                               identifier))
+                           identifiers))))
+    ; Handle duplicates
+    (swap! state
+           update-in [:identifiers]
+           (fn [identifiers]
+             (into [] (map (fn [identifier]
+                             (let [found-dups (first (filter (fn [dup] (= (:identifier identifier) (:input dup))) duplicates))]
+                               (if-not (empty? found-dups)
+                                 (assoc identifier
+                                        :status :duplicate
+                                        :duplicates found-dups)
+                                 identifier)))
+                           identifiers))))
+    ; Handle converted types
+    (swap! state
+           update-in [:identifiers]
+           (fn [identifiers]
+             (into [] (map (fn [identifier]
+                             (let [found-convert (first (filter (fn [dup] (= (:identifier identifier) (:input dup))) converteds))]
+                               (if-not (empty? found-convert)
+                                 (assoc identifier
+                                        :status :converted
+                                        :product (if (= 1 (count (:matches found-convert)))
+                                                   (first (:matches found-convert))
+                                                   found-convert
+                                                   ))
+                                 identifier)))
+                           identifiers))))
+
+    ; Iterate over matches (which can have multiple inputs)
+    (for [match matches]
+      (let [inputs (:input match)]
+        (swap! state
+               update-in [:identifiers]
+               (fn [identifiers]
+                 (into [] (map (fn [identifier]
+                                 (if (some #{(:identifier identifier)} (:input match))
+                                   (assoc identifier
+                                          :status :match
+                                          :product match)
+                                   identifier))
+                               identifiers))))))))
+
+(defn run-job
+  "Resolve all identifiers with an input status of :new"
+  [state]
+  (doall
+    (for [identifier (filter (fn [i] (= :new (:status i))) (:identifiers @state))]
+      (do
+        ; Update the identifier's status to :pending
+        (swap! state
+               assoc :identifiers
+               (into [] (map (fn [i]
+                               (if (= (:identifier identifier) (:identifier i))
+                                 (assoc i :status :pending)
+                                 i))
+                             (:identifiers @state))))
+        ; Resolve the ID
+        (go (let [response (<! (resolve-id (:identifier identifier)))]
+              (doall (parse-response state response))))))))
+
+
+
+
+(defn input-box
+  "Component to handle user input.
+  TODO: currently a flexy container but it doesn't wrap when the length
+  of the input exceeds the remaining space."
+  []
   (let [textbox-value (reagent/atom "")
         reset #(set! (-> % .-target .-value) nil)]
-    (fn [persistent-state]
-      [:input.freeform {:value @textbox-value
-                        :type "text"
-                        :on-change (fn [e]
-                                     (let [split-vals (clojure.string/split (.. e -target -value) #" ")]
-                                       (if (> (count split-vals) 1)
-                                         (do
-                                           (swap! persistent-state
-                                                  update-in [:identifiers]
-                                                  into
-                                                  split-vals)
+    (reagent/create-class
+     {:component-did-mount
+      (fn [this]
+        (let [node (reagent/dom-node this)]
+          (.focus node)))
+      :reagent-render
+      (fn [persistent-state]
+        [:input.freeform {:value @textbox-value
+                          :type "text"
+                          :on-change (fn [e]
+                                       (reset! textbox-value (clojure.string/trim (.. e -target -value))))
+                          :on-key-down (fn [k]
+                                         (let [code (.-which k)]
+                                           ; Check for breaking characters...
+                                           (if-not (nil? (some #{code} '(9 13 32 188)))
+                                             ; Break! Parse that puppy.
+                                             (do
+                                               (let [cleansed-val (strip-characters @textbox-value ",; ")]
+                                                 ; Keep an ordered list of inputs
+                                                 (swap! persistent-state
+                                                        update-in [:identifiers]
+                                                        conj {:identifier cleansed-val
+                                                              :status :new})
+                                                 ; Create a new ID resolution job for all new identifiers
+                                                 (run-job persistent-state)
+                                                 ; Reset our textbox value
+                                                 (reset k))))))}])})))
 
-                                           (swap! persistent-state
-                                                  update-in [:bank]
-                                                  merge
-                                                  (reduce (fn [total next]
-                                                            (assoc total
-                                                                   (keyword next)
-                                                                   {:status :new}))
-                                                          {}
-                                                          split-vals)
-                                                  {:status :new})
+(defn handle-values
+  "Proceed with the bluegenes workflow.
+  TODO: call an API function like :has-something"
+  [values]
+  (println (doall (map #(-> % :product :id) (:identifiers values)))))
 
-                                           (run-job persistent-state))
+(defn stats
+  "A container representing statistics about the resolution job."
+  []
+  (fn [identifiers]
+    [:div.stats
+     [:div.stat (str (count (filter #(= (:status %) :match) identifiers)) " Matches")]
+     [:div.stat (str (count (filter #(= (:status %) :duplicate) identifiers)) " Duplicates")]
+     [:div.stat (str (count (filter #(= (:status %) :converted) identifiers)) " Converted")]
+     [:div.stat (str (count (filter #(= (:status %) :unresolved) identifiers)) " Unresolved")]]))
 
-                                         (reset! textbox-value (clojure.string/trim (.. e -target -value))))))
+(defn controls
+  "A container for controlling the ID resolution job / proceeding with workflows."
+  [state]
+  (fn []
+    [:div
+     [:div.btn.btn-raised.btn-info
+      {:on-click (fn [e] (handle-values @state))} "Go"]]))
 
-
-                        :on-key-down (fn [k]
-                                       (let [code (.-which k)]
-                                         (if-not (nil? (some #{code} '(9 13 32 188)))
-                                           (do
-                                             (let [cleansed-val (strip-characters @textbox-value ",; ")]
-                                               ; Keep an ordered list of inputs
-                                               (swap! persistent-state
-                                                      update-in [:identifiers]
-                                                      conj cleansed-val)
-                                               ; Keep a bank of the resolution results
-                                               (swap! persistent-state
-                                                      update-in [:bank]
-                                                      assoc (keyword cleansed-val)
-                                                      {:status :new})
-                                               ; Create a new ID resolution job for all new identifiers
-                                               (run-job persistent-state)
-                                               ; Reset our textbox value
-                                               (reset k))))))}])))
-
-(defn smartbox [step-data]
-  (let [persistent-state (reagent/atom
-                          (merge {:identifiers []
-                                  :bank {}
-                                  :type "Gene"
-                                  :caseSensitive false
-                                  :wildCards true
-                                  :extra "D. melanogaster"}
-                                 (:state step-data)))
-        local-state (reagent/atom {:current-page 1
-                                   :rows-per-page 20})]
+(defn smartbox
+  "Element containing the entire ID resolution."
+  [step-data]
+  (let [persistent-state (reagent/atom (merge {:identifiers []
+                                               :bank {}
+                                               :type "Gene"
+                                               :caseSensitive false
+                                               :wildCards true
+                                               :extra "D. melanogaster"}
+                                              (:state step-data)))]
     (fn []
-      [:div.smartbox
-       (doall (map (fn [next]
-              ^{:key next} [identifier next (:bank @persistent-state)])
-            (:identifiers @persistent-state)))
-       [input-box persistent-state]
-      ;  (json-html/edn->hiccup @persistent-state)
+      [:div
+       [:div.smartbox
+        (doall
+          (map (fn [next]
+                 ^{:key (:identifier next)}
+                 [identifier next persistent-state])
+               (:identifiers @persistent-state)))
+        [input-box persistent-state]]
+       [stats (:identifiers @persistent-state)]
+       [controls persistent-state]
+        (json-html/edn->hiccup @persistent-state)
        ])))
 
 (defn ^:export main [step-data]
