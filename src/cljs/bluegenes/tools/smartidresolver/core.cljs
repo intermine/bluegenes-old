@@ -227,7 +227,7 @@
                           :type "Gene"
                           :payload (remove nil? (map #(-> % :product :id) (:identifiers values)))}
                          :service {:root "beta.flymine.org/beta"}
-                        ;  :shortcut "viewtable"
+                         :shortcut "viewtable"
                          })
   (println (doall (map #(-> % :product :id) (:identifiers values)))))
 
@@ -268,7 +268,7 @@
                  [identifier next persistent-state])
                (:identifiers @persistent-state)))
         [input-box persistent-state]]
-      ;  [stats (:identifiers @persistent-state)]
+       [stats (:identifiers @persistent-state)]
        [controls persistent-state (:api step-data)]
         ; (json-html/edn->hiccup @persistent-state)
        ])))

@@ -24,6 +24,7 @@ bluegenes.tools.enrichment.core.preview = function() {};
 bluegenes.tools.enrichment.core.main = function() {};
 bluegenes.tools.chooselistcompact.core.preview = function() {};
 bluegenes.tools.chooselistcompact.core.main = function() {};
+bluegenes.tools.smartidresolver.core.main = function() {};
 
 
 // Functions used by imjs
