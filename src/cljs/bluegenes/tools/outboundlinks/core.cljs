@@ -13,26 +13,38 @@
     :name "HumanMine"
     :url "http://www.humanmine.org/humanmine"
     :service {:root "http://www.humanmine.org/humanmine/service"}
-    :organisms ["H. sapiens"]}
+    :organism "H. sapiens"}
+  :yeastmine {
+    :name "YeastMine"
+    :url "http://yeastmine.yeastgenome.org/yeastmine"
+    :service {:root "http://yeastmine.yeastgenome.org/yeastmine/service"}
+    :organism "S. cervisiae"}
+  :zebrafishmine {
+    :name "ZebraFishMine"
+    :url "http://www.zebrafishmine.org"
+    :service {:root "http://www.zebrafishmine.org"}
+    :organism "D. rerio"}
   :mousemine {
-        :name "MouseMine"
-        :url "http://www.mousemine.org/mousemine"
-        :service {:root "http://www.mousemine.org/mousemine/service"}
-        :organisms ["M. musculus"]}})
+    :name "MouseMine"
+    :url "http://www.mousemine.org/mousemine"
+    :service {:root "http://www.mousemine.org/mousemine/service"}
+    :organism "M. musculus"}})
 
 (defn load-data [upstream-data]
+  "Loads one data "
   (doall (for [[minename details] remote-mines]
     ;(.log js/console "%c Remotes" "border-bottom:skyblue dotted 3px" (clj->js details)
     ;)
-  (go (let [
+    (go (let [
       svc (select-keys upstream-data [:service])
       id (get-in upstream-data [:data :payload 0])
       type (get-in upstream-data [:data :type])
-      homologues (<! (im/homologues svc (select-keys details [:service]) type id (get-in details [:organisms 0])))]
+      homologues (<! (im/homologues svc (select-keys details [:service]) type id (get-in details [:organism])))]
         (swap! search-results assoc minename (first homologues))
     )))))
 
 (defn get-identifier [homologue]
+  "returns an identifier. looks for the symbol first, if there is one, or otherwise uses the primary identifier."
   (let [pi (get-in homologue [:Gene :primaryIdentifier])
         symbol (get-in homologue [:homologue :symbol])]
   (if (some? symbol)
@@ -49,17 +61,18 @@
       (get-identifier homie)]]) homologues)))
 
 (defn homologue-links [local-state api upstream-data]
-  "Visual link show component"
-  [:div
-   [:h5 "Outbound links"]
+  "Visual link show component that shows one result per mine"
+  [:div.outbound
+  [:h5 "Homologues in other Mines"]
+  [:div.homologuelinks
     (for [[k v] @search-results]
       (let [this-mine (k remote-mines)]
         ^{:key k}
-        [:div
-         [:div (:name this-mine)]
-         [:div (get-in this-mine [:organisms 0])]
+        [:div.onemine
+         [:h6 (:name this-mine)]
+         [:div.subtitle (:organism this-mine)]
          [:div (list-homologues (:homologues v) (:url this-mine))]
-       ]))])
+       ]))]])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
