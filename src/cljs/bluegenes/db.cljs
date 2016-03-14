@@ -18,9 +18,15 @@
    :histories {:id4u {:name "Smart ID Resolver"
                       :slug "id-resolver"
                       :description "Browse and analyse lists"
-                      :structure [:a1]
+                      :structure [:a1 :b1]
                       :steps {:a1 {:_id :a1
-                                   :tool "smartidresolver"}}}
+                                   :tool "smartidresolver"}
+                              :b1 {:_id :b1
+                                   :tool "enrichment"
+                                   :subscribe [:a1]
+                                   :state [{:widget "go_enrichment_for_gene"
+                                            :correction "None"
+                                            :title "Gene Ontology Enrichment"}]}}}
 
                :k {:name "List Analysis"
                    :slug "local-history-k"

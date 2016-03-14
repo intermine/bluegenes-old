@@ -1,7 +1,8 @@
 div.smartbox {
   width: 100%;
   // min-height: 200px;
-  background: #f8f5ec;
+  // background: #f8f5ec;
+  border: 1px solid rgba(0,0,0,0.2);
   font-size: 1.2em;
   display: flex;
   flex-wrap: wrap;
@@ -70,7 +71,13 @@ div.smartbox .identifier.converted {
 }
 
 div.smartbox .identifier.unresolved {
-  background: red;
+  background: repeating-linear-gradient(
+  45deg,
+  #9F0000,
+  #9F0000 10px,
+  #BD0000 10px,
+  #BD0000 20px
+);
   color: white;
 }
 

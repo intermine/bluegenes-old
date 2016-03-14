@@ -86,7 +86,8 @@
     :else
     [:div.identifier {:class (:status input)}
      (:identifier input)
-     [:i.fa.fa-times]]))
+    ;  [:i.fa.fa-times]
+     ]))
 
 (defn resolve-id
   "Resolves an ID from Intermine."
@@ -220,7 +221,14 @@
 (defn handle-values
   "Proceed with the bluegenes workflow.
   TODO: call an API function like :has-something"
-  [values]
+  [values api]
+  ((:has-something api) {:data
+                         {:format "ids"
+                          :type "Gene"
+                          :payload (remove nil? (map #(-> % :product :id) (:identifiers values)))}
+                         :service {:root "beta.flymine.org/beta"}
+                        ;  :shortcut "viewtable"
+                         })
   (println (doall (map #(-> % :product :id) (:identifiers values)))))
 
 (defn stats
@@ -235,11 +243,11 @@
 
 (defn controls
   "A container for controlling the ID resolution job / proceeding with workflows."
-  [state]
+  [state api]
   (fn []
     [:div
      [:div.btn.btn-raised.btn-info
-      {:on-click (fn [e] (handle-values @state))} "Go"]]))
+      {:on-click (fn [e] (handle-values @state api))} "Go"]]))
 
 (defn smartbox
   "Element containing the entire ID resolution."
@@ -260,9 +268,9 @@
                  [identifier next persistent-state])
                (:identifiers @persistent-state)))
         [input-box persistent-state]]
-       [stats (:identifiers @persistent-state)]
-       [controls persistent-state]
-        (json-html/edn->hiccup @persistent-state)
+      ;  [stats (:identifiers @persistent-state)]
+       [controls persistent-state (:api step-data)]
+        ; (json-html/edn->hiccup @persistent-state)
        ])))
 
 (defn ^:export main [step-data]
@@ -276,7 +284,7 @@
       (fn [step-data]
         [:div
          [:h1 "ID Resolution"]
-         [smartbox]])
+         [smartbox step-data]])
       :component-will-receive-props
       (fn [this new-props]
         (let [{:keys [upstream-data api state]} (extract-props new-props)]))})))
