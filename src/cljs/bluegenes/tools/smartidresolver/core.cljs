@@ -43,7 +43,9 @@
                           ; Or return the non-match
                           identifier)) identifiers)))))
 
-(defn dropdown
+
+
+(defn duplicate-dropdown
   "A dropdown that houses duplicate matches."
   [input state]
   (fn []
@@ -73,7 +75,7 @@
     ; Duplicate (ambigious)
     (= (:status input) :duplicate)
     [:div.identifier {:class (:status input)}
-     [dropdown input state]
+     [duplicate-dropdown input state]
      [:i.fa.fa-exclamation-triangle]]
     ; Converted (hopefully good?)
     ; TODO: is there a case when a converted type
@@ -91,14 +93,14 @@
 
 (defn resolve-id
   "Resolves an ID from Intermine."
-  [identifier]
+  [identifier settings]
   (go (let [res (<! (im/resolve-ids
                      {:service {:root "beta.flymine.org/beta"}}
                      {:identifiers (if (string? identifier) [identifier] identifier)
                       :type "Gene"
                       :caseSensitive false
                       :wildCards true
-                      :extra "D. melanogaster"}))]
+                      :extra (:extra settings)}))]
         (-> res :body :results))))
 
 
@@ -177,7 +179,7 @@
                                  i))
                              (:identifiers @state))))
         ; Resolve the ID
-        (go (let [response (<! (resolve-id (:identifier identifier)))]
+        (go (let [response (<! (resolve-id (:identifier identifier) @state))]
               (doall (parse-response state response))))))))
 
 
@@ -241,37 +243,99 @@
      [:div.stat (str (count (filter #(= (:status %) :converted) identifiers)) " Converted")]
      [:div.stat (str (count (filter #(= (:status %) :unresolved) identifiers)) " Unresolved")]]))
 
+
+(defn dropdown
+  []
+  (fn [{:keys [values handler value]}]
+    [:div.dropdown
+     [:div.btn.btn-default.dropdown-toggle {:data-toggle "dropdown"}
+      (str value)
+      [:span.caret]]
+     [:ul.dropdown-menu
+      (doall (for [value values]
+               ^{:key value} [:li [:a
+                     {:on-click (fn [e]
+                                  (println "calling on value" value)
+                                  (handler value))}
+                     value]]))]]))
+
+
+(defn reset-identifiers
+  "Assigns a :status of :new to all maps in a collection"
+  [identifiers]
+  (map (fn [id] (assoc id :status :new)) identifiers))
+
+(defn fetch-organisms [service]
+  (im/query-records
+   service
+   {:from "Organism"
+    :select "shortName"}))
+
+(defn swap-organism [state organism]
+  (swap! state assoc :extra organism))
+
+(defn swap-type [state value]
+  (swap! state assoc :type value))
+
 (defn controls
   "A container for controlling the ID resolution job / proceeding with workflows."
   [state api]
   (fn []
     [:div
-     [:div.btn.btn-raised.btn-info
+     [:div.btn.btn-raised.btn-primary
       {:on-click (fn [e] (handle-values @state api))} "Go"]]))
 
 (defn smartbox
   "Element containing the entire ID resolution."
   [step-data]
-  (let [persistent-state (reagent/atom (merge {:identifiers []
+  (let [local-state (reagent/atom {:organisms []
+                                   :types ["Gene" "Protein"]})
+        persistent-state (reagent/atom (merge {:identifiers []
                                                :bank {}
                                                :type "Gene"
                                                :caseSensitive false
                                                :wildCards true
                                                :extra "D. melanogaster"}
                                               (:state step-data)))]
-    (fn []
-      [:div
-       [:div.smartbox
-        (doall
-          (map (fn [next]
-                 ^{:key (:identifier next)}
-                 [identifier next persistent-state])
-               (:identifiers @persistent-state)))
-        [input-box persistent-state]]
-       [stats (:identifiers @persistent-state)]
-       [controls persistent-state (:api step-data)]
-        ; (json-html/edn->hiccup @persistent-state)
-       ])))
+    (reagent/create-class
+     {:reagent-render (fn []
+                        [:div
+                         [:div.row
+                          [:div.col-xs-2
+                           [:form.form
+                            [:div.form-group
+                             [:label "Type"]
+                             ; Build a dropdown of available organisms
+                             [dropdown {:values (:types @local-state)
+                                        :value (:type @persistent-state)
+                                        :handler (partial swap-type persistent-state)}]]
+                            [:div.form-group
+                             [:label "Organism"]
+                             ; Build a dropdown of available organisms
+                             [dropdown {:values (map :shortName (:organisms @local-state))
+                                        :value (:extra @persistent-state)
+                                        :handler (partial swap-organism persistent-state)}]]]]
+                          [:div.col-xs-10
+                           [:label "Identifiers"]
+                           [:div.smartbox
+                            (doall (map (fn [next]
+                                          ^{:key (:identifier next)}
+                                          [identifier next persistent-state])
+                                        (:identifiers @persistent-state)))
+                            [input-box persistent-state]]]]
+
+                         [:div.form-group
+                         ]
+                         ;  [stats (:identifiers @persistent-state)]
+                         [controls persistent-state (:api step-data)]
+                        ;  (json-html/edn->hiccup @persistent-state)
+                        ;  (json-html/edn->hiccup @local-state)
+                         ])
+      :component-did-mount (fn [this]
+                             ; Asynchronously fetch our list of organisms
+                             (go (let [organisms (<! (fetch-organisms {:service {:root "beta.flymine.org/beta"}}))]
+                                   (swap! local-state assoc :organisms organisms))))})))
+
 
 (defn ^:export main [step-data]
   "Output a table representing all lists in a mine.
@@ -283,7 +347,7 @@
      {:reagent-render
       (fn [step-data]
         [:div
-         [:h1 "ID Resolution"]
+         [:h1 "Enter Identifiers"]
          [smartbox step-data]])
       :component-will-receive-props
       (fn [this new-props]

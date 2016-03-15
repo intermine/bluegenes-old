@@ -56,17 +56,12 @@
 (defn query-rows
   "Returns IMJS row-style result"
   [service query-map]
-  (println "query sees maps" query-map)
   (let [c (chan)]
-    (println "in the let" (clj->js service))
     (-> (js/imjs.Service. (clj->js (:service service)))
         (.rows (clj->js query-map))
         (.then (fn [rows]
-                 (println "got the rows" rows)
                  (go (>! c (js->clj rows :keywordize-keys true))))
-               (fn [error]
-                 (println "got error" error)
-                 )))
+               (fn [error])))
     c))
 
 
