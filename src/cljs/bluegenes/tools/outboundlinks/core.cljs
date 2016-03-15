@@ -45,9 +45,9 @@
 
 (defn get-identifier [homologue]
   "returns an identifier. looks for the symbol first, if there is one, or otherwise uses the primary identifier."
-  (let [pi (get-in homologue [:Gene :primaryIdentifier])
+  (let [pi (get-in homologue [:homologue :primaryIdentifier])
         symbol (get-in homologue [:homologue :symbol])]
-  (if (some? symbol)
+  (if symbol
     symbol
     pi)
 ))

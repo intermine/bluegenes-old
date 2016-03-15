@@ -50,7 +50,7 @@
 (defn query-records
   "Returns an IMJS records-style results"
   [service query-map]
-  (.log js/console "Records query sees maps" (clj->js query-map))
+;  (.log js/console "Records query sees maps" (clj->js query-map))
   (let [c (chan)]
     (-> (js/imjs.Service. (clj->js (:service service)))
         (.records (clj->js query-map))
@@ -166,13 +166,20 @@
   [original-service remote-service type id organism]
   (let [c (chan)]
     (go (let [
-            ;;get the primary identifier from the current mine
-            primary-id (<! (get-primary-identifier type id original-service))
-            ;;build the query
-            q (homologue-query primary-id organism)
-            ;;query the remote mine for homologues
-            response (<! (query-records remote-service q))]
-            (.log js/console "%c Homologues" "border-bottom:mediumorchid dotted 3px" (clj->js response)) ;;this prints the expected response
+      ;;get the primary identifier from the current mine
+      primary-id (<! (get-primary-identifier type id original-service))
+      ;build the query
+      q (homologue-query primary-id organism)
+      ;;query the remote mine for homologues
+      response (<! (query-records remote-service q))
+      local-response (<! (query-records original-service q))]
+      ;(.log js/console "%c Homologues" "border-bottom:mediumorchid dotted 3px" (clj->js response)) ;;this prints the expected response
+      (if (> (count response) 0)
+        (do ;(.log js/console "%c Homologues" "border-bottom:green dashed 3px" (clj->js response))
+        (>! c response))
+        (do ;(.log js/console "%c No homologues" "border-bottom:red solid 3px" (clj->js local-response))
+        (>! c local-response))
+        )
 
-            (>! c response) ;; put the response in the channel
+             ;; put the response in the channel
     ))c))
