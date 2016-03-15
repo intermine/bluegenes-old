@@ -299,37 +299,33 @@
                                               (:state step-data)))]
     (reagent/create-class
      {:reagent-render (fn []
-                        [:div
-                         [:div.row
-                          [:div.col-xs-2
-                           [:form.form
-                            [:div.form-group
-                             [:label "Type"]
-                             ; Build a dropdown of available organisms
-                             [dropdown {:values (:types @local-state)
-                                        :value (:type @persistent-state)
-                                        :handler (partial swap-type persistent-state)}]]
-                            [:div.form-group
-                             [:label "Organism"]
-                             ; Build a dropdown of available organisms
-                             [dropdown {:values (map :shortName (:organisms @local-state))
-                                        :value (:extra @persistent-state)
-                                        :handler (partial swap-organism persistent-state)}]]]]
-                          [:div.col-xs-10
-                           [:label "Identifiers"]
-                           [:div.smartbox
-                            (doall (map (fn [next]
-                                          ^{:key (:identifier next)}
-                                          [identifier next persistent-state])
-                                        (:identifiers @persistent-state)))
-                            [input-box persistent-state]]]]
+                        [:div.smartboxcontainer
+                         [:form.form-inline
+                          [:div.form-group
+                           [:label "Type"]
+                           ; Build a dropdown of available organisms
+                           [dropdown {:values (:types @local-state)
+                                      :value (:type @persistent-state)
+                                      :handler (partial swap-type persistent-state)}]]
+                          [:div.form-group
+                           [:label "Organism"]
+                           ; Build a dropdown of available organisms
+                           [dropdown {:values (map :shortName (:organisms @local-state))
+                                      :value (:extra @persistent-state)
+                                      :handler (partial swap-organism persistent-state)}]]]
+                         [:div.entry
+                         [:label "Identifiers"]
+                          [:div.smartbox
+                           (doall (map (fn [next]
+                                         ^{:key (:identifier next)}
+                                         [identifier next persistent-state])
+                                       (:identifiers @persistent-state)))
+                           [input-box persistent-state]]]
 
-                         [:div.form-group
-                         ]
                          ;  [stats (:identifiers @persistent-state)]
                          [controls persistent-state (:api step-data)]
-                        ;  (json-html/edn->hiccup @persistent-state)
-                        ;  (json-html/edn->hiccup @local-state)
+                         ;  (json-html/edn->hiccup @persistent-state)
+                         ;  (json-html/edn->hiccup @local-state)
                          ])
       :component-did-mount (fn [this]
                              ; Asynchronously fetch our list of organisms
@@ -347,7 +343,7 @@
      {:reagent-render
       (fn [step-data]
         [:div
-         [:h1 "Enter Identifiers"]
+         [:h3 "Enter Identifiers"]
          [smartbox step-data]])
       :component-will-receive-props
       (fn [this new-props]

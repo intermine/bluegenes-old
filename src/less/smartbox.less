@@ -12,6 +12,15 @@ div.smartbox {
   padding-left: 20px;
 }
 
+div.smartboxcontainer .form-group {
+  padding-right: 15px;
+}
+
+div.smartboxcontainer .entry {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
 div.smartbox input.freeform {
   float: left;
   padding: 9px 0 9px 0;
@@ -22,6 +31,11 @@ div.smartbox input.freeform {
   background: transparent;
   color: #2d2d2d;
   flex: 1 0;
+  outline: none;
+
+  &:focus {
+    border-bottom: 1px solid darkblue;
+  }
 }
 
 div.smartbox .dropdown-menu {
