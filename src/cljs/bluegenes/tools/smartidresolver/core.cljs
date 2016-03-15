@@ -97,7 +97,7 @@
   (go (let [res (<! (im/resolve-ids
                      {:service {:root "beta.flymine.org/beta"}}
                      {:identifiers (if (string? identifier) [identifier] identifier)
-                      :type "Gene"
+                      :type (:type settings)
                       :caseSensitive false
                       :wildCards true
                       :extra (:extra settings)}))]
@@ -111,7 +111,8 @@
   (let [matches (:MATCH (:matches response))
         unresolveds (:unresolved response)
         duplicates (:DUPLICATE (:matches response))
-        converteds (:TYPE_CONVERTED (:matches response))]
+        converteds (:TYPE_CONVERTED (:matches response))
+        others (:OTHER (:matches response))]
 
     ; Handle unresolved
     (swap! state
@@ -140,6 +141,22 @@
            (fn [identifiers]
              (into [] (map (fn [identifier]
                              (let [found-convert (first (filter (fn [dup] (= (:identifier identifier) (:input dup))) converteds))]
+                               (if-not (empty? found-convert)
+                                 (assoc identifier
+                                        :status :converted
+                                        :product (if (= 1 (count (:matches found-convert)))
+                                                   (first (:matches found-convert))
+                                                   found-convert
+                                                   ))
+                                 identifier)))
+                           identifiers))))
+
+    ; Handler synonyms
+    (swap! state
+           update-in [:identifiers]
+           (fn [identifiers]
+             (into [] (map (fn [identifier]
+                             (let [found-convert (first (filter (fn [dup] (= (:identifier identifier) (:input dup))) others))]
                                (if-not (empty? found-convert)
                                  (assoc identifier
                                         :status :converted
@@ -224,14 +241,14 @@
   "Proceed with the bluegenes workflow.
   TODO: call an API function like :has-something"
   [values api]
-  ((:has-something api) {:data
-                         {:format "ids"
-                          :type "Gene"
-                          :payload (remove nil? (map #(-> % :product :id) (:identifiers values)))}
-                         :service {:root "beta.flymine.org/beta"}
-                         :shortcut "viewtable"
-                         })
-  (println (doall (map #(-> % :product :id) (:identifiers values)))))
+  (let [output (remove nil? (map #(-> % :product :id) (:identifiers values)))]
+    (if-not (empty? output)
+      ((:has-something api) {:data
+                             {:format "ids"
+                              :type "Gene"
+                              :payload (remove nil? (map #(-> % :product :id) (:identifiers values)))}
+                             :service {:root "beta.flymine.org/beta"}
+                             :shortcut "viewtable"}))))
 
 (defn stats
   "A container representing statistics about the resolution job."
@@ -263,7 +280,7 @@
 (defn reset-identifiers
   "Assigns a :status of :new to all maps in a collection"
   [identifiers]
-  (map (fn [id] (assoc id :status :new)) identifiers))
+  (map (fn [id] (assoc id :status :new :product nil)) identifiers))
 
 (defn fetch-organisms [service]
   (im/query-records
@@ -283,7 +300,9 @@
   (fn []
     [:div
      [:div.btn.btn-raised.btn-primary
-      {:on-click (fn [e] (handle-values @state api))} "Go"]]))
+      {:class (if (empty? (remove nil? (map #(-> % :product :id) (:identifiers @state)))) "disabled")
+       :on-click (fn [e] (handle-values @state api))}
+      "View Results"]]))
 
 (defn smartbox
   "Element containing the entire ID resolution."
@@ -306,13 +325,21 @@
                            ; Build a dropdown of available organisms
                            [dropdown {:values (:types @local-state)
                                       :value (:type @persistent-state)
-                                      :handler (partial swap-type persistent-state)}]]
+                                      :handler (fn [e]
+                                                 (swap-type persistent-state e)
+                                                 (swap! persistent-state
+                                                        update-in [:identifiers] reset-identifiers)
+                                                 (run-job persistent-state))}]]
                           [:div.form-group
                            [:label "Organism"]
                            ; Build a dropdown of available organisms
                            [dropdown {:values (map :shortName (:organisms @local-state))
                                       :value (:extra @persistent-state)
-                                      :handler (partial swap-organism persistent-state)}]]]
+                                      :handler (fn [e]
+                                                 (swap-organism persistent-state e)
+                                                 (swap! persistent-state
+                                                        update-in [:identifiers] reset-identifiers)
+                                                 (run-job persistent-state))}]]]
                          [:div.entry
                          [:label "Identifiers"]
                           [:div.smartbox
@@ -324,8 +351,8 @@
 
                          ;  [stats (:identifiers @persistent-state)]
                          [controls persistent-state (:api step-data)]
-                         ;  (json-html/edn->hiccup @persistent-state)
-                         ;  (json-html/edn->hiccup @local-state)
+                          ; (json-html/edn->hiccup @persistent-state)
+                          ; (json-html/edn->hiccup @local-state)
                          ])
       :component-did-mount (fn [this]
                              ; Asynchronously fetch our list of organisms
