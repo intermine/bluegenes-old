@@ -145,14 +145,22 @@
           (swap! persistent-state merge state)
           (call (:is-loading api) true)
           (swap! local-state assoc :enrichment-results nil)
+          (println "DATA FORMAT" upstream-data)
           (go (let [res (<! (im/enrichment
                              (select-keys upstream-data [:service])
-                             {:list (:payload (:data upstream-data))
-                              :widget enrichment-type
-                              :population (:population @persistent-state)
-                              :maxp (:maxp @persistent-state)
-                              :format "json"
-                              :correction (:correction @persistent-state)}))]
+                             (merge {:widget enrichment-type
+                                     :population (:population @persistent-state)
+                                     :maxp (:maxp @persistent-state)
+                                     :format "json"
+                                     :correction (:correction @persistent-state)}
+                                    (cond
+                                      (= "list" (:format (:data upstream-data)))
+                                      {:list (:payload (:data upstream-data))}
+                                      (= "ids" (:format (:data upstream-data)))
+                                      {:ids (:payload (:data upstream-data))}))))]
+
+
+
                 (call (:is-loading api) false)
              (swap! local-state assoc
                     :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
