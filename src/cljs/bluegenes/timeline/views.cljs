@@ -145,6 +145,6 @@
 
 (defn main-view []
     [:div
-     [stepdash/main]
+    ;  [stepdash/main]
     ;  [nextsteps/main]
      [previous-steps]])
