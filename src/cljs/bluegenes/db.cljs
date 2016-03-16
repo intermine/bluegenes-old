@@ -8,16 +8,41 @@
    :active-history nil
    :dimmer true
 
-   :mines {:flymine {:root "www.flymine.org/query"
-                     :token nil}
-           :humanmine {:root "www.humanmine.org/humanmine"
-                       :token nil}
-           :default {:root "www.humanmine.org/humanmine"
-                     :token nil}}
+   :remote-mines {
+     :humanmine {
+       :name "HumanMine"
+       :url "http://www.humanmine.org/humanmine"
+       :service {:root "http://www.humanmine.org/humanmine/service"}
+       :organism "H. sapiens"}
+     :yeastmine {
+       :name "YeastMine"
+       :url "http://yeastmine.yeastgenome.org/yeastmine"
+       :service {:root "http://yeastmine.yeastgenome.org/yeastmine/service"}
+       :organism "S. cerevisiae"}
+     :zebrafishmine {
+       :name "ZebraFishMine"
+       :url "http://www.zebrafishmine.org"
+       :service {:root "http://www.zebrafishmine.org"}
+       :organism "D. rerio"}
+     :ratmine {
+       :name "RatMine"
+       :url "http://ratmine.mcw.edu/ratmine"
+       :service {:root "http://stearman.hmgc.mcw.edu/ratmine"}
+       :organism "R. norvegicus"}
+     :mousemine {
+       :name "MouseMine"
+       :url "http://www.mousemine.org/mousemine"
+       :service {:root "http://www.mousemine.org/mousemine/service"}
+       :organism "M. musculus"}
+     :modmine {
+       :name "ModMine"
+       :url "http://intermine.modencode.org/release-33"
+       :service {:root "http://intermine.modencode.org/release-33"}
+       :organism "C. elegans"}}
 
    :histories {:id4u {:name "Smart ID Resolver"
                       :slug "id-resolver"
-                      :description "Browse and analyse lists"
+                      :description "Look up a list of identifiers, e.g. Genes Symbols"
                       :structure [:a1]
                       :steps {:a1 {:_id :a1
                                    :tool "smartidresolver"}
@@ -91,28 +116,10 @@
                                 :tool "echotool"
                                 :subscribe [:d1]}}}
 
-               :lists {:name "Gene Lists"
-                       :slug "local-history-x"
-                       :description "Browse Intermine Gene lists.s"
-                       :steps {:choose-list {:tool "chooselist"
-                                             :_id :choose-list
-                                             :title "List Chooser"
-                                             :description "List Chooser Description"
-                                             :state []}}}
-
-               :homepage-list-upload {:name "List Upload"
-                                      :slug "list-upload"
-                                      :description "Upload a list of genes, proteins, etc."
-                                      :steps {:id-resolver
-                                              {:tool "idresolver"
-                                               :_id :id-resolver
-                                               :title "Show Results"
-                                               :description "Show Results"
-                                               :state []}}}
                :search {:name "Search"
                         :slug "search"
-                        :description "I too was born in app-db."
-                        :structure [:search-tool [:summary1]]
+                        :description "Search across InterMine for just about anything."
+                        :structure [:search-tool [:summary :outboundlinks]]
                         :steps {
                           :search-tool {
                             :tool "search"
@@ -120,20 +127,20 @@
                             :title "Search InterMine"
                             :description "Search"
                             :state []}
-                          :summary1 {
+                          :summary {
                             :subscribe [:search-tool]
                             :tool "summary"
-                            :_id :summary1
+                            :_id :summary
                             :title "Summary"
                             :description "Summary"
                             :state []}
-                          ; :summary2 {
-                            ; :subscribe [:search-tool]
-                            ; :tool "summary"
-                            ; :_id :summary2
-                            ; :title "Summary"
-                            ; :description "Summary"
-                            ; :state []}
+                          :outboundlinks {
+                            :subscribe [:search-tool]
+                            :tool "outboundlinks"
+                            :_id :outboundlinks
+                            :title "Outbound Links"
+                            :description "Outbound Links"
+                            :state []}
                                 }}
 
                :homepage-template-histories {:a { :type "Gene"
