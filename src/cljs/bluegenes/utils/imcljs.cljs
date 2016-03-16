@@ -5,19 +5,52 @@
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [intermine.imjs :as imjs]))
 
+(defn resolve-ids
+  "Completes the steps required to resolve identifiers.
+  1. Start an ID Resolution job.
+  2. Poll the server for the job status (every 1s)
+  3. Delete the job (side effect).
+  4. Return results"
+  [{{:keys [root token]} :service}
+   input]
+  (go (let [response (<! (http/post (str "http://" root "/service/ids")
+                                    {:with-credentials? false
+                                     :json-params (clj->js input)}))]
+        (if-let [uid (-> response :body :uid)]
+          (loop []
+            (let [status-response (<! (http/get (str "http://" root "/service/ids/" uid "/status")
+                                                {:with-credentials? false}))]
+              (if (= "SUCCESS" (:status (:body status-response)))
+                (let [final-response (<! (http/get (str "http://" root "/service/ids/" uid "/results")
+                                                   {:with-credentials? false}))]
+                  (http/delete (str "http://" root "/service/ids/" uid)
+                               {:with-credentials? false})
+                  final-response)
+                (do
+                  (<! (timeout 1000))
+                  (recur)))))))))
+
+
 (defn enrichment
   "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
-  [ {{:keys [root token]} :service} {:keys [list widget maxp correction population]}]
-  (go (let [response (<! (http/get (str "http://" root "/service/list/enrichment")
+  [ {{:keys [root token]} :service} {:keys [ids list widget maxp correction population]}]
+  (println "ids" ids)
+  (go (let [response (<! (http/post (str "http://" root "/service/list/enrichment")
                                    {:with-credentials? false
                                     :keywordize-keys? true
-                                    :query-params (merge {:list list
-                                                          :widget widget
-                                                          :maxp maxp
-                                                          :format "json"
-                                                          :correction correction}
+                                    :form-params (merge
+                                                   {:widget widget
+                                                    :maxp maxp
+                                                    :format "json"
+                                                    :correction correction}
 
-                                                         (if-not (nil? population) {:population population}))}))]
+                                                   (cond
+                                                     ids
+                                                     {:ids (clojure.string/join "," ids)}
+                                                     list
+                                                     {:list list})
+
+                                                   (if-not (nil? population) {:population population}))}))]
         (-> response :body))))
 
 
@@ -30,11 +63,8 @@
     (-> (js/imjs.Service. (clj->js (:service service)))
         (.rows (clj->js query-map))
         (.then (fn [rows]
-                 (println "got the rows" rows)
                  (go (>! c (js->clj rows :keywordize-keys true))))
-               (fn [error]
-                 (println "got error" error)
-                 )))
+               (fn [error])))
     c))
 
 

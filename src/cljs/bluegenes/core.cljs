@@ -10,6 +10,7 @@
               [bluegenes.tools.chooselist.core :as chooselist]
               [bluegenes.tools.idresolver.core :as idresolver]
               [bluegenes.tools.viewtable.core :as viewtable]
+              [bluegenes.tools.smartidresolver.core :as smartidresolver]
               [bluegenes.tools.search.core :as search]
               [bluegenes.tools.summary.core :as summary]
               [bluegenes.tools.outboundlinks.core :as outboundlinks]

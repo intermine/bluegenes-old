@@ -1,0 +1,125 @@
+div.smartbox {
+  width: 100%;
+  // min-height: 200px;
+  // background: #f8f5ec;
+  // border: 1px solid rgba(0,0,0,0.2);
+  font-size: 1.2em;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pad-left {
+  padding-left: 20px;
+}
+
+div.smartboxcontainer .form-group {
+  padding-right: 15px;
+}
+
+div.smartboxcontainer .entry {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+div.smartbox input.freeform {
+  float: left;
+  padding: 9px 0 9px 0;
+  border: none;
+  // border: 1px dotted black;
+  margin: 2px;
+  font-size: 1em;
+  background: transparent;
+  color: #2d2d2d;
+  flex: 1 0;
+  outline: none;
+
+  &:focus {
+    border-bottom: 1px solid darkblue;
+  }
+}
+
+div.smartbox .dropdown-menu {
+  width: 100%;
+  color: red;
+}
+
+div.smartbox .identifier {
+  // float: left;
+  padding: 6px;
+  margin: 2px;
+  border-radius: 9px;
+  transition: all 0.5s ease;
+  flex: 0 0 auto;
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  // font-weight: bold;
+
+  div.bg {
+    position: absolute;
+    border: 1px solid red;
+  }
+  span, div {
+    padding-right: 5px;
+  }
+}
+
+div.stats {
+  display: flex;
+  align-items: center;
+
+  div.stat {
+
+    &:not(:last-child) {
+      border-right: 1px solid grey;
+    }
+    padding: 10px;
+
+
+    flex: 1 0 auto;
+    text-align: center;
+  }
+}
+
+
+div.smartbox .identifier.pending {
+  background: #333;
+  color: white;
+}
+
+div.smartbox .identifier.converted {
+  background: #9FCC68;
+  color: white;
+}
+
+div.smartbox .identifier.unresolved {
+  background: repeating-linear-gradient(
+  45deg,
+  #9F0000,
+  #9F0000 10px,
+  #BD0000 10px,
+  #BD0000 20px
+);
+  color: white;
+}
+
+div.smartbox .identifier.duplicate {
+  background: #F9C800;
+  color: black;
+}
+
+div.smartbox .identifier.new {
+  background: grey;
+  color: white;
+}
+
+div.smartbox .identifier.match {
+  background: #9FCC68;
+  color: white;
+}
+
+div.smartbox .identifier.notfound {
+  background: #FF6363;
+  color: white;
+}

@@ -40,11 +40,24 @@
        :service {:root "http://intermine.modencode.org/release-33"}
        :organism "C. elegans"}}
 
-   :histories {:k {:name "List Analysis"
+   :histories {:id4u {:name "Smart ID Resolver"
+                      :slug "id-resolver"
+                      :description "Browse and analyse lists"
+                      :structure [:a1]
+                      :steps {:a1 {:_id :a1
+                                   :tool "smartidresolver"}
+                              :b1 {:_id :b1
+                                   :tool "enrichment"
+                                   :subscribe [:a1]
+                                   :state [{:widget "go_enrichment_for_gene"
+                                            :correction "None"
+                                            :title "Gene Ontology Enrichment"}]}
+                              }}
+
+               :k {:name "List Analysis"
                    :slug "local-history-k"
                    :description "Browse and analyse lists"
                    :structure [:a1 [:z1 :z2 :z3 :z4 :z5 :z6]]
-
                    :steps {:a1 {:_id :a1
                                 :tool "chooselistcompact"}
                            :z1 {:_id :z1
@@ -102,6 +115,7 @@
                            :e4 {:_id :e4
                                 :tool "echotool"
                                 :subscribe [:d1]}}}
+
                :lists {:name "Gene Lists"
                        :slug "local-history-x"
                        :description "Browse Intermine Gene lists.s"
@@ -110,6 +124,7 @@
                                              :title "List Chooser"
                                              :description "List Chooser Description"
                                              :state []}}}
+
                :homepage-list-upload {:name "List Upload"
                                       :slug "list-upload"
                                       :description "Upload a list of genes, proteins, etc."
