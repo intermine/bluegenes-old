@@ -26,7 +26,7 @@
      (for [[key values] @histories]
        ^{:key key}
        [:div
-        [:a {:href (str "#/timeline/" (:slug values))} [:h4 (:name values)]]
+        [:h4 [:a {:href (str "#/timeline/" (:slug values))} (:name values)]]
         [:span (:description values)]])]))])
 
 (defn list-upload-section []

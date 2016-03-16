@@ -42,7 +42,7 @@
 
    :histories {:id4u {:name "Smart ID Resolver"
                       :slug "id-resolver"
-                      :description "Browse and analyse lists"
+                      :description "Look up a list of identifiers, e.g. Genes Symbols"
                       :structure [:a1]
                       :steps {:a1 {:_id :a1
                                    :tool "smartidresolver"}
@@ -116,27 +116,9 @@
                                 :tool "echotool"
                                 :subscribe [:d1]}}}
 
-               :lists {:name "Gene Lists"
-                       :slug "local-history-x"
-                       :description "Browse Intermine Gene lists.s"
-                       :steps {:choose-list {:tool "chooselist"
-                                             :_id :choose-list
-                                             :title "List Chooser"
-                                             :description "List Chooser Description"
-                                             :state []}}}
-
-               :homepage-list-upload {:name "List Upload"
-                                      :slug "list-upload"
-                                      :description "Upload a list of genes, proteins, etc."
-                                      :steps {:id-resolver
-                                              {:tool "idresolver"
-                                               :_id :id-resolver
-                                               :title "Show Results"
-                                               :description "Show Results"
-                                               :state []}}}
                :search {:name "Search"
                         :slug "search"
-                        :description "I too was born in app-db."
+                        :description "Search across InterMine for just about anything."
                         :structure [:search-tool [:summary :outboundlinks]]
                         :steps {
                           :search-tool {
