@@ -44,6 +44,15 @@
                           ; Or return the non-match
                           identifier)) identifiers)))))
 
+(defn remove-identifier
+  "Swap an identifier in some state for a new value.
+  Typical use case: swapping an identifier with duplicates with
+  a user selected one."
+  [state identifier]
+  (swap! state
+         update-in [:identifiers]
+         (fn [identifiers]
+           (remove (fn [id] (= (:identifier id) identifier)) identifiers))))
 
 
 (defn duplicate-dropdown
@@ -66,8 +75,12 @@
   (cond
     ; Matches (Good)
     (= (:status input) :match)
-    [:div.identifier {:class (:status input)}
-     (:identifier input)]
+    [:div.identifier.dropdown {:class (:status input)}
+     [:div.dropdown-toggle {:data-toggle "dropdown"}
+      (:identifier input)]
+     [:ul.dropdown-menu
+      ; [:li [:a "Disable"]] TODO
+      [:li [:a {:on-click #(remove-identifier state (:identifier input))} "Remove"]]]]
     ; Pending (In progress...)
     (= (:status input) :pending)
     [:div.identifier {:class (:status input)}
@@ -80,6 +93,8 @@
      [:div.dropdown-toggle {:data-toggle "dropdown"}
       (:identifier input) [:i.fa.fa-exclamation-triangle]]
      [:ul.dropdown-menu
+      [:li [:a {:on-click #(remove-identifier state (:identifier input))} "Remove"]]
+      [:li.divider {:role "separator"}]
       (doall (for [dup (:matches (:duplicates input))]
                ^{:key (:primaryIdentifier (:summary dup))} [:li [:a
                      {:on-click #(swap-identifier state (:identifier input) dup)}
@@ -96,17 +111,27 @@
     ; TODO: is there a case when a converted type
     ; has more than one value? If so, dropdown please.
     (= (:status input) :converted)
-    [:div.identifier {:class (:status input)}
-     (:identifier input)
-     [:i.fa.fa-random]
-     (-> input :product :summary :primaryIdentifier)
-     ]
+
+    [:div.identifier.dropdown {:class (:status input)}
+     [:div.dropdown-toggle {:data-toggle "dropdown"}
+      (-> input :product :summary :primaryIdentifier) [:i.fa.fa-random]]
+     [:ul.dropdown-menu
+      ; [:li [:a "Disable"]] TODO
+      [:li [:a {:on-click #(remove-identifier state (:identifier input))} "Remove"]]]]
+
+    ; [:div.identifier {:class (:status input)}
+    ;  (:identifier input)
+    ;  [:i.fa.fa-random]
+    ;  (-> input :product :summary :primaryIdentifier)
+    ;  ]
     ; Catch the rest.
     :else
-    [:div.identifier {:class (:status input)}
-     (:identifier input)
-    ;  [:i.fa.fa-times]
-     ]))
+    [:div.identifier.dropdown {:class (:status input)}
+     [:div.dropdown-toggle {:data-toggle "dropdown"}
+      (:identifier input)]
+     [:ul.dropdown-menu
+      ; [:li [:a "Disable"]] TODO
+      [:li [:a {:on-click #(remove-identifier state (:identifier input))} "Remove"]]]]))
 
 (defn resolve-id
   "Resolves an ID from Intermine."
