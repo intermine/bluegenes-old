@@ -13,6 +13,7 @@
               [bluegenes.tools.smartidresolver.core :as smartidresolver]
               [bluegenes.tools.search.core :as search]
               [bluegenes.tools.summary.core :as summary]
+              [bluegenes.tools.outboundlinks.core :as outboundlinks]
               [bluegenes.tools.runtemplate.core :as runtemplate]
               [bluegenes.tools.echotool.core :as echotool]
               [bluegenes.tools.chooselistcompact.core :as chooselistcompact]

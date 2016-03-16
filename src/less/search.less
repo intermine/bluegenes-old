@@ -51,7 +51,15 @@
     .results {
       margin: @spacer/2 @spacer/2 @spacer/2 @spacer;
       .result {
-        input[type=radio] {margin: 0 @spacer/2;}
+        input[type=radio] {
+          margin: 0 @spacer/2;
+          vertical-align:middle;
+          padding-top:4px;
+          &:before {
+          margin-top:4px;
+          content: " ";
+          }
+        }
         border-bottom: solid 1px #e4e4e4;
          span,
          cite {
