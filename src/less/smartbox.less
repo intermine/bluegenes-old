@@ -9,13 +9,16 @@ div.smartbox {
 }
 
 .btn-clear, .btn-clear:active {
-
-  &:hover {
-    color: blue;
-  }
-
+  &:hover { color: blue; }
   background-color: transparent;
   box-shadow: none;
+}
+
+.btn-inverted, .btn-inverted:active {
+  // &:hover { color: white; }
+  background-color: black;
+  color: white;
+  // box-shadow: none;
 }
 
 
@@ -57,6 +60,7 @@ div.smartbox .dropdown-menu {
 
 div.smartbox .identifier {
   // float: left;
+  .btn;
   padding: 6px;
   margin: 2px;
   border-radius: 9px;
@@ -102,6 +106,7 @@ div.smartbox .identifier.pending {
 
 div.smartbox .identifier.converted {
   background: #9FCC68;
+  background: #529401;
   color: white;
 }
 
@@ -128,6 +133,7 @@ div.smartbox .identifier.new {
 
 div.smartbox .identifier.match {
   background: #9FCC68;
+  background: #529401;
   color: white;
 }
 

@@ -55,7 +55,7 @@
       (:identifier input)]
      [:ul.dropdown-menu
       (doall (for [dup (:matches (:duplicates input))]
-               [:li [:a
+               ^{:key (:primaryIdentifier (:summary dup))} [:li [:a
                      {:on-click #(swap-identifier state (:identifier input) dup)}
                      [:div (:symbol (:summary dup))]
                      [:div (:primaryIdentifier (:summary dup))]]]))]]))
@@ -81,7 +81,7 @@
       (:identifier input) [:i.fa.fa-exclamation-triangle]]
      [:ul.dropdown-menu
       (doall (for [dup (:matches (:duplicates input))]
-               [:li [:a
+               ^{:key (:primaryIdentifier (:summary dup))} [:li [:a
                      {:on-click #(swap-identifier state (:identifier input) dup)}
                      [:div (:symbol (:summary dup))]
                      [:div (:primaryIdentifier (:summary dup))]]]))]]
@@ -311,11 +311,8 @@
       [:span.caret]]
      [:ul.dropdown-menu
       (doall (for [value values]
-               ^{:key value} [:li [:a
-                     {:on-click (fn [e]
-                                  (println "calling on value" value)
-                                  (handler value))}
-                     value]]))]]))
+               ^{:key value} [:li [:a {:on-click (fn [e] (handler value))}
+                                   value]]))]]))
 
 
 (defn reset-identifiers
@@ -340,14 +337,26 @@
   [state api]
   (fn []
     [:div
-     [:div.btn.btn-raised.btn-primary
+     [:div.btn.btn-primary
       {:class (if (empty? (remove nil? (map #(-> % :product :id) (:identifiers @state)))) "disabled")
        :on-click (fn [e] (handle-values @state api))}
       "View Results"]
+      [:div.btn.btn-clear.pad-left
+       {:class (if (empty? (:identifiers @state)) "disabled")
+        :on-click (fn [e] (swap! state assoc :identifiers []))}
+       "Clear"]
      [:div.btn.btn-clear.pad-left
-      {:class (if (empty? (:identifiers @state)) "disabled")
-       :on-click (fn [e] (swap! state assoc :identifiers []))}
-      "Clear"]]))
+      {:on-click (fn [e] (let [split-identifiers (splitter example)
+                               with-details (map (fn [id]
+                                                   {:identifier id
+                                                    :status :new})
+                                                 split-identifiers)]
+                           (swap! state
+                                  update-in [:identifiers]
+                                  concat with-details)
+                           (run-job state)))}
+      "Example"]
+     ]))
 
 (defn smartbox
   "Element containing the entire ID resolution."
@@ -386,18 +395,7 @@
                                                         update-in [:identifiers] reset-identifiers)
                                                  (run-job persistent-state))}]]]
                          [:div.entry
-                         [:label "Identifiers " [:a {:on-click (fn []
-                                                                 (let [split-identifiers (splitter example)
-                                                                       with-details (map (fn [id]
-                                                                                           {:identifier id
-                                                                                            :status :new})
-                                                                                         split-identifiers)]
-                                                                   (println "split identifi" split-identifiers)
-                                                                   (swap! persistent-state
-                                                                          update-in [:identifiers]
-                                                                          concat with-details)
-                                                                   (run-job persistent-state)
-                                                                   ))}" (Example)"]]
+                         [:label "Identifiers"]
                           [:div.smartbox
                            (doall (map (fn [next]
                                          ^{:key (:identifier next)}
