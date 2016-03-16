@@ -9,48 +9,17 @@
 (enable-console-print!)
 (def search-results (reagent.core/atom nil))
 
-(def remote-mines {
-  :humanmine {
-    :name "HumanMine"
-    :url "http://www.humanmine.org/humanmine"
-    :service {:root "http://www.humanmine.org/humanmine/service"}
-    :organism "H. sapiens"}
-  :yeastmine {
-    :name "YeastMine"
-    :url "http://yeastmine.yeastgenome.org/yeastmine"
-    :service {:root "http://yeastmine.yeastgenome.org/yeastmine/service"}
-    :organism "S. cerevisiae"}
-  :zebrafishmine {
-    :name "ZebraFishMine"
-    :url "http://www.zebrafishmine.org"
-    :service {:root "http://www.zebrafishmine.org"}
-    :organism "D. rerio"}
-  :ratmine {
-    :name "RatMine"
-    :url "http://ratmine.mcw.edu/ratmine"
-    :service {:root "http://stearman.hmgc.mcw.edu/ratmine"}
-    :organism "R. norvegicus"}
-  :mousemine {
-    :name "MouseMine"
-    :url "http://www.mousemine.org/mousemine"
-    :service {:root "http://www.mousemine.org/mousemine/service"}
-    :organism "M. musculus"}
-  :modmine {
-    :name "ModMine"
-    :url "http://intermine.modencode.org/release-33"
-    :service {:root "http://intermine.modencode.org/release-33"}
-    :organism "C. elegans"}})
-
 (defn load-data [upstream-data]
   "Loads homologues from each mine."
-  (doall (for [[minename details] remote-mines]
-    (go (let [
-      svc (select-keys upstream-data [:service])
-      id (get-in upstream-data [:data :payload 0])
-      type (get-in upstream-data [:data :type])
-      homologues (<! (im/homologues svc (select-keys details [:service]) type id (get-in details [:organism])))]
-        (swap! search-results assoc minename homologues)
-    )))))
+  (let [remote-mines (re-frame/subscribe [:remote-mines])]
+    (doall (for [[minename details] @remote-mines]
+      (go (let [
+        svc (select-keys upstream-data [:service])
+        id (get-in upstream-data [:data :payload 0])
+        type (get-in upstream-data [:data :type])
+        homologues (<! (im/homologues svc (select-keys details [:service]) type id (get-in details [:organism])))]
+          (swap! search-results assoc minename homologues)
+      ))))))
 
 (defn get-identifier [homologue]
   "returns an identifier. looks for the symbol first, if there is one, or otherwise uses the primary identifier."
@@ -74,14 +43,15 @@
   [:div.outbound
   [:h5 "Homologues in other Mines"]
   [:div.homologuelinks
-    (for [[k v] @search-results]
-      (let [this-mine (k remote-mines)]
+  (let [remote-mines (re-frame/subscribe [:remote-mines])]
+    (doall (for [[k v] @search-results]
+      (let [this-mine (k @remote-mines)]
         ^{:key k}
         [:div.onemine
          [:h6 (:name this-mine)]
          [:div.subtitle (:organism this-mine)]
          [:div (list-homologues (:homologues v) (:url this-mine))]
-       ]))]
+       ]))))]
    ;;handy for debug:
    ;;[:p (json-html/edn->hiccup @search-results)]
    ])
@@ -96,11 +66,12 @@
         (let [passed-in-state (:state (reagent/props this))
               api (:api (reagent/props this))
               upstream (:upstream-data (reagent/props this))]
-          (.log js/console "================" (clj->js upstream))
           (reset! local-state (:input passed-in-state)
           ;;don't load homologues for, say, publications
           (cond (= "Gene" (get-in upstream [:data :type]))
             (load-data upstream)))))
+      :component-will-update (fn []
+        (reset! search-results nil))
       :component-did-update (fn [this old-props]
         (let [upstream (:upstream-data (reagent/props this))]
           (cond (= "Gene" (get-in upstream [:data :type]))

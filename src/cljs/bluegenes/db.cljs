@@ -8,12 +8,37 @@
    :active-history nil
    :dimmer true
 
-   :mines {:flymine {:root "www.flymine.org/query"
-                     :token nil}
-           :humanmine {:root "www.humanmine.org/humanmine"
-                       :token nil}
-           :default {:root "www.humanmine.org/humanmine"
-                     :token nil}}
+   :remote-mines {
+     :humanmine {
+       :name "HumanMine"
+       :url "http://www.humanmine.org/humanmine"
+       :service {:root "http://www.humanmine.org/humanmine/service"}
+       :organism "H. sapiens"}
+     :yeastmine {
+       :name "YeastMine"
+       :url "http://yeastmine.yeastgenome.org/yeastmine"
+       :service {:root "http://yeastmine.yeastgenome.org/yeastmine/service"}
+       :organism "S. cerevisiae"}
+     :zebrafishmine {
+       :name "ZebraFishMine"
+       :url "http://www.zebrafishmine.org"
+       :service {:root "http://www.zebrafishmine.org"}
+       :organism "D. rerio"}
+     :ratmine {
+       :name "RatMine"
+       :url "http://ratmine.mcw.edu/ratmine"
+       :service {:root "http://stearman.hmgc.mcw.edu/ratmine"}
+       :organism "R. norvegicus"}
+     :mousemine {
+       :name "MouseMine"
+       :url "http://www.mousemine.org/mousemine"
+       :service {:root "http://www.mousemine.org/mousemine/service"}
+       :organism "M. musculus"}
+     :modmine {
+       :name "ModMine"
+       :url "http://intermine.modencode.org/release-33"
+       :service {:root "http://intermine.modencode.org/release-33"}
+       :organism "C. elegans"}}
 
    :histories {:k {:name "List Analysis"
                    :slug "local-history-k"

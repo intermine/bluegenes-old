@@ -192,21 +192,21 @@
 (defn get-local-homologues  [original-service remote-service q type organism]
   "If the remote mine says it has no homologues for a given identifier, query the local mine instead. It may be that there *are* homologues, but the remote mine doesn't know about them. If the local mine returns identifiers, verify them on the remote server and return them to the user."
   (let [c (chan)]
-    (.log js/console "%c getting local homologues for %s" "border-bottom:wheat solid 3px" (:root (:service remote-service)))
+    ;(.log js/console "%c getting local homologues for %s" "border-bottom:wheat solid 3px" (:root (:service remote-service)))
     (go (let [
       ;;get the list of homologues from the local mine
       local-homologue-results (:homologues (first (<! (query-records original-service q))))]
         (cond (some? local-homologue-results)
-          (do
-          (let ;;convert the results to just the list of homologues
-          [local-homologue-list (map #(-> % :homologue :primaryIdentifier) local-homologue-results)
-          ;;build the query to send to the remote service
-          remote-homologue-query (local-homologue-query local-homologue-list type organism)
-          ;;look up the list of identifers we just made on the remote mine to
-          ;;get the correct objectid to link to
-          remote-homologue-results (<! (query-records remote-service remote-homologue-query))]
-
-          (>! c (map-local-homologue-response remote-homologue-results))))))) c))
+          (do (let
+            ;;convert the results to just the list of homologues
+            [local-homologue-list (map #(-> % :homologue :primaryIdentifier) local-homologue-results)
+            ;;build the query to send to the remote service
+            remote-homologue-query (local-homologue-query local-homologue-list type organism)
+            ;;look up the list of identifers we just made on the remote mine to
+            ;;get the correct objectid to link to
+            remote-homologue-results (<! (query-records remote-service remote-homologue-query))]
+            ;;put the results in the channel
+            (>! c (map-local-homologue-response remote-homologue-results))))))) c))
 
 (defn homologues
   "returns homologues of a given gene id from a remote mine."
@@ -219,11 +219,8 @@
       q (homologue-query primary-id organism)
       ;;query the remote mine for homologues
       response (<! (query-records remote-service q))]
-          (.log js/console "%c getting homologues for %s" "border-bottom:mediumorchid dotted 3px" (:root (:service remote-service)))
+          ;(.log js/console "%c getting homologues for %s" "border-bottom:mediumorchid dotted 3px" (:root (:service remote-service)))
       (if (> (count response) 0)
         (>! c (first response))
         (>! c (<! (get-local-homologues original-service remote-service q type organism)))
-        )
-
-             ;; put the response in the channel
-    ))c))
+)))c))
