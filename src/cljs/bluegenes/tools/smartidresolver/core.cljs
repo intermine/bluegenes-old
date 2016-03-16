@@ -250,7 +250,19 @@
                                                     concat with-details)
                                              (run-job persistent-state)
                                              (reset! textbox-value ""))
-                                           (reset! textbox-value value))))}])})))
+                                           (reset! textbox-value value))))
+                          :on-key-down (fn [k]
+                                         ; Detect backspaces and open the last identifier
+                                         ; for editing.
+                                         (let [code (.-which k)]
+                                           (cond
+                                             (= code 8)
+                                             (if (empty? @textbox-value)
+                                               (do
+                                                 (reset! textbox-value (:identifier (last (:identifiers @persistent-state))))
+                                                 (swap! persistent-state
+                                                        update-in [:identifiers]
+                                                        butlast))))))}])})))
 
 (defn handle-values
   "Proceed with the bluegenes workflow.
@@ -317,7 +329,11 @@
      [:div.btn.btn-raised.btn-primary
       {:class (if (empty? (remove nil? (map #(-> % :product :id) (:identifiers @state)))) "disabled")
        :on-click (fn [e] (handle-values @state api))}
-      "View Results"]]))
+      "View Results"]
+     [:div.btn.btn-raised.btn-default.pad-left
+      {:class (if (empty? (:identifiers @state)) "disabled")
+       :on-click (fn [e] (swap! state assoc :identifiers []))}
+      "Clear"]]))
 
 (defn smartbox
   "Element containing the entire ID resolution."
