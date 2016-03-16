@@ -89,7 +89,7 @@
    (go (let [response (<! (http/get (str "http://" (:root service) "/service/model/" type "." (clj->js k)) {:with-credentials? false :keywordize-keys true}))]
    (-> response :body :name))))
 
-(defn map-response [response]
+(defn map-summary-response [response]
   "formats the summary fields map response for easier updating"
   (reduce (fn [new-map [k v]]
     (assoc new-map k {:name k :val v}))
@@ -109,7 +109,7 @@
 
          (let [q (summary-query type id (.allDescriptors result))]
           (go (let [response (first (<! (query-records service q)))
-                    mapped-response (map-response response)]
+                    mapped-response (map-summary-response response)]
             (>! c mapped-response))))))))
         (fn [error]
           (println "got error" error)
@@ -185,6 +185,10 @@
       ]
     })
 
+(defn map-local-homologue-response [data]
+  "formats the get-local-homologues response to match the default homologue response shape, so they can be output using the same logic."
+  {:homologues (map (fn [homie] {:homologue homie} ) data)})
+
 (defn get-local-homologues  [original-service remote-service q type organism]
   (let [c (chan)]
     (go (let [
@@ -200,8 +204,9 @@
             ;;the correct objectid to link to
             remote-homologue-results (<! (query-records remote-service remote-homologue-query))]
 
-      ;(.log js/console "%c Local Homologues" "border-bottom:mediumorchid dotted 3px" (clj->js remote-homologue-results))
-          (>! c remote-homologue-results)))))) c))
+
+
+          (>! c (map-local-homologue-response remote-homologue-results))))))) c))
 
 (defn homologues
   "returns homologues of a given gene id from a remote mine."
