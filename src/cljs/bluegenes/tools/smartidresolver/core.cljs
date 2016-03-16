@@ -365,7 +365,7 @@
      [:div.btn.btn-primary
       {:class (if (empty? (remove nil? (map #(-> % :product :id) (:identifiers @state)))) "disabled")
        :on-click (fn [e] (handle-values @state api))}
-      "View Results"]
+      (str "View Results (" (count (remove nil? (map #(-> % :product :id) (:identifiers @state)))) ")")]
       [:div.btn.btn-clear.pad-left
        {:class (if (empty? (:identifiers @state)) "disabled")
         :on-click (fn [e] (swap! state assoc :identifiers []))}
