@@ -19,17 +19,27 @@
     :name "YeastMine"
     :url "http://yeastmine.yeastgenome.org/yeastmine"
     :service {:root "http://yeastmine.yeastgenome.org/yeastmine/service"}
-    :organism "S. cervisiae"}
+    :organism "S. cerevisiae"}
   :zebrafishmine {
     :name "ZebraFishMine"
     :url "http://www.zebrafishmine.org"
     :service {:root "http://www.zebrafishmine.org"}
     :organism "D. rerio"}
+  :ratmine {
+    :name "RatMine"
+    :url "http://ratmine.mcw.edu/ratmine"
+    :service {:root "http://stearman.hmgc.mcw.edu/ratmine"}
+    :organism "R. norvegicus"}
   :mousemine {
     :name "MouseMine"
     :url "http://www.mousemine.org/mousemine"
     :service {:root "http://www.mousemine.org/mousemine/service"}
-    :organism "M. musculus"}})
+    :organism "M. musculus"}
+  :modmine {
+    :name "ModMine"
+    :url "http://intermine.modencode.org/release-33"
+    :service {:root "http://intermine.modencode.org/release-33"}
+    :organism "C. elegans"}})
 
 (defn load-data [upstream-data]
   "Loads homologues from each mine."
@@ -72,7 +82,8 @@
          [:div.subtitle (:organism this-mine)]
          [:div (list-homologues (:homologues v) (:url this-mine))]
        ]))]
-   [:p (json-html/edn->hiccup @search-results)]
+   ;;handy for debug:
+   ;;[:p (json-html/edn->hiccup @search-results)]
    ])
 
 (defn ^:export main []
