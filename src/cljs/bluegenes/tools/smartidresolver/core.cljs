@@ -7,6 +7,7 @@
             [bluegenes.tools.enrichment.controller :as c]
             [bluegenes.utils.imcljs :as im]
             [json-html.core :as json-html]
+            [clojure.string :refer [split]]
             [reagent.impl.util :as impl :refer [extract-props]]))
 
 (defn strip-characters
@@ -83,7 +84,9 @@
     (= (:status input) :converted)
     [:div.identifier {:class (:status input)}
      (:identifier input)
-     [:i.fa.fa-random]]
+     [:i.fa.fa-random]
+     (-> input :product :summary :primaryIdentifier)
+     ]
     ; Catch the rest.
     :else
     [:div.identifier {:class (:status input)}
@@ -199,8 +202,24 @@
         (go (let [response (<! (resolve-id (:identifier identifier) @state))]
               (doall (parse-response state response))))))))
 
+(def separators (set ".,; "))
 
+(def example "CG9151,FBgn0000099;CG3629, TfIIB, Mad, CG1775, CG2262, TWIST_DROME,
+  tinman, runt, E2f, CG8817, FBgn0010433, CG9786, CG1034, ftz,
+  FBgn0024250,FBgn0001251, tll, CG1374, CG33473, ato, so, CG16738, tramtrack,
+  CG2328, gt")
 
+(defn splitter
+  "Splits a string on any one of a set of strings."
+  [string]
+  (->> (split string (re-pattern (str "[" (reduce str separators) "\\r?\\n]")))
+       (remove nil?)
+       (remove #(= "" %))))
+
+(defn has-separator?
+  "Returns true if a string contains any one of a set of strings."
+  [str]
+  (some? (some separators str)))
 
 (defn input-box
   "Component to handle user input.
@@ -219,23 +238,19 @@
         [:input.freeform {:value @textbox-value
                           :type "text"
                           :on-change (fn [e]
-                                       (reset! textbox-value (clojure.string/trim (.. e -target -value))))
-                          :on-key-down (fn [k]
-                                         (let [code (.-which k)]
-                                           ; Check for breaking characters...
-                                           (if-not (nil? (some #{code} '(9 13 32 188)))
-                                             ; Break! Parse that puppy.
-                                             (do
-                                               (let [cleansed-val (strip-characters @textbox-value ",; ")]
-                                                 ; Keep an ordered list of inputs
-                                                 (swap! persistent-state
-                                                        update-in [:identifiers]
-                                                        conj {:identifier cleansed-val
-                                                              :status :new})
-                                                 ; Create a new ID resolution job for all new identifiers
-                                                 (run-job persistent-state)
-                                                 ; Reset our textbox value
-                                                 (reset k))))))}])})))
+                                       (let [value (.. e -target -value)]
+                                         (if (has-separator? value)
+                                           (let [split-identifiers (splitter value)
+                                                 with-details (map (fn [id]
+                                                                     {:identifier id
+                                                                      :status :new})
+                                                                   split-identifiers)]
+                                             (swap! persistent-state
+                                                    update-in [:identifiers]
+                                                    concat with-details)
+                                             (run-job persistent-state)
+                                             (reset! textbox-value ""))
+                                           (reset! textbox-value value))))}])})))
 
 (defn handle-values
   "Proceed with the bluegenes workflow.
@@ -341,7 +356,18 @@
                                                         update-in [:identifiers] reset-identifiers)
                                                  (run-job persistent-state))}]]]
                          [:div.entry
-                         [:label "Identifiers"]
+                         [:label "Identifiers " [:a {:on-click (fn []
+                                                                 (let [split-identifiers (splitter example)
+                                                                       with-details (map (fn [id]
+                                                                                           {:identifier id
+                                                                                            :status :new})
+                                                                                         split-identifiers)]
+                                                                   (println "split identifi" split-identifiers)
+                                                                   (swap! persistent-state
+                                                                          update-in [:identifiers]
+                                                                          concat with-details)
+                                                                   (run-job persistent-state)
+                                                                   ))}" (Example)"]]
                           [:div.smartbox
                            (doall (map (fn [next]
                                          ^{:key (:identifier next)}
