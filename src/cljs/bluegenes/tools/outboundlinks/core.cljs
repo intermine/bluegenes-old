@@ -3,6 +3,7 @@
   (:require [re-frame.core :as re-frame]
     [cljs.core.async :refer [put! chan <! >! timeout close!]]
     [bluegenes.utils.imcljs :as im]
+    [json-html.core :as json-html]
     [reagent.core :as reagent]))
 
 (enable-console-print!)
@@ -31,16 +32,14 @@
     :organism "M. musculus"}})
 
 (defn load-data [upstream-data]
-  "Loads one data "
+  "Loads homologues from each mine."
   (doall (for [[minename details] remote-mines]
-    ;(.log js/console "%c Remotes" "border-bottom:skyblue dotted 3px" (clj->js details)
-    ;)
     (go (let [
       svc (select-keys upstream-data [:service])
       id (get-in upstream-data [:data :payload 0])
       type (get-in upstream-data [:data :type])
       homologues (<! (im/homologues svc (select-keys details [:service]) type id (get-in details [:organism])))]
-        (swap! search-results assoc minename (first homologues))
+        (swap! search-results assoc minename homologues)
     )))))
 
 (defn get-identifier [homologue]
@@ -72,7 +71,9 @@
          [:h6 (:name this-mine)]
          [:div.subtitle (:organism this-mine)]
          [:div (list-homologues (:homologues v) (:url this-mine))]
-       ]))]])
+       ]))]
+   [:p (json-html/edn->hiccup @search-results)]
+   ])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]

@@ -161,6 +161,48 @@
     ]
   })
 
+(defn local-homologue-query [ids type organism]
+    {
+    :from type
+    :select [
+      "primaryIdentifier"
+      "symbol"
+      "organism.shortName"
+      ]
+    :orderBy [
+        {
+        :path "primaryIdentifier"
+        :direction "ASC"
+        }
+      ]
+    :where [
+        {
+        :path type
+        :op "LOOKUP"
+        :value ids
+        :extraValue organism
+        }
+      ]
+    })
+
+(defn get-local-homologues  [original-service remote-service q type organism]
+  (let [c (chan)]
+    (go (let [
+      ;;get the list of homologues from the local mine
+      local-homologue-results (:homologues (first (<! (query-records original-service q))))]
+          (cond (some? local-homologue-results)
+            (do
+            (let ;;convert the results to just the list of homologues
+            [local-homologue-list (map #(-> % :homologue :primaryIdentifier) local-homologue-results)
+            ;;build the query to send to the remote service
+            remote-homologue-query (local-homologue-query local-homologue-list type organism)
+            ;;look up the list of identifers we just made on the remote mine to get
+            ;;the correct objectid to link to
+            remote-homologue-results (<! (query-records remote-service remote-homologue-query))]
+
+      ;(.log js/console "%c Local Homologues" "border-bottom:mediumorchid dotted 3px" (clj->js remote-homologue-results))
+          (>! c remote-homologue-results)))))) c))
+
 (defn homologues
   "returns homologues of a given gene id from a remote mine."
   [original-service remote-service type id organism]
@@ -171,14 +213,11 @@
       ;build the query
       q (homologue-query primary-id organism)
       ;;query the remote mine for homologues
-      response (<! (query-records remote-service q))
-      local-response (<! (query-records original-service q))]
-      ;(.log js/console "%c Homologues" "border-bottom:mediumorchid dotted 3px" (clj->js response)) ;;this prints the expected response
+      response (<! (query-records remote-service q))]
+          ;(.log js/console "%c Local Homologues" "border-bottom:mediumorchid dotted 3px" (clj->js remote-homologue-results))
       (if (> (count response) 0)
-        (do ;(.log js/console "%c Homologues" "border-bottom:green dashed 3px" (clj->js response))
-        (>! c response))
-        (do ;(.log js/console "%c No homologues" "border-bottom:red solid 3px" (clj->js local-response))
-        (>! c local-response))
+        (>! c (first response))
+        (>! c (<! (get-local-homologues original-service remote-service q type organism)))
         )
 
              ;; put the response in the channel
