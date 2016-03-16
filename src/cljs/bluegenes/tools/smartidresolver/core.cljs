@@ -74,10 +74,24 @@
      (:identifier input)
      [:i.fa.fa-circle-o-notch.fa-spin]]
     ; Duplicate (ambigious)
+
     (= (:status input) :duplicate)
-    [:div.identifier {:class (:status input)}
-     [duplicate-dropdown input state]
-     [:i.fa.fa-exclamation-triangle]]
+    [:div.identifier.dropdown {:class (:status input)}
+     [:div.dropdown-toggle {:data-toggle "dropdown"}
+      (:identifier input) [:i.fa.fa-exclamation-triangle]]
+     [:ul.dropdown-menu
+      (doall (for [dup (:matches (:duplicates input))]
+               [:li [:a
+                     {:on-click #(swap-identifier state (:identifier input) dup)}
+                     [:div (:symbol (:summary dup))]
+                     [:div (:primaryIdentifier (:summary dup))]]]))]]
+
+    ; (= (:status input) :duplicate)
+    ; [:div.identifier.dropdown {:class (:status input)}
+    ;  [duplicate-dropdown input state]
+    ;  [:i.fa.fa-exclamation-triangle]]
+
+
     ; Converted (hopefully good?)
     ; TODO: is there a case when a converted type
     ; has more than one value? If so, dropdown please.
@@ -330,7 +344,7 @@
       {:class (if (empty? (remove nil? (map #(-> % :product :id) (:identifiers @state)))) "disabled")
        :on-click (fn [e] (handle-values @state api))}
       "View Results"]
-     [:div.btn.btn-raised.btn-default.pad-left
+     [:div.btn.btn-clear.pad-left
       {:class (if (empty? (:identifiers @state)) "disabled")
        :on-click (fn [e] (swap! state assoc :identifiers []))}
       "Clear"]]))
