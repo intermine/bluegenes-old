@@ -43,15 +43,18 @@
   [:div.outbound
   [:h5 "Homologues in other Mines"]
   [:div.homologuelinks
-  (let [remote-mines (re-frame/subscribe [:remote-mines])]
-    (doall (for [[k v] @search-results]
-      (let [this-mine (k @remote-mines)]
-        ^{:key k}
-        [:div.onemine
-         [:h6 (:name this-mine)]
-         [:div.subtitle (:organism this-mine)]
-         [:div (list-homologues (:homologues v) (:url this-mine))]
-       ]))))]
+    (let [remote-mines (re-frame/subscribe [:remote-mines])]
+      (doall (for [[k v] @search-results]
+        (let [this-mine (k @remote-mines)]
+          ^{:key k}
+          [:div.onemine
+           [:h6 (:name this-mine)]
+           [:div.subtitle (:organism this-mine)]
+           [:div (list-homologues (:homologues v) (:url this-mine))]
+         ]))))
+   ;;let's tell them we have no homologues if no mines have results. 
+   (cond (< (count @search-results) 1)
+     [:p "No homologues found. :("])]
    ;;handy for debug:
    ;;[:p (json-html/edn->hiccup @search-results)]
    ])
