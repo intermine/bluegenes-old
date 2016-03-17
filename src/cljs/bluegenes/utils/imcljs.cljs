@@ -226,7 +226,7 @@
     (go (let [
       ;;get the list of homologues from the local mine
       local-homologue-results (:homologues (first (<! (query-records original-service q))))]
-        (cond (some? local-homologue-results)
+        (if (some? local-homologue-results)
           (do (let
             ;;convert the results to just the list of homologues
             [local-homologue-list (map #(-> % :homologue :primaryIdentifier) local-homologue-results)
@@ -236,7 +236,8 @@
             ;;get the correct objectid to link to
             remote-homologue-results (<! (query-records remote-service remote-homologue-query))]
             ;;put the results in the channel
-            (>! c (map-local-homologue-response remote-homologue-results))))))) c))
+            (>! c (map-local-homologue-response remote-homologue-results))))
+            (>! c {:homologues [] })))) c))
 
 (defn homologues
   "returns homologues of a given gene id from a remote mine."
@@ -249,7 +250,7 @@
       q (homologue-query primary-id organism)
       ;;query the remote mine for homologues
       response (<! (query-records remote-service q))]
-          ;(.log js/console "%c getting homologues for %s" "border-bottom:mediumorchid dotted 3px" (:root (:service remote-service)))
+          (.log js/console "%c getting homologues for %s" "border-bottom:mediumorchid dotted 3px" (:root (:service remote-service)) (clj->js response))
       (if (> (count response) 0)
         (>! c (first response))
         (>! c (<! (get-local-homologues original-service remote-service q type organism)))

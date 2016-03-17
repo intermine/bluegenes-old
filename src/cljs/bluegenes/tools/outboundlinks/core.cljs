@@ -18,6 +18,7 @@
         id (get-in upstream-data [:data :payload 0])
         type (get-in upstream-data [:data :type])
         homologues (<! (im/homologues svc (select-keys details [:service]) type id (get-in details [:organism])))]
+            (.log js/console "Homologues for" (clj->js minename) (clj->js homologues))
           (swap! search-results assoc minename homologues)
       ))))))
 
@@ -39,13 +40,27 @@
         :target "_blank"}
       [:svg.icon.icon-external [:use {:xlinkHref "#icon-external"}]]
       (get-identifier homie)
-
       ]]) homologues)))
+
+(defn loaded-from-list []
+  (let [remote-mines (re-frame/subscribe [:remote-mines])
+        mine-names (set (keys @remote-mines))
+        active-mines (set (keys @search-results))
+        waiting-mines (clojure.set/difference mine-names active-mines)]
+  [:div
+   (.log js/console "all" (clj->js mine-names) "active" (clj->js active-mines) "waiting" (clj->js waiting-mines))
+  [:div "Loading from: "
+    (doall
+      (for [[k v] @remote-mines]
+        (cond (nil? (k @search-results))
+        ^{:key k}
+        [:span (:name v)])))]]))
 
 (defn homologue-links [local-state api upstream-data]
   "Visual link show component that shows one result per mine"
   [:div.outbound
   [:h5 "Homologues in other Mines"]
+  [loaded-from-list]
   [:div.homologuelinks
     (let [remote-mines (re-frame/subscribe [:remote-mines])]
       (doall (for [[k v] @search-results]
