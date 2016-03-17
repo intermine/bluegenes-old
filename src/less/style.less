@@ -1,17 +1,13 @@
 @import url(https://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic);
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,900,300italic,300,400italic);
-
 // Base Bootstrap
 @import "../../bower_components/bootstrap/less/bootstrap";
 @import "variables";
-
 // Bootswatch Paper theme
 @import "bootswatch";
 @import "overrides";
-
 // Homepage:
 @import "homepage";
-
 // Tool import:
 @import "list-chooser";
 @import "stepdash";
@@ -20,23 +16,18 @@
 @import "dashboard";
 @import "outboundlinks";
 @import "smartbox";
-
-
 @rgba-primary-0: rgba(211,209,198,1);
 /* Main Primary color */
 @rgba-primary-1: rgba(249,242,213,1);
 @rgba-primary-2: rgba(195,191,174,1);
 @rgba-primary-3: rgba(175,170,147,1);
 @rgba-primary-4: rgba(160,153,125,1);
-@cta-color: #4CAF50;
+@cta-color: @brand-primary;
 @cta-color-text: #fff;
 @selectedColor: #3F51B5;
 @selectedColorText: #fff;
-
 @stripe-color: #f6f6f6;
-
-@default-dark-text-color:rgba(0,0,0,0.87);
-
+@default-dark-text-color: rgba(0,0,0,0.87);
 //define master colours for popular data types. Try to draw from 500 colours
 //here: https://www.google.com/design/spec/style/color.html# to keep the colours
 //visually distinct. They should be used ONLY for data type tagging, not general theming
@@ -45,7 +36,7 @@
 @color-Publication: #2196F3;
 @border-radius: 2px;
 .result-type {
-  line-height:1.5em;
+  line-height: 1.5em;
   background-color: #ccc;
   color: @default-dark-text-color;
   &.type-Gene {
@@ -59,7 +50,6 @@
     background: @color-Protein;
   }
 }
-
 body {
   background: @rgba-primary-0;
   background: #D9D9D9;
@@ -107,6 +97,13 @@ body {
 }
 .hide {
   display: none;
+}
+.icon {
+  width: 1em;
+  height: 1em;
+  margin-left: 0.4em;
+  margin-right: 0.4em;
+  fill: currentColor;
 }
 @spinner-color: rgba(0,0,0,0.1);
 @spinner-highlight: rgba(0,0,0,0.5);
@@ -248,13 +245,13 @@ body {
   }
   .toolbar {
     @toolbarColor: #eee;
-    color:  @default-dark-text-color;
+    color: @default-dark-text-color;
     .clearfix;
     background: @toolbarColor;
     border: solid 1px @toolbarColor;
     li {
       a {
-        color:  @default-dark-text-color;
+        color: @default-dark-text-color;
       }
       padding: 0 1em;
       min-height: 3em;
@@ -391,7 +388,7 @@ th.jh-key {
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:hover,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:focus {
-  color:  @default-dark-text-color;
+  color: @default-dark-text-color;
   border-top: 3px solid #bbe9f0;
   color: white;
   background-color: rgba(82, 82, 82, 1);
@@ -433,9 +430,8 @@ th.jh-key {
     cursor: pointer;
   }
 }
-
 //IM tables pagination fixes:
-@paginationheight : 3em;
+@paginationheight: 3em;
 ul.pagination {
   margin: 0;
   form {

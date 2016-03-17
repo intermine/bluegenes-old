@@ -3,6 +3,7 @@
                  [org.clojure/clojurescript "1.7.228"]
                  [reagent "0.5.1"]
                  [re-frame "0.6.0"]
+                 [cljsjs/react "0.14.3-0"] ;;this React lib allow svgs to render properly. Remove if Reagent ever uses React > 0.14
                  [secretary "1.2.3"]
                  [compojure "1.4.0"]
                  [cheshire "5.5.0"]

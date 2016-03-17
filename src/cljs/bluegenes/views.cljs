@@ -5,6 +5,7 @@
             [bluegenes.components.dimmer :as dimmer]
             [bluegenes.timeline.api :as timeline-api]
             [clojure.string :as str]
+            [bluegenes.utils.icons :as icons]
             ; [bluegenes.components.googlesignin :as google-sign-in]
             [bluegenes.tools.idresolver.core :as idresolver]
             [json-html.core :as json-html])
@@ -147,6 +148,8 @@
   (let [active-panel (re-frame/subscribe [:active-panel])]
     (fn []
       [:div
+       [icons/icons]
        [nav-panel]
        (panels @active-panel)
-       [dimmer/main]])))
+       [dimmer/main]
+       ])))

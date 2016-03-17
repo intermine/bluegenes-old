@@ -35,8 +35,12 @@
   (into [:ul.homologues] (map (fn [homie]
     [:li
      [:a {
-        :href(str url "/report.do?id=" (get-in homie [:homologue :objectId]))}
-      (get-identifier homie)]]) homologues)))
+        :href (str url "/report.do?id=" (get-in homie [:homologue :objectId]))
+        :target "_blank"}
+      [:svg.icon.icon-share [:use {:xlinkHref "#icon-share"}]]
+      (get-identifier homie)
+
+      ]]) homologues)))
 
 (defn homologue-links [local-state api upstream-data]
   "Visual link show component that shows one result per mine"
@@ -52,8 +56,11 @@
            [:div.subtitle (:organism this-mine)]
            [:div (list-homologues (:homologues v) (:url this-mine))]
          ]))))
-   ;;let's tell them we have no homologues if no mines have results. 
-   (cond (< (count @search-results) 1)
+   ;;let's tell them we have no homologues if no mines have results,
+   ;;but not if it's just because searches haven't come back yet.
+   (cond (and
+          (some? @search-results)
+          (< (count @search-results) 1))
      [:p "No homologues found. :("])]
    ;;handy for debug:
    ;;[:p (json-html/edn->hiccup @search-results)]
