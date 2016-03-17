@@ -5,7 +5,7 @@
 ;;project.clj. This makes SVG [:use] tags work properly but results in some
 ;;(seemingly?) harmless console warnings about deprecated methods.
 ;;if they DO prove problematic, try this method below as a workaround:
-(defn img-with-href [[elem-type props :as elem]]
+'(defn img-with-href [[elem-type props :as elem]]
   (let [image-elem [elem-type (select-keys props #{:href :height :width})]
         image-elem-html (clojure.string/replace
                          (reagent/render-to-static-markup image-elem)

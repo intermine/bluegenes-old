@@ -37,7 +37,7 @@
      [:a {
         :href (str url "/report.do?id=" (get-in homie [:homologue :objectId]))
         :target "_blank"}
-      [:svg.icon.icon-share [:use {:xlinkHref "#icon-share"}]]
+      [:svg.icon.icon-external [:use {:xlinkHref "#icon-external"}]]
       (get-identifier homie)
 
       ]]) homologues)))
