@@ -42,44 +42,60 @@
       (get-identifier homie)
       ]]) homologues)))
 
-(defn loaded-from-list []
+(defn loading-from-list []
   (let [remote-mines (re-frame/subscribe [:remote-mines])
         mine-names (set (keys @remote-mines))
         active-mines (set (keys @search-results))
-        waiting-mines (clojure.set/difference mine-names active-mines)]
+        waiting-mines (clojure.set/difference mine-names active-mines)
+      ;  empty-mines ()
+        ]
+    (cond (some? @search-results)
   [:div
    (.log js/console "all" (clj->js mine-names) "active" (clj->js active-mines) "waiting" (clj->js waiting-mines))
-  [:div "Loading from: "
-    (doall
-      (for [[k v] @remote-mines]
-        (cond (nil? (k @search-results))
-        ^{:key k}
-        [:span (:name v)])))]]))
+   (cond (< 0 (count waiting-mines))
+    [:div "Loading from: "
+      (doall
+        (for [[k v] @remote-mines]
+          (cond (nil? (k @search-results))
+          ^{:key k}
+          [:span (:name v)])))])])))
+
+
+(defn successful-homologue-results []
+  "visually outputs results for each mine that has more than 0 homologues."
+  (let [remote-mines (re-frame/subscribe [:remote-mines])]
+    [:div.homologuelinks
+    (doall (for [[k v] @search-results]
+      (let [this-mine (k @remote-mines)
+            homies (:homologues v)]
+        (if (> (count homies) 0)
+          ;;Output successful mines
+          (doall
+            ^{:key k}
+            [:div.onemine
+              [:h6 (:name this-mine)]
+              [:div.subtitle (:organism this-mine)]
+              [:div (list-homologues homies (:url this-mine))]])
+       ))))]))
+
 
 (defn homologue-links [local-state api upstream-data]
   "Visual link show component that shows one result per mine"
   [:div.outbound
-  [:h5 "Homologues in other Mines"]
-  [loaded-from-list]
-  [:div.homologuelinks
-    (let [remote-mines (re-frame/subscribe [:remote-mines])]
-      (doall (for [[k v] @search-results]
-        (let [this-mine (k @remote-mines)]
-          ^{:key k}
-          [:div.onemine
-           [:h6 (:name this-mine)]
-           [:div.subtitle (:organism this-mine)]
-           [:div (list-homologues (:homologues v) (:url this-mine))]
-         ]))))
-   ;;let's tell them we have no homologues if no mines have results,
-   ;;but not if it's just because searches haven't come back yet.
-   (cond (and
-          (some? @search-results)
-          (< (count @search-results) 1))
-     [:p "No homologues found. :("])]
-   ;;handy for debug:
-   ;;[:p (json-html/edn->hiccup @search-results)]
-   ])
+    [:h5 "Homologues in other Mines"]
+    (if (some? @search-results)
+      (do
+        [loading-from-list]
+        [:div
+          [successful-homologue-results]
+          ;;let's tell them we have no homologues if no mines have results,
+          ;;but not if it's just because searches haven't come back yet.
+          (cond (< (count @search-results) 1)
+            [:p "No homologues found. "])])
+      [:div.disabled
+        [:svg.icon.icon-external [:use {:xlinkHref "#icon-question"}]]
+       "Want to see homologues? Search for something above, then select a search result to see more details."]
+      )])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]

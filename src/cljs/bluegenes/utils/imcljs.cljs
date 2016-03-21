@@ -250,7 +250,7 @@
       q (homologue-query primary-id organism)
       ;;query the remote mine for homologues
       response (<! (query-records remote-service q))]
-          (.log js/console "%c getting homologues for %s" "border-bottom:mediumorchid dotted 3px" (:root (:service remote-service)) (clj->js response))
+          ;(.log js/console "%c getting homologues for %s" "border-bottom:mediumorchid dotted 3px" (:root (:service remote-service)) (clj->js response))
       (if (> (count response) 0)
         (>! c (first response))
         (>! c (<! (get-local-homologues original-service remote-service q type organism)))
