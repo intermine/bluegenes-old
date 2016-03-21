@@ -66,8 +66,8 @@
   [:div.results
     [:h4 "Results" [results-count state]]
     [:form
+     (let [active-results (filter (fn [result] (is-active-result? state result)) (:results @state))]
      (doall (for [result (:results @state)]
-       (if (is-active-result? state result)
          ^{:key (.-id result)}
          [resulthandler/result-row {:result result :state state :api api}]
          )))]])
