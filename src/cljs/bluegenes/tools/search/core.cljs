@@ -4,7 +4,9 @@
             [clojure.string :as str]
             [intermine.imjs :as imjs]
             [bluegenes.tools.search.filters :as filters]
-            [bluegenes.tools.search.resultrow :as resulthandler]))
+            [bluegenes.tools.search.resultrow :as resulthandler]            [json-html.core :as json-html])
+
+    (:use [json-html.core :only [edn->hiccup]]))
 (enable-console-print!)
 
 (def search-results (reagent.core/atom {:results nil}))
@@ -61,16 +63,27 @@
   "Visual component: outputs the number of results shown."
     [:small " Displaying " (count-current-results state) " of " (count-total-results @state) " results"])
 
+(defn load-more-results [state api active-filter]
+  ()
+  (.log js/console "The total filter count for %s is" (:active-filter @state) (clj->js (get (:category (:facets @state)) active-filter))))
+
 (defn results-display [state api]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
     [:h4 "Results" [results-count state]]
     [:form
-      (let [active-results (filter
-          (fn [result] (is-active-result? state result)) (:results @state))]
-        (doall (for [result active-results]
-          ^{:key (.-id result)}
-          [resulthandler/result-row {:result result :state state :api api}])))]])
+     (doall
+     ;[:div (json-html/edn->hiccup @state)]
+     (let [active-results (filter
+        (fn [result] (is-active-result? state result)) (:results @state))
+           active-filter (:active-filter @state)
+           filtered-result-count (get (:category (:facets @state)) active-filter)]
+            (cond (< (count-current-results state) filtered-result-count)
+              (load-more-results state api active-filter))
+            (for [result active-results]
+              ^{:key (.-id result)}
+              [resulthandler/result-row {:result result :state state :api api}])))]
+   ])
 
 (defn check-for-search-term-in-url []
   "Splits out the search term from the URL, allowing repeatable external linking to searches"
