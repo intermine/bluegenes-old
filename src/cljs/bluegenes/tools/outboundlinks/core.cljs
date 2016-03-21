@@ -113,7 +113,7 @@
       ;;if there are no results
       [:div.disabled
         [:svg.icon.icon-external [:use {:xlinkHref "#icon-question"}]]
-       "Want to see homologues? Search for something above, then select a search result to see more details."])
+       " Want to see homologues? Search for something above, then select a search result to see more details."])
 
       ])
 
