@@ -19,11 +19,11 @@
        :url "http://yeastmine.yeastgenome.org/yeastmine"
        :service {:root "http://yeastmine.yeastgenome.org/yeastmine/service"}
        :organism "S. cerevisiae"}
-    ;  :zebrafishmine {
-    ;    :name "ZebraFishMine"
-    ;    :url "http://www.zebrafishmine.org"
-    ;    :service {:root "http://www.zebrafishmine.org"}
-    ;    :organism "D. rerio"}
+     :zebrafishmine {
+       :name "ZebraFishMine"
+       :url "http://www.zebrafishmine.org"
+       :service {:root "http://www.zebrafishmine.org"}
+       :organism "D. rerio"}
      :ratmine {
        :name "RatMine"
        :url "http://ratmine.mcw.edu/ratmine"

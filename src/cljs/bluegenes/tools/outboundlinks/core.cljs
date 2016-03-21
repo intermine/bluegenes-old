@@ -42,29 +42,41 @@
       (get-identifier homie)
       ]]) homologues)))
 
+(defn status-no-known-homologues [empty-mines remote-mines]
+  "outputs visual list of mines for which we have 0 homologue results"
+  [:div.no-homologues
+   "No known homologues found in: "
+    (doall
+      (map (fn [mine]
+        (:name (mine @remote-mines))) empty-mines))])
+
+(defn status-waiting-for-homologues [remote-mines]
+  "Visually output mine list for which we still have no results."
+  [:div.awaiting-homologues
+   [:svg.icon.icon-waiting [:use {:xlinkHref "#icon-waiting"}]]
+   "Awaiting results from: "
+    (doall
+      (for [[k v] @remote-mines]
+        (cond (nil? (k @search-results))
+        ^{:key k}
+        [:span (:name v)])))])
+
 (defn status-list []
+  "Give the user status of mines for which we are still loading or have no results for"
   (let [remote-mines (re-frame/subscribe [:remote-mines])
         mine-names (set (keys @remote-mines))
         active-mines (set (keys @search-results))
         waiting-mines (clojure.set/difference mine-names active-mines)
         empty-mines (keys (filter (fn [[k v]] (empty? (:homologues v))) @search-results))
         ]
-    [:div
+    [:div.status-list
      ;(.log js/console "all" (clj->js mine-names) "active" (clj->js active-mines) "waiting" (clj->js waiting-mines) "Empty:" (clj->js empty-mines))
       ;;output mines from which we're still awaiting results
       (cond (seq waiting-mines)
-        [:div.awaiting-homologues "Awaiting results from: "
-          (doall
-            (for [[k v] @remote-mines]
-              (cond (nil? (k @search-results))
-              ^{:key k}
-              [:span (:name v)])))])
+        [status-waiting-for-homologues remote-mines])
       ;;output mines with 0 results.
       (cond (seq empty-mines)
-        [:div.no-homologues "No known homologues: "
-          (doall
-            (map (fn [mine]
-              (:name (mine @remote-mines))) empty-mines))])]))
+        [status-no-known-homologues empty-mines remote-mines])]))
 
 
 (defn successful-homologue-results []
