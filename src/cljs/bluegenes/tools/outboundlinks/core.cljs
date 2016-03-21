@@ -42,23 +42,29 @@
       (get-identifier homie)
       ]]) homologues)))
 
-(defn loading-from-list []
+(defn status-list []
   (let [remote-mines (re-frame/subscribe [:remote-mines])
         mine-names (set (keys @remote-mines))
         active-mines (set (keys @search-results))
         waiting-mines (clojure.set/difference mine-names active-mines)
-      ;  empty-mines ()
+        empty-mines (keys (filter (fn [[k v]] (empty? (:homologues v))) @search-results))
         ]
-    (cond (some? @search-results)
-  [:div
-   (.log js/console "all" (clj->js mine-names) "active" (clj->js active-mines) "waiting" (clj->js waiting-mines))
-   (cond (< 0 (count waiting-mines))
-    [:div "Loading from: "
-      (doall
-        (for [[k v] @remote-mines]
-          (cond (nil? (k @search-results))
-          ^{:key k}
-          [:span (:name v)])))])])))
+    [:div
+     ;(.log js/console "all" (clj->js mine-names) "active" (clj->js active-mines) "waiting" (clj->js waiting-mines) "Empty:" (clj->js empty-mines))
+      ;;output mines from which we're still awaiting results
+      (cond (seq waiting-mines)
+        [:div.awaiting-homologues "Awaiting results from: "
+          (doall
+            (for [[k v] @remote-mines]
+              (cond (nil? (k @search-results))
+              ^{:key k}
+              [:span (:name v)])))])
+      ;;output mines with 0 results.
+      (cond (seq empty-mines)
+        [:div.no-homologues "No known homologues: "
+          (doall
+            (map (fn [mine]
+              (:name (mine @remote-mines))) empty-mines))])]))
 
 
 (defn successful-homologue-results []
@@ -84,18 +90,20 @@
   [:div.outbound
     [:h5 "Homologues in other Mines"]
     (if (some? @search-results)
-      (do
-        [loading-from-list]
-        [:div
-          [successful-homologue-results]
-          ;;let's tell them we have no homologues if no mines have results,
-          ;;but not if it's just because searches haven't come back yet.
-          (cond (< (count @search-results) 1)
-            [:p "No homologues found. "])])
+      ;;if there are results
+      [:div
+        [status-list]
+        [successful-homologue-results]
+        ;;let's tell them we have no homologues if no mines have results,
+        ;;but not if it's just because searches haven't come back yet.
+        (cond (< (count @search-results) 1)
+          [:p "No homologues found. "])]
+      ;;if there are no results
       [:div.disabled
         [:svg.icon.icon-external [:use {:xlinkHref "#icon-question"}]]
-       "Want to see homologues? Search for something above, then select a search result to see more details."]
-      )])
+       "Want to see homologues? Search for something above, then select a search result to see more details."])
+
+      ])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
