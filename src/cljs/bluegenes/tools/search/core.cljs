@@ -66,11 +66,11 @@
   [:div.results
     [:h4 "Results" [results-count state]]
     [:form
-     (let [active-results (filter (fn [result] (is-active-result? state result)) (:results @state))]
-     (doall (for [result (:results @state)]
-         ^{:key (.-id result)}
-         [resulthandler/result-row {:result result :state state :api api}]
-         )))]])
+      (let [active-results (filter
+          (fn [result] (is-active-result? state result)) (:results @state))]
+        (doall (for [result active-results]
+          ^{:key (.-id result)}
+          [resulthandler/result-row {:result result :state state :api api}])))]])
 
 (defn check-for-search-term-in-url []
   "Splits out the search term from the URL, allowing repeatable external linking to searches"
