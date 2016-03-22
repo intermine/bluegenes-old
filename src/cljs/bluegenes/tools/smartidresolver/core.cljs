@@ -276,6 +276,7 @@
       (fn [persistent-state]
         [:input.freeform {:value @textbox-value
                           :type "text"
+                          :placeholder "Type IDs here..."
                           :on-change (fn [e]
                                        (let [value (.. e -target -value)]
                                          (if (has-separator? value)
