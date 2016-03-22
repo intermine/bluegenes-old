@@ -72,11 +72,12 @@
   "Visual component: outputs the number of results shown."
     [:small " Displaying " (count-current-results) " of " (count-total-results @search-results) " results"])
 
-(defn load-more-results [api]
-  (search "adh" api (:active-filter @search-results))
+(defn load-more-results [api local-state]
+  (.log js/console (clj->js @local-state))
+  (search @local-state api (:active-filter @search-results))
   )
 
-(defn results-display [api]
+(defn results-display [api local-state]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
     [:h4 "Results" [results-count]]
@@ -90,7 +91,7 @@
           ;;the original search returned
           (cond (and  (< (count-current-results) filtered-result-count)
                       (<= (count-current-results) max-results))
-            (load-more-results api))
+            (load-more-results api local-state))
           ;;output em!
           (for [result active-results]
             ^{:key (.-id result)}
@@ -121,7 +122,7 @@
     [:button "Submit"]]
    [:div.response
       [filters/facet-display search-results api search searchterm]
-      [results-display api]]]))
+      [results-display api local-state]]]))
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
@@ -141,5 +142,4 @@
               (reset! local-state search-term)
               (submit-handler search-term api)
               ))))
-      :component-did-update (fn [this old-props]
-        (.log js/console "did update" this old-props))})))
+})))

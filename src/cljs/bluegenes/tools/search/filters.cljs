@@ -5,7 +5,7 @@
 (enable-console-print!)
 
 (defn filter-by [criterion state]
-  "sets the active filter. Currently this is a single filter type; we may wish to handle multiples in thefuture"
+  "sets the active filter. Currently this is a single filter type; we may wish to handle multiples in the future"
   (swap! state assoc :active-filter criterion)
 )
 
@@ -15,20 +15,18 @@
 
 (defn remove-filter [filter-name state api search searchterm]
   "the little x in the corner that allows you to remove filters, and its behaviour"
+  ;;we can probably tidy up the mess of args above.
   (fn [filter-name state]
     [:a {
       :aria-label (str "Remove " filter-name " filter") ;;we need this to stop screen readers from reading the 'x' symbol out loud as though it was meaningful text
       :on-click (fn [e]
         (.stopPropagation js/e) ;; if we don't do this the event bubbles to the tr click handler and re-applies the filter. lol.
         (swap! state dissoc :active-filter)
-        (.log js/console (clj->js @state) (clj->js api))
-        (search searchterm api)
-        )
-      }
+        (search searchterm api))}
       [:span.close "×"]])) ;;that's a cute little &times; to us HTML folk
 
 (defn display-active-filter [active-filter state api search searchterm]
-  "Outputs which filter is active (if any)"
+  "Outputs which filter is active (if any) at the top of the filter section"
   [:div.active
    [:h5 "Active filters: "]
     (if (some? active-filter)
