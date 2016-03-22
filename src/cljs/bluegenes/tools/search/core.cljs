@@ -29,57 +29,63 @@
       :category (sort-by-value (js->clj (aget results "facets" "Category")))}})
   )
 
+(defn search
+  "search for the given term via IMJS promise. Filter is optional"
+  [searchterm api & filter]
+    (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
+          search {:q searchterm :facets (cond filter {:facet "Category" :name filter})}
+          id-promise (-> mine (.search (clj->js search)))]
+      (-> id-promise (.then
+          (fn [results]
+            (results-handler results mine api))))))
 
 (defn submit-handler [searchterm api]
-  "Resolves IDs via IMJS promise"
+  "Adds search term to the state, and searches for the term"
   ((:append-state api) {:input searchterm})
-  (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
-        search {:q searchterm}
-        id-promise (-> mine (.search (clj->js search)))]
-    (-> id-promise (.then
-        (fn [results]
-          (results-handler results mine api))))))
+  (search searchterm api))
 
-(defn is-active-result? [state result]
+(defn is-active-result? [result]
   "returns true is the result should be considered 'active' - e.g. if there is no filter at all, or if the result matches the active filter type."
     (or
-      (= (:active-filter @state) (.-type result))
-      (nil? (:active-filter @state))))
+      (= (:active-filter @search-results) (.-type result))
+      (nil? (:active-filter @search-results))))
 
 (defn count-total-results [state]
   "returns total number of results by summing the number of results per category. This includes any results on the server beyond the number that were returned"
   (reduce + (vals (:category (:facets state))))
   )
 
-(defn count-current-results [state]
+(defn count-current-results []
   "returns number of results currently shown, taking into account result limits nd filters"
   (count
     (remove
       (fn [result]
-        (not (is-active-result? state result))) (:results @state))))
+        (not (is-active-result? result))) (:results @search-results))))
 
 
-(defn results-count [state]
+(defn results-count []
   "Visual component: outputs the number of results shown."
-    [:small " Displaying " (count-current-results state) " of " (count-total-results @state) " results"])
+    [:small " Displaying " (count-current-results) " of " (count-total-results @search-results) " results"])
 
-(defn load-more-results [state api active-filter]
-  ()
-  (.log js/console "The total filter count for %s is" (:active-filter @state) (clj->js (get (:category (:facets @state)) active-filter))))
+(defn load-more-results [api active-filter]
+  ;;load more results here
+  ;;
+  (.log js/console "The total filter count for %s is" (:active-filter @search-results) (clj->js (get (:category (:facets @search-results)) active-filter)))
+  )
 
-(defn results-display [state api]
+(defn results-display [api]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
-    [:h4 "Results" [results-count state]]
+    [:h4 "Results" [results-count]]
     [:form
      (doall
-     ;[:div (json-html/edn->hiccup @state)]
-     (let [active-results (filter
-        (fn [result] (is-active-result? state result)) (:results @state))
+     (let [state search-results
+           active-results (filter
+        (fn [result] (is-active-result? result)) (:results @state))
            active-filter (:active-filter @state)
            filtered-result-count (get (:category (:facets @state)) active-filter)]
-            (cond (< (count-current-results state) filtered-result-count)
-              (load-more-results state api active-filter))
+            (cond (< (count-current-results) filtered-result-count)
+              (load-more-results api active-filter))
             (for [result active-results]
               ^{:key (.-id result)}
               [resulthandler/result-row {:result result :state state :api api}])))]
@@ -109,7 +115,7 @@
     [:button "Submit"]]
    [:div.response
       [filters/facet-display search-results]
-      [results-display search-results api]]])
+      [results-display api]]])
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
