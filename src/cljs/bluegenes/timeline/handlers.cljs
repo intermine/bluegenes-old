@@ -162,6 +162,7 @@
              })
           (update-in [:histories (keyword new-history-id)] merge
                      {:slug new-history-id
+                      :structure [(keyword new-step-id)]
                       :description (:name tool)
                       :name (:name tool)}))
       )))
