@@ -4,13 +4,10 @@
             [clojure.string :as str]
             [intermine.imjs :as imjs]
             [bluegenes.tools.search.filters :as filters]
-            [bluegenes.tools.search.resultrow :as resulthandler]            [json-html.core :as json-html])
-
-    (:use [json-html.core :only [edn->hiccup]]))
+            [bluegenes.tools.search.resultrow :as resulthandler]))
 (enable-console-print!)
 
 (def search-results (reagent.core/atom {:results nil}))
-(def results-counter (reagent.core/atom {:shown-results-count 0}))
 (def max-results 99);;todo - this is only used in a cond right now, won't modify number of results returned. IMJS was being tricky;
 
 (defn sort-by-value [result-map]
