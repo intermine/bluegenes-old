@@ -95,7 +95,7 @@
                :search {:name "Search"
                         :slug "search"
                         :description "Search across InterMine for just about anything."
-                        :structure [:search-tool [:summary :outboundlinks]]
+                        :structure [:search-tool [:summary :minelinks]]
                         :steps {
                           :search-tool {
                             :tool "search"
@@ -110,10 +110,10 @@
                             :title "Summary"
                             :description "Summary"
                             :state []}
-                          :outboundlinks {
+                          :minelinks {
                             :subscribe [:search-tool]
-                            :tool "outboundlinks"
-                            :_id :outboundlinks
+                            :tool "minelinks"
+                            :_id :minelinks
                             :title "Outbound Links"
                             :description "Outbound Links"
                             :state []}

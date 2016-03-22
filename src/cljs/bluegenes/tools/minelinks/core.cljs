@@ -1,4 +1,4 @@
-(ns bluegenes.tools.outboundlinks.core
+(ns bluegenes.tools.minelinks.core
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [re-frame.core :as re-frame]
     [cljs.core.async :refer [put! chan <! >! timeout close!]]
