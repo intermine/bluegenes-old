@@ -11,6 +11,7 @@
 
 (def search-results (reagent.core/atom {:results nil}))
 (def results-counter (reagent.core/atom {:shown-results-count 0}))
+(def max-results 99);;todo - this is only used in a cond right now, won't modify number of results returned. IMJS was being tricky;
 
 (defn sort-by-value [result-map]
   "Sort map results by their values. Used to order the category maps correctly"
@@ -19,29 +20,33 @@
                                   [(get result-map key1) key1])))
         result-map))
 
-(defn results-handler [results mine api]
+(defn results-handler [results mine api searchterm]
   "Store results in local state once the promise comes back."
-  (reset! search-results
-    {
-    :results  (.-results results)
-    :facets {
-      :organisms (sort-by-value (js->clj (aget results "facets" "organism.shortName")))
-      :category (sort-by-value (js->clj (aget results "facets" "Category")))}})
-  )
+  (if (:active-filter @search-results)
+    ;;if we're resturning a filter result, leave the old facets intact.
+    (swap! search-results
+      assoc :results (.-results results))
+    ;;if we're returning a non-filtered result, add new facets to the atom
+    (reset! search-results
+      {
+      :results  (.-results results)
+      :facets {
+        :organisms (sort-by-value (js->clj (aget results "facets" "organism.shortName")))
+        :category (sort-by-value (js->clj (aget results "facets" "Category")))}}))
+  ((:append-state api) {:input searchterm :results @search-results}))
 
 (defn search
   "search for the given term via IMJS promise. Filter is optional"
   [searchterm api & filter]
     (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
-          search {:q searchterm :facets (cond filter {:facet "Category" :name filter})}
+          search {:q searchterm :Category filter}
           id-promise (-> mine (.search (clj->js search)))]
       (-> id-promise (.then
           (fn [results]
-            (results-handler results mine api))))))
+            (results-handler results mine api searchterm))))))
 
 (defn submit-handler [searchterm api]
   "Adds search term to the state, and searches for the term"
-  ((:append-state api) {:input searchterm})
   (search searchterm api))
 
 (defn is-active-result? [result]
@@ -67,10 +72,8 @@
   "Visual component: outputs the number of results shown."
     [:small " Displaying " (count-current-results) " of " (count-total-results @search-results) " results"])
 
-(defn load-more-results [api active-filter]
-  ;;load more results here
-  ;;
-  (.log js/console "The total filter count for %s is" (:active-filter @search-results) (clj->js (get (:category (:facets @search-results)) active-filter)))
+(defn load-more-results [api]
+  (search "adh" api (:active-filter @search-results))
   )
 
 (defn results-display [api]
@@ -78,17 +81,20 @@
   [:div.results
     [:h4 "Results" [results-count]]
     [:form
-     (doall
-     (let [state search-results
-           active-results (filter
-        (fn [result] (is-active-result? result)) (:results @state))
-           active-filter (:active-filter @state)
-           filtered-result-count (get (:category (:facets @state)) active-filter)]
-            (cond (< (count-current-results) filtered-result-count)
-              (load-more-results api active-filter))
-            (for [result active-results]
-              ^{:key (.-id result)}
-              [resulthandler/result-row {:result result :state state :api api}])))]
+      (doall (let [state search-results
+        ;;active-results might seem redundant, but it outputs the results we have client side
+        ;;while the remote results are loading. Good for slow connections.
+        active-results (filter (fn [result] (is-active-result? result)) (:results @state))
+        filtered-result-count (get (:category (:facets @state)) (:active-filter @state))]
+          ;;load more results if there are less than our preferred number, but more than
+          ;;the original search returned
+          (cond (and  (< (count-current-results) filtered-result-count)
+                      (<= (count-current-results) max-results))
+            (load-more-results api))
+          ;;output em!
+          (for [result active-results]
+            ^{:key (.-id result)}
+            [resulthandler/result-row {:result result :state state :api api}])))]
    ])
 
 (defn check-for-search-term-in-url []
@@ -101,11 +107,11 @@
 
 (defn search-form [local-state api]
   "Visual form component which handles submit and change"
+  (let [searchterm @local-state]
   [:div.search
-  [:form.searchform {:on-submit (fn [e]
+    [:form.searchform {:on-submit (fn [e]
       (.preventDefault js/e)
-      (let [searchterm @local-state]
-        (submit-handler searchterm api)))}
+        (submit-handler searchterm api))}
         [:input {
           :type "text"
           :placeholder "Search for a gene, protein, disease, etc..."
@@ -114,8 +120,8 @@
               (reset! local-state (-> val .-target .-value)))}]
     [:button "Submit"]]
    [:div.response
-      [filters/facet-display search-results]
-      [results-display api]]])
+      [filters/facet-display search-results api search searchterm]
+      [results-display api]]]))
 
 (defn ^:export main []
   (let [local-state (reagent/atom " ")]
@@ -128,6 +134,7 @@
               search-term (check-for-search-term-in-url)
               api (:api (reagent/props this))]
           (reset! local-state (:input passed-in-state))
+          (swap! search-results assoc :search-term search-term)
           ;populate the form from the url if there's a query param
           (cond (some? search-term)
             (do
