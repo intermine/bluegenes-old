@@ -78,7 +78,9 @@
     :component-did-update (fn [new-stuff old-stuff]
       (let [passed-in-upstream (:upstream-data (reagent/props new-stuff))]
         (if (some? passed-in-upstream)
-          (do ;(.log js/console "Passed in state" (clj->js passed-in-upstream))
+          (do
             (reset! local-state passed-in-upstream)
-            (get-data @local-state))))
-      )}))
+            (get-data @local-state)))))
+    :component-will-update (fn []
+      (reset! search-results nil))
+    }))

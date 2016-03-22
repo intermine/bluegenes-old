@@ -1,9 +1,23 @@
-.homologuelinks {
-  display:flex;
-  .onemine {
-    min-width: 9em;
-    ul, li {
-      list-style-type:none;margin-left:0;padding-left:0;
+.outbound {
+  .status-list {
+    background-color: @stripe-color;
+  }
+  .awaiting-homologues,
+  .no-homologues {
+    span {
+      margin-right: 0.3em;
+    }
+  }
+  .homologuelinks {
+    display: flex;
+    .onemine {
+      min-width: 9em;
+      ul,
+      li {
+        list-style-type: none;
+        margin-left: 0;
+        padding-left: 0;
+      }
     }
   }
 }

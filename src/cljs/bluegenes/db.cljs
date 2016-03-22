@@ -55,7 +55,7 @@
                               }}
 
                :k {:name "List Analysis"
-                   :slug "local-history-k"
+                   :slug "list-analysis"
                    :description "Browse and analyse lists"
                    :structure [:a1 [:z1 :z2 :z3 :z4 :z5 :z6]]
                    :steps {:a1 {:_id :a1
@@ -90,31 +90,7 @@
                                 :tool "enrichment"
                                 :subscribe [:a1]
                                 :state [{:widget "bdgp_enrichment"
-                                         :title "BDGP Enrichment"}]}
-                           :b1 {:_id :b1
-                                :tool "echotool"
-                                :subscribe [:a1]}
-                           :b2 {:_id :b2
-                                :tool "echotool"
-                                :subscribe [:a1]}
-                           :c1 {:_id :c1
-                                :tool "echotool"
-                                :subscribe [:b1]}
-                           :d1 {:_id :d1
-                                :tool "echotool"
-                                :subscribe [:c1]}
-                           :e1 {:_id :e1
-                                :tool "echotool"
-                                :subscribe [:d1]}
-                           :e2 {:_id :e2
-                                :tool "echotool"
-                                :subscribe [:d1]}
-                           :e3 {:_id :e3
-                                :tool "echotool"
-                                :subscribe [:d1]}
-                           :e4 {:_id :e4
-                                :tool "echotool"
-                                :subscribe [:d1]}}}
+                                         :title "BDGP Enrichment"}]}}}
 
                :search {:name "Search"
                         :slug "search"
