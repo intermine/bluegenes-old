@@ -72,12 +72,12 @@
   "Visual component: outputs the number of results shown."
     [:small " Displaying " (count-current-results) " of " (count-total-results @search-results) " results"])
 
-(defn load-more-results [api local-state]
-  (.log js/console (clj->js @local-state))
-  (search @local-state api (:active-filter @search-results))
+(defn load-more-results [api search-term]
+  (.log js/console (clj->js @search-term))
+  (search @search-term api (:active-filter @search-results))
   )
 
-(defn results-display [api local-state]
+(defn results-display [api search-term]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
     [:h4 "Results" [results-count]]
@@ -91,14 +91,14 @@
           ;;the original search returned
           (cond (and  (< (count-current-results) filtered-result-count)
                       (<= (count-current-results) max-results))
-            (load-more-results api local-state))
+            (load-more-results api search-term))
           ;;output em!
           (for [result active-results]
             ^{:key (.-id result)}
             [resulthandler/result-row {:result result :state state :api api}])))]
    ])
 
-(defn check-for-search-term-in-url []
+(defn check-for-query-string-in-url []
   "Splits out the search term from the URL, allowing repeatable external linking to searches"
   (let [url (aget js/window "location" "href")
         last-section (str/split url #"/search\?")]
@@ -106,40 +106,39 @@
       (last last-section)
       nil)))
 
-(defn search-form [local-state api]
+(defn search-form [search-term api]
   "Visual form component which handles submit and change"
-  (let [searchterm @local-state]
   [:div.search
     [:form.searchform {:on-submit (fn [e]
       (.preventDefault js/e)
-        (submit-handler searchterm api))}
+        (submit-handler @search-term api))}
         [:input {
           :type "text"
           :placeholder "Search for a gene, protein, disease, etc..."
-          :value @local-state
+          :value @search-term
           :on-change (fn [val]
-              (reset! local-state (-> val .-target .-value)))}]
+              (reset! search-term (-> val .-target .-value)))}]
     [:button "Submit"]]
    [:div.response
-      [filters/facet-display search-results api search searchterm]
-      [results-display api local-state]]]))
+      [filters/facet-display search-results api search @search-term]
+      [results-display api search-term]]])
 
 (defn ^:export main []
-  (let [local-state (reagent/atom " ")]
+  (let [search-term (reagent/atom " ")]
   (reagent/create-class
     {:reagent-render
       (fn render [{:keys [state upstream-data api]}]
-        [search-form local-state api])
+        [search-form search-term api])
       :component-did-mount (fn [this]
         (let [passed-in-state (:state (reagent/props this))
-              search-term (check-for-search-term-in-url)
+              query-string (check-for-query-string-in-url)
               api (:api (reagent/props this))]
-          (reset! local-state (:input passed-in-state))
-          (swap! search-results assoc :search-term search-term)
+          (reset! search-term (:input passed-in-state))
+          (swap! search-results assoc :query-string query-string)
           ;populate the form from the url if there's a query param
-          (cond (some? search-term)
+          (cond (some? query-string)
             (do
-              (reset! local-state search-term)
-              (submit-handler search-term api)
+              (reset! search-term query-string)
+              (submit-handler query-string api)
               ))))
 })))
