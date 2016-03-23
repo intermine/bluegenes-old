@@ -49,7 +49,10 @@
     (for [[k v] @search-results]
       (if (im/is-good-result? k v)
       ^{:key (:name v)}
-      [:div [:dt (clj->js (:name v))] [:dd (:val v)]]))
+      [:div
+       ;;casts :val v to string, to ensure boolean values output on the screen.
+       ;;previously they diappeared like magic.
+       [:dt (clj->js (:name v))] [:dd (str (:val v))]]))
     ]])
 
 (defn ^:export preview
