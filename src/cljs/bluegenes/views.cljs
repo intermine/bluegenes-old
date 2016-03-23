@@ -129,7 +129,10 @@
       [:div
        [:ul.nav.navbar-nav
         [:li {:class (if (= panel-name "home-panel") "active")} [:a {:href "#"} "Home"]]
-        [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]]
+        ;;don't show timeline in navbar unless we're actually there already, as
+        ;clicking on timeline from elsewhere just gives a blank page
+        (if (= panel-name "timeline-panel")
+          [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]])
         [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]
        [:div
         [:ul.nav.navbar-nav.pull-right.signin
