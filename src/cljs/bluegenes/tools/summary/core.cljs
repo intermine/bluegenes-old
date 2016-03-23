@@ -54,6 +54,12 @@
     (cond name (str name " ")))
     "Summary"])
 
+(defn manually-positioned-summary-row [name]
+  (let [result (name @search-results)]
+    (if (and result (some? (:val result)))
+      [summary-row result]
+      nil)))
+
 (defn summary []
   "Visual output of each of the summary fields returned. Has default locations at top and bottom for more/less significant fields."
    [:div.summary-fields
@@ -61,16 +67,16 @@
     [:dl
      ;;output certain fields in preferred locations, if they exist.
      ;;these fields go at the start (Rachel says)
-      (cond (:name @search-results) [summary-row (:name @search-results)])
-      (cond (:title @search-results) [summary-row (:title @search-results)])
+      [manually-positioned-summary-row :name]
+      [manually-positioned-summary-row :title]
      ;;output everything else
       (for [[k v] (dissoc @search-results :abstractText :description :name :title)]
         (if (im/is-good-result? k v)
           ^{:key (:name v)}
           [summary-row v]))
      ;;these need to go at the end (Rachel says).
-      (cond (:description @search-results) [summary-row (:description @search-results)])
-      (cond (:abstractText @search-results) [summary-row (:abstractText @search-results)])
+      [manually-positioned-summary-row :description]
+      [manually-positioned-summary-row :abstractText]
      ]])
 
 (defn ^:export preview
