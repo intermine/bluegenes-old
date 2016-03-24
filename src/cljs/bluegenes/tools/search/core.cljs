@@ -92,7 +92,7 @@
           ;;output em!
           (for [result active-results]
             ^{:key (.-id result)}
-            [resulthandler/result-row {:result result :state state :api api}])))]
+            [resulthandler/result-row {:result result :state state :api api :search-term search-term}])))]
    ])
 
 (defn check-for-query-string-in-url []

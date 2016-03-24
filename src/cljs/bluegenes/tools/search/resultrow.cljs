@@ -39,8 +39,9 @@
   ))
 
 (defn show [row-data selector]
-  (let [string (aget (:result row-data) "fields" selector)]
-    (.log js/console "%cString:" "border-bottom: solid 3px royalblue" (clj->js string))
+  (let [string (aget (:result row-data) "fields" selector)
+        term @(:search-term row-data)]
+;    (.log js/console "%cTerm:" "border-bottom: solid 3px royalblue" (clj->js term))
     string
   ))
 
