@@ -27,6 +27,7 @@
     (reset! search-results
       {
       :results  (.-results results)
+      :highlight-results (:highlight-results @search-results)
       :facets {
         :organisms (sort-by-value (js->clj (aget results "facets" "organism.shortName")))
         :category (sort-by-value (js->clj (aget results "facets" "Category")))}}))

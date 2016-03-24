@@ -44,13 +44,12 @@
   '[:span I love [:span.searchterm 'bob'] the builder]'.
   TODO: If we know ways to refactor this, let's do so. It's verrry slow."
   [:span
-    ;;iterate over the string arrays, and wrap span.searchterm around the terms.
-    ;;don't do it for blank strings, and don't do it for the last string.
-    ;;otherwise we end up with random extra search terms appended where there should be none.
+    ;; iterate over the string arrays, and wrap span.searchterm around the terms.
+    ;; don't do it for the last string, otherwise we end up with random extra
+    ;; search terms appended where there should be none.
     (map (fn [string]
-      (cond (not (clojure.string/blank? string))
         ^{:key string}
-        [:span string [:span.searchterm term]])) (butlast broken-string))
+        [:span string [:span.searchterm term]]) (butlast broken-string))
       (cond   ;;special case: if both strings are empty, the entire string was the term in question
         (and  ;;so we need to wrap it in searchterm and return the term
           (clojure.string/blank? (last broken-string))
@@ -61,6 +60,7 @@
 
 
 (defn show [row-data selector]
+  "Helper: fetch a result from the data model, adding a highlight if the setting is enabled."
   (let [string (aget (:result row-data) "fields" selector)
         term (:search-term row-data)]
     (if (and string (:highlight-results @(:state row-data)))
