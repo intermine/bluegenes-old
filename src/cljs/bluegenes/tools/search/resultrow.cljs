@@ -38,39 +38,41 @@
     (contents)]
   ))
 
+(defn show [row-data selector]
+  (let [string (aget (:result row-data) "fields" selector)]
+    (.log js/console "%cString:" "border-bottom: solid 3px royalblue" (clj->js string))
+    string
+  ))
+
 (defmulti result-row
   "Result-row outputs nicely formatted type-specific results for common types and has a default that just outputs all non id, type, and relevance fields."
   (fn [row-data] (.-type (:result row-data))))
 
 (defmethod result-row "Gene" [row-data]
-  (let [details (.-fields (:result row-data))]
     [row-structure row-data (fn []
       [:div.details
-        [:span.organism (aget details "organism.name")]
-        [:span " Symbol: " (.-symbol details) ]
-        [:span.ids " Identifiers: " (.-primaryIdentifier details) ", " (.-secondaryIdentifier details)]])]))
+        [:span.organism (show row-data "organism.name")]
+        [:span " Symbol: " (show row-data "symbol") ]
+        [:span.ids " Identifiers: " (show row-data "primaryIdentifier") ", " (show row-data "secondaryIdentifier")]])])
 
 (defmethod result-row "Protein" [row-data]
- (let [details (js->clj (.-fields (:result row-data)))]
    [row-structure row-data (fn []
      [:div.details
-        [:span.organism (get details "organism.name")]
-        [:span " Accession: " (get details "symbol" "unknown") ]
-        [:span.ids " Identifiers: " (get details "primaryIdentifier" "unknown")]])]))
-
+        [:span.organism (show row-data "organism.name")]
+        [:span " Accession: " (show row-data "primaryAccession") ]
+        [:span.ids " Identifiers: " (show row-data "primaryIdentifier")]])])
 
 (defmethod result-row "Publication" [row-data]
-  (let [details (.-fields (:result row-data))]
   [row-structure row-data (fn []
     [:div.details
-      [:span "Author: " (.-firstAuthor details)]
-      [:cite " \"" (.-title details) "\""]
-      [:span.journal " (" (.-journal details) " pp. " (.-pages details)] ")"])]))
+      [:span "Author: " (show row-data "firstAuthor")]
+      [:cite " \"" (show row-data "title") "\""]
+      [:span.journal " (" (show row-data "journal") " pp. " (show row-data "pages")] ")"])])
 
 (defmethod result-row "Author" [row-data]
   [row-structure row-data (fn []
     [:div.details
-      (aget (:result row-data) "fields" "name")])])
+      (show row-data "name")])])
 
 (defmethod result-row :default [row-data]
   "format a row in a readable way when no other templates apply. Adds 'name: description' default first rows if present."
@@ -78,9 +80,9 @@
   [row-structure row-data (fn []
     [:div.details
     (if (contains? details "name")
-      [:span.name (get details "name")])
+      [:span.name (show row-data "name")])
     (if (contains? details "description")
-      [:span.description (get details "description")])
+      [:span.description (show row-data "description")])
      (for [[k value] details]
        (if (and (not= k "name") (not= k "description"))
        ^{:key k}
