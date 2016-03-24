@@ -110,8 +110,8 @@
 
 (defn is-good-result? [k v]
   "Check that values are non null or machine-only names - no point getting dispaly names for them. "
- (and (not (contains? machine/fields k)) ;;don't output user-useless results
- (some? (:val v))) ;;don't output null results
+  (and (not (contains? machine/fields k)) ;;don't output user-useless results
+  (some? (:val v))) ;;don't output null results
  )
 
  (defn get-display-name [service type k]

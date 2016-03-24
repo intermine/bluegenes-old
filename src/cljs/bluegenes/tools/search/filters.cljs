@@ -33,6 +33,18 @@
       [:div.active-filter active-filter [remove-filter active-filter state api search searchterm]]
       [:div "None"])])
 
+      (defn controls [state]
+        [:form.controls
+         [:div
+         [:label
+          [:input {:type "checkbox" :on-click
+                   (fn [e]
+                     ;;toggle highlight.
+                     (swap! state assoc :highlight-results (.-checked (.-target e))))
+                   }]
+          "Highlight search terms in results (experimental, may be sluggish)"]
+         ]])
+
 (defn facet-display [state api search searchterm]
   "Visual component which outputs the category filters."
   (let [facets (:facets @state) active (:active-filter @state)]
@@ -59,4 +71,6 @@
          [:td.count.result-type {:class (str "type-" name)} value]
          [:td name (if (is-active name active)
            [remove-filter name state api search searchterm])]])]
-       ]]])))
+       ]]
+       [controls state]
+   ])))

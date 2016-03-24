@@ -41,16 +41,43 @@
             [response (<! (im/summary-fields {:service service} type id))]
               (results-handler response service type)))))
 
+(defn summary-row [val]
+  "casts :val val to string, to ensure boolean values output on the screen.
+  previously they disappeared like magic."
+  [:div
+   [:dt (clj->js (:name val))] [:dd (str (:val val))]])
+
+(defn summary-title []
+  "outputs the result name if present, or just 'summary' otherwise"
+  [:h5
+   (let [name (:val (:name @search-results))]
+    (cond name (str name " ")))
+    "Summary"])
+
+(defn manually-positioned-summary-row [name]
+  (let [result (name @search-results)]
+    (if (and result (some? (:val result)))
+      [summary-row result]
+      nil)))
+
 (defn summary []
-  "Visual output of each of the summary fields returned."
+  "Visual output of each of the summary fields returned. Has default locations at top and bottom for more/less significant fields."
    [:div.summary-fields
-    [:h5 "Results"]
+    [summary-title]
     [:dl
-    (for [[k v] @search-results]
-      (if (im/is-good-result? k v)
-      ^{:key (:name v)}
-      [:div [:dt (clj->js (:name v))] [:dd (:val v)]]))
-    ]])
+     ;;output certain fields in preferred locations, if they exist.
+     ;;these fields go at the start (Rachel says)
+      [manually-positioned-summary-row :name]
+      [manually-positioned-summary-row :title]
+     ;;output everything else
+      (for [[k v] (dissoc @search-results :abstractText :description :name :title)]
+        (if (im/is-good-result? k v)
+          ^{:key (:name v)}
+          [summary-row v]))
+     ;;these need to go at the end (Rachel says).
+      [manually-positioned-summary-row :description]
+      [manually-positioned-summary-row :abstractText]
+     ]])
 
 (defn ^:export preview
   "Render a preview of the tool."

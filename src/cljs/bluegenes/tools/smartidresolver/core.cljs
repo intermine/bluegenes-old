@@ -276,6 +276,7 @@
       (fn [persistent-state]
         [:input.freeform {:value @textbox-value
                           :type "text"
+                          :placeholder "Type IDs here..."
                           :on-change (fn [e]
                                        (let [value (.. e -target -value)]
                                          (if (has-separator? value)
@@ -420,7 +421,7 @@
                                                         update-in [:identifiers] reset-identifiers)
                                                  (run-job persistent-state))}]]]
                          [:div.entry
-                         [:label "Identifiers"]
+                         [:label "Identifiers: "]
                           [:div.smartbox
                            (doall (map (fn [next]
                                          ^{:key (:identifier next)}
@@ -449,7 +450,7 @@
      {:reagent-render
       (fn [step-data]
         [:div
-         [:h3 "Enter Identifiers"]
+         [:h4 "Smart ID Resolver"]
          [smartbox step-data]])
       :component-will-receive-props
       (fn [this new-props]

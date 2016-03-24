@@ -27,6 +27,7 @@
     (reset! search-results
       {
       :results  (.-results results)
+      :highlight-results (:highlight-results @search-results)
       :facets {
         :organisms (sort-by-value (js->clj (aget results "facets" "organism.shortName")))
         :category (sort-by-value (js->clj (aget results "facets" "Category")))}}))
@@ -44,7 +45,9 @@
 
 (defn submit-handler [searchterm api]
   "Adds search term to the state, and searches for the term"
-  (search searchterm api))
+  (aset js/window "location" "href"
+    (str "/#/timeline/search?" searchterm))
+    (search searchterm api))
 
 (defn is-active-result? [result]
   "returns true is the result should be considered 'active' - e.g. if there is no filter at all, or if the result matches the active filter type."
@@ -92,7 +95,7 @@
           ;;output em!
           (for [result active-results]
             ^{:key (.-id result)}
-            [resulthandler/result-row {:result result :state state :api api}])))]
+            [resulthandler/result-row {:result result :state state :api api :search-term @search-term}])))]
    ])
 
 (defn check-for-query-string-in-url []

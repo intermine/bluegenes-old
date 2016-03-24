@@ -95,7 +95,7 @@
                :search {:name "Search"
                         :slug "search"
                         :description "Search across InterMine for just about anything."
-                        :structure [:search-tool [:summary :outboundlinks]]
+                        :structure [:search-tool [:summary :minelinks :externallinks]]
                         :steps {
                           :search-tool {
                             :tool "search"
@@ -110,24 +110,19 @@
                             :title "Summary"
                             :description "Summary"
                             :state []}
-                          :outboundlinks {
+                          :minelinks {
                             :subscribe [:search-tool]
-                            :tool "outboundlinks"
-                            :_id :outboundlinks
+                            :tool "minelinks"
+                            :_id :minelinks
+                            :title "Homologue Links"
+                            :description "Homologue Links"
+                            :state []}
+                          :externallinks {
+                            :subscribe [:search-tool]
+                            :tool "externallinks"
+                            :_id :externallinks
                             :title "Outbound Links"
                             :description "Outbound Links"
                             :state []}
                                 }}
-
-               :homepage-template-histories {:a { :type "Gene"
-                                                 :description "For the selected organism retrieve all genes
-                                                 and their coding sequences, suitable for export as GFF3 or FASTA."
-                                                 ;:steps {};TODO: add entry point for single gene. protein, organism?
-                                                 }
-                                             :b { :type "Protein"
-                                                 :description "Show all the proteins
-                                                 from a particular organism."}
-                                             :c { :type "Gene"
-                                                 :description "Show all alleles for a specific Drosophila gene.
-                                                 Show all available information, eg mutagen,
-                                                 allele class and phenotype linked to each allele."}}}})
+}})

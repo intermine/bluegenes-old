@@ -7,7 +7,7 @@
             [clojure.string :as str]
             [bluegenes.utils.icons :as icons]
             ; [bluegenes.components.googlesignin :as google-sign-in]
-            [bluegenes.tools.idresolver.core :as idresolver]
+            [bluegenes.tools.smartidresolver.core :as idresolver]
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
 
@@ -25,19 +25,20 @@
     [:div
      [:h3 "Choose a starting point:"]
      (for [[key values] @histories]
-       ^{:key key}
-       [:div
-        [:h4 [:a {:href (str "#/timeline/" (:slug values))} (:name values)]]
-        [:span (:description values)]])]))])
+       (cond key (do ;;there's a nil key coming from somewhere that spawns lots of console errors. This cond prevents the errors.
+         ^{:key key}
+         [:div
+          [:h4 [:a {:href (str "#/timeline/" (:slug values))} (:name values)]]
+          [:span (:description values)]])))]))])
 
 (defn list-upload-section []
   "Nonfunctional (currently) list upload homepage widget"
-  (let [api (timeline-api/build-homepage-api-map {:name "idresolver"})]
+  (let [api (timeline-api/build-homepage-api-map {:name "smartidresolver"})]
   [ui-card
    (fn []
      [:div
       [:h3 "I have data I want to know more about:"]
-      [idresolver/main {:state " "
+      [idresolver/main {:state ["" ""]
         :api api
         :upstream-data nil}]])]))
 
@@ -128,7 +129,10 @@
       [:div
        [:ul.nav.navbar-nav
         [:li {:class (if (= panel-name "home-panel") "active")} [:a {:href "#"} "Home"]]
-        [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]]
+        ;;don't show timeline in navbar unless we're actually there already, as
+        ;clicking on timeline from elsewhere just gives a blank page
+        (if (= panel-name "timeline-panel")
+          [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]])
         [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]
        [:div
         [:ul.nav.navbar-nav.pull-right.signin
