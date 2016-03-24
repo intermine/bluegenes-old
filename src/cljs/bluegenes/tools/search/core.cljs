@@ -45,7 +45,9 @@
 
 (defn submit-handler [searchterm api]
   "Adds search term to the state, and searches for the term"
-  (search searchterm api))
+  (aset js/window "location" "href"
+    (str "/#/timeline/search?" searchterm))
+    (search searchterm api))
 
 (defn is-active-result? [result]
   "returns true is the result should be considered 'active' - e.g. if there is no filter at all, or if the result matches the active filter type."

@@ -42,7 +42,7 @@
                      ;;toggle highlight.
                      (swap! state assoc :highlight-results (.-checked (.-target e))))
                    }]
-          "Highlight search terms in results (experimental)"]
+          "Highlight search terms in results (experimental, may be sluggish)"]
          ]])
 
 (defn facet-display [state api search searchterm]
