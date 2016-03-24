@@ -38,12 +38,39 @@
     (contents)]
   ))
 
+(defn wrap-term [broken-string term]
+  "Joins an array of terms which have already been broken on [term] adding a highlight class as we go.
+  So given the search term 'bob' and the string 'I love bob the builder', we'll return something like
+  '[:span I love [:span.searchterm 'bob'] the builder]'.
+  TODO: If we know ways to refactor this, let's do so. It's verrry slow."
+  [:span
+    ;;iterate over the string arrays, and wrap span.searchterm around the terms.
+    ;;don't do it for blank strings, and don't do it for the last string.
+    ;;otherwise we end up with random extra search terms appended where there should be none.
+    (map (fn [string]
+      (cond (not (clojure.string/blank? string))
+        ^{:key string}
+        [:span string [:span.searchterm term]])) (butlast broken-string))
+      (cond   ;;special case: if both strings are empty, the entire string was the term in question
+        (and  ;;so we need to wrap it in searchterm and return the term
+          (clojure.string/blank? (last broken-string))
+          (clojure.string/blank? (first broken-string)))
+        [:span.searchterm term])
+      ;;finally, we need to output the last term, without appending anything to it.
+      [:span (last broken-string)]])
+
+
 (defn show [row-data selector]
   (let [string (aget (:result row-data) "fields" selector)
-        term @(:search-term row-data)]
-;    (.log js/console "%cTerm:" "border-bottom: solid 3px royalblue" (clj->js term))
-    string
-  ))
+        term (:search-term row-data)]
+    (if (and string (:highlight-results @(:state row-data)))
+      (let [pattern (re-pattern (str "(?i)([\\S\\s]*)" term "([\\S\\s]*)"))
+            broken-string (re-seq pattern string)]
+        (if broken-string
+          (wrap-term (rest (first broken-string)) term)
+          [:span-searchterm string]))
+    [:span-searchterm string]
+  )))
 
 (defmulti result-row
   "Result-row outputs nicely formatted type-specific results for common types and has a default that just outputs all non id, type, and relevance fields."

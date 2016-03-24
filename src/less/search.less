@@ -12,13 +12,14 @@
   button {
     vertical-align: middle;
     &[type="text"] {
-      height: @spacer*1.5;
+      height: @spacer * 1.5;
       padding: 0 0 0 @spacer/4;
       min-width: 300px;
       width: 60%;
     }
   }
   button {
+    .btn;
     height: @spacer*1.5;
     padding: 0 0 0 @spacer/4;
     min-width: 10em;
@@ -27,9 +28,9 @@
     text-transform: uppercase;
     padding: 1em 5em;
     float: right;
+    line-height: 0.3em;
     vertical-align: middle;
     background: @cta-color;
-    line-height: 0.3em;
     color: @cta-color-text;
     border-radius: @border-radius;
     box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
@@ -53,6 +54,14 @@
         background: @highlight;
         border-radius: @border-radius;
         padding: 0 @spacer/4;
+      }
+      .controls {
+        .checkbox;
+        label span {
+          display: block;
+          margin-top: -1.4em;
+          font-weight: 300;
+        }
       }
       .result-type {
         text-align: center;
@@ -86,19 +95,24 @@
     .results {
       margin: @spacer/2 @spacer/2 @spacer/2 @spacer;
       .result {
-        input[type=radio] {
-          margin: 0 @spacer/2;
-          vertical-align: middle;
-          padding-top: 4px;
-          &:before {
-            margin-top: 4px;
-            content: " ";
-          }
-        }
         border-bottom: solid 1px #e4e4e4;
-        span,
+        .searchterm {
+          input[type=radio] {
+            margin: 0 @spacer/2;
+            vertical-align: middle;
+            padding-top: 4px;
+            &:before {
+              margin-top: 4px;
+              content: " ";
+            }
+          }
+          background-color: rgba(255,255,0,0.15);
+          padding: 0.1em;
+          margin: 0 -0.15em;
+        }
+        >span,
         cite {
-          margin-right: 0.3em;
+          margin: 0.15em;
         }
         &:nth-child(even) {
           background: @stripe-color;
