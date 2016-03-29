@@ -1,5 +1,5 @@
 .search {
-  font-size:1.05em;
+  font-size: 1.05em;
   button,
   input[type=text] {
     float: left;
@@ -43,12 +43,14 @@
   }
   .searchform {
     display: flex;
+    flex-wrap:wrap;
     justify-content: center;
   }
   .response {
     clear: both;
     display: flex;
     .facets {
+      order: 1;
       @highlight: #ddd;
       margin: 1em;
       .active-filter {
@@ -94,6 +96,7 @@
       }
     }
     .results {
+      order: 2;
       margin: @spacer/2 @spacer/2 @spacer/2 @spacer;
       .result {
         border-bottom: solid 1px #e4e4e4;
@@ -192,5 +195,33 @@
     padding: 0 0.2em;
     border-radius: @border-radius;
     margin: 0.2em;
+  }
+}
+@media (max-width: 800px) {
+  .search {
+    button {
+      clear: both;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 1em;
+      margin-left: 0;
+    }
+    input[type=text] {
+      clear: both;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 1em;
+    }
+    .response {
+      flex-wrap:wrap;
+      .facets {
+        order: 2;
+        margin-left:0;
+      }
+      .results {
+        order: 1;
+        margin-left:0;
+      }
+    }
   }
 }
