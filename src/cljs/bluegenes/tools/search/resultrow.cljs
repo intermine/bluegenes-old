@@ -68,7 +68,7 @@
             broken-string (re-seq pattern string)]
         (if broken-string
           (wrap-term (rest (first broken-string)) term)
-          [:span.searchterm string]))
+          [:span string]))
     [:span string]
   )))
 
