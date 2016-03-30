@@ -38,7 +38,7 @@
     padding-bottom: @spacer;
     padding-top: @spacer;
     button {
-      float:none;
+      float: none;
       margin-left: @spacer;
     }
   }
@@ -54,7 +54,9 @@
       min-height: @moduleHeight;
       flex: 1;
       padding: @spacer/2;
-      h3 {margin-top:0;}
+      h3 {
+        margin-top: 0;
+      }
     }
   }
   .templates li {
@@ -76,27 +78,34 @@
       background: @color-Protein;
     }
   }
-  .bubble div {text-align:center;}
+  .bubble div {
+    text-align: center;
+  }
   textarea {
     width: 100%;
   }
 }
-
 //so, for a smaller screen....
-@media (max-width: 800px) {
-  .homepage #search {
-    button {
-      clear: both;
-      width: 100%;
-      box-sizing: border-box;
-      margin-top: 1em;
-      margin-left: 0;
+@media (max-width: 767px) {
+  .homepage {
+    #search {
+      button {
+        clear: both;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 1em;
+        margin-left: 0;
+      }
+      input {
+        clear: both;
+        width: 100%;
+        min-width: auto;
+        box-sizing: border-box;
+        margin-top: 1em;
+      }
     }
-    input {
-      clear: both;
-      width: 100%;
-      box-sizing: border-box;
-      margin-top: 1em;
+    .cards .step-container {
+      min-width: 260px;
     }
   }
 }
