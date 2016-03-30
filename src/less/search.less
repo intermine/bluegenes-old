@@ -43,7 +43,7 @@
   }
   .searchform {
     display: flex;
-    flex-wrap:wrap;
+    flex-wrap: wrap;
     justify-content: center;
   }
   .response {
@@ -151,7 +151,7 @@
       }
       .default-description {
         text-transform: capitalize;
-        margin-right: 0.5em;
+        margin: 0em 0.25em;
         display: inline-block;
         vertical-align: middle;
       }
@@ -161,11 +161,13 @@
       .description,
       .default-value {
         vertical-align: middle;
-        white-space: nowrap;
         overflow: hidden;
         max-width: 350px;
         display: inline-block;
         text-overflow: ellipsis;
+      }
+      .default-value {
+        white-space: nowrap;
       }
       .name,
       .organism {
@@ -197,7 +199,7 @@
     margin: 0.2em;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 767px) {
   .search {
     button {
       clear: both;
@@ -211,16 +213,24 @@
       width: 100%;
       box-sizing: border-box;
       margin-top: 1em;
+      min-width:auto;
     }
     .response {
-      flex-wrap:wrap;
+      flex-wrap: wrap;
       .facets {
         order: 2;
-        margin-left:0;
+        margin-left: 0;
       }
       .results {
         order: 1;
-        margin-left:0;
+        margin-left: 0;
+      }
+      .description span {
+        line-height:1.5em;
+        vertical-align:middle;
+        display: inline-block;
+        max-height: 3em;
+        overflow: hidden;
       }
     }
   }
