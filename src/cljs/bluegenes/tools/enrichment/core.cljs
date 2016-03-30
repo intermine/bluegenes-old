@@ -134,7 +134,7 @@
     (reagent/create-class
      {:reagent-render
       (fn [step-data]
-        [:div
+        [:div.enrichment
          [:h3 (:title (:state step-data))]
          [enrichment-controls (-> step-data :api :replace-state) persistent-state]
          [table @local-state (:api step-data) (:upstream-data step-data)]])
