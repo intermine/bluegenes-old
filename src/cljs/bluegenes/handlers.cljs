@@ -1,9 +1,11 @@
 (ns bluegenes.handlers
-    (:require [re-frame.core :as re-frame :refer [trim-v]]
-              [bluegenes.db :as db]
-              [bluegenes.timeline.handlers]
-              [intermine.imjs :as imjs]
-              [ajax.core :refer [GET POST]]))
+  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require [re-frame.core :as re-frame :refer [trim-v]]
+            [bluegenes.db :as db]
+            [bluegenes.timeline.handlers]
+            [intermine.imjs :as imjs]
+            [cljs-http.client :as http]
+            [cljs.core.async :refer [chan <!]]))
 
 (re-frame/register-handler
  :initialize-db
@@ -18,8 +20,11 @@
 
 (re-frame/register-handler
  :set-active-panel
+ ;"Clear active history and move to specified panel. Clearing history is
+ ;important for the homepage wadgets so they don't get associated with the wrong
+ ;history."
  (fn [db [_ active-panel & args]]
-   (assoc db :active-panel active-panel)))
+   (assoc db :active-panel active-panel :active-history nil)))
 
 (re-frame/register-handler
  :set-timeline-panel trim-v
@@ -71,8 +76,8 @@
  trim-v
  (fn [db]
    "Get histories from the server."
-   (GET "/api/history"
-        :keywords? true
-        :response-format :json
-        :handler #(re-frame/dispatch [:process-histories %]))
+   (go (let [res (<! (http/get "/api/history"
+                               {:with-credentials? false
+                                :keywordize-keys? true}))]
+         (re-frame/dispatch [:process-histories res])))
    db))

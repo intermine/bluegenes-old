@@ -1,38 +1,71 @@
+@import url(https://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic);
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,900,300italic,300,400italic);
+// Base Bootstrap
+@import "../../bower_components/bootstrap/less/bootstrap";
+@import "variables";
+// Bootswatch Paper theme
+@import "bootswatch";
+@import "overrides";
+// Homepage:
+@import "homepage";
+// Tool import:
+@import "list-chooser";
+@import "stepdash";
+@import "search";
+@import "summary";
+@import "dashboard";
+@import "outboundlinks";
+@import "smartbox";
+
 @rgba-primary-0: rgba(211,209,198,1);
 /* Main Primary color */
 @rgba-primary-1: rgba(249,242,213,1);
 @rgba-primary-2: rgba(195,191,174,1);
 @rgba-primary-3: rgba(175,170,147,1);
 @rgba-primary-4: rgba(160,153,125,1);
-
-
-@cta-color:#4CAF50;
+@cta-color: @brand-primary;
 @cta-color-text: #fff;
-
 @selectedColor: #3F51B5;
 @selectedColorText: #fff;
+@stripe-color: #f6f6f6;
+@default-dark-text-color: rgba(0,0,0,0.87);
+
+//useful breakpoint:
+@tiny-screen: 767px;
+
 //define master colours for popular data types. Try to draw from 500 colours
 //here: https://www.google.com/design/spec/style/color.html# to keep the colours
 //visually distinct. They should be used ONLY for data type tagging, not general theming
 @color-Gene: #8BC34A;
 @color-Protein: #FFC107;
-@import url(https://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic);
-@import url(https://fonts.googleapis.com/css?family=Roboto:400,900,300italic,300,400italic);
-@import "../../bower_components/bootstrap/less/bootstrap";
-@import "../../bower_components/bootstrap-material-design/less/bootstrap-material-design";
-//homepage:
-@import "homepage";
-//tool import:
-@import "list-chooser";
+@color-Publication: #2196F3;
+@border-radius: 2px;
+.result-type {
+  line-height: 1.5em;
+  background-color: #ccc;
+  color: @default-dark-text-color;
+  &.type-Gene {
+    background: @color-Gene;
+    color: #fff;
+  }
+  &.type-Publication {
+    background: @color-Publication;
+  }
+  &.type-Protein {
+    background: @color-Protein;
+  }
+}
 body {
   background: @rgba-primary-0;
-  background: white;
-  background: #f7f7f7;
   background: #D9D9D9;
   -webkit-font-smoothing: antialiased;
   font-family: 'Lora', serif;
   font-family: 'Roboto', sans-serif;
 }
+
+@link-visited-color: #3F51B5;
+
+
 .sec {
   padding: 20px;
 }
@@ -44,7 +77,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+//  width: 100%;
   height: 100%;
   background-color: white;
 }
@@ -58,32 +91,40 @@ body {
   text-align: center;
   background-color: #000;
   // filter: alpha(opacity=50);
-  -moz-opacity: 0.5;
-  opacity: 0.6;
+  opacity: 0.9;
+  opacity: 1;
   z-index: 9999;
-  background: #A9A9A9;
+  background: #2D2D2D;
+  background: white;
 }
 .dimmer div.message {
   padding: 5px;
   border-radius: 5px;
-  color: #000;
   color: #bbe9f0;
   position: relative;
-  top: 50%;
+  top: 30%;
 }
 .hide {
   display: none;
 }
-@spinner-color: #bbe9f0;
+.icon {
+  vertical-align:middle;
+  display:inline-block;
+  width: 1.2em;
+  height:1.2em;
+  fill: currentColor;
+}
+@spinner-color: rgba(0,0,0,0.1);
+@spinner-highlight: rgba(0,0,0,0.5);
 .loader {
   margin: auto;
   font-size: 10px;
   position: relative;
   text-indent: -9999em;
-  border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-  border-left: 1.1em solid #ffffff;
+  border-top: 0.7em solid @spinner-color;
+  border-right: 0.7em solid @spinner-color;
+  border-bottom: 0.7em solid @spinner-color;
+  border-left: 0.7em solid @spinner-highlight;
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);
@@ -93,8 +134,8 @@ body {
 .loader,
 .loader:after {
   border-radius: 50%;
-  width: 10em;
-  height: 10em;
+  width: 5em;
+  height: 5em;
 }
 @-webkit-keyframes load8 {
   0% {
@@ -116,7 +157,6 @@ body {
     transform: rotate(360deg);
   }
 }
-
 //'fade', belowm is used to slide in a component from the top.
 // We allow it to size from 0 to auto in a newly created element using max-height and animations. Thanks, https://www.christianheilmann.com/2015/08/30/quicky-fading-in-a-newly-created-element-using-css/
 // and
@@ -129,9 +169,9 @@ body {
     max-height: 3000px;
   }
 }
-
 .tool-card-container {
   display: flex;
+  flex-wrap:wrap;
 }
 .next-steps-title {
   // background: #3C4750;
@@ -184,13 +224,18 @@ body {
     }
   }
 }
+.step-dashboard {
+  background: orange;
+}
 .step-container {
   box-sizing: border-box;
   margin: 10px 20px;
   .panel;
   .panel-default;
-  img {max-width:75%;} //this resizes images to match the box
-
+  img {
+    max-width: 75%;
+  }
+  //this resizes images to match the box
   //babycard and growing up are used to transition animations on newly added
   //DOM elements.
   &.babyCard {
@@ -203,7 +248,6 @@ body {
     animation: fade 3s;
     animation-timing-function: cubic-bezier(0.2, 2.0, 0.2);
   }
-
   .body {
     .panel-body;
     position: relative;
@@ -211,13 +255,13 @@ body {
   }
   .toolbar {
     @toolbarColor: #eee;
-    color: rgba(0,0,0, 0.87);
+    color: @default-dark-text-color;
     .clearfix;
     background: @toolbarColor;
     border: solid 1px @toolbarColor;
     li {
       a {
-        color: rgba(0,0,0, 0.87);
+        color: @default-dark-text-color;
       }
       padding: 0 1em;
       min-height: 3em;
@@ -326,6 +370,7 @@ th.jh-key {
   color: #999;
   font-size: small;
 }
+
 #custom-bootstrap-menu.navbar-default .navbar-brand {
   color: rgba(187, 233, 240, 1);
   font-weight: bold;
@@ -354,7 +399,7 @@ th.jh-key {
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:hover,
 #custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:focus {
-  color: rgba(0, 0, 0, 1);
+  color: @default-dark-text-color;
   border-top: 3px solid #bbe9f0;
   color: white;
   background-color: rgba(82, 82, 82, 1);
@@ -373,8 +418,6 @@ th.jh-key {
 #custom-bootstrap-menu.navbar-default .navbar-toggle:focus .icon-bar {
   background-color: #333333;
 }
-
-
 .whoami {
   text-align: right;
   .name {
@@ -389,12 +432,42 @@ th.jh-key {
     color: white;
   }
 }
-
 //the sign in curser is a text-select cursor by default for some reason.
 //users need to know it's a clickable link.
-.signin li div{
-  padding:20px 15px;
+.signin li div {
+  padding: 20px 15px;
   &:hover {
-  background:#525252;
-  cursor:pointer;
-}}
+    background: #525252;
+    cursor: pointer;
+  }
+}
+//IM tables pagination fixes:
+@paginationheight: 3em;
+ul.pagination {
+  margin: 0;
+  form {
+    margin: -3px 0.4em 0;
+    select {
+      text-transform: capitalize;
+    }
+  }
+}
+.im-table-pagination {
+  margin-left: 1em;
+}
+.im-table-pagination,
+.im-page-sizer {
+  display: block;
+  float: right;
+  min-height: @paginationheight;
+}
+.im-pagination-button,
+ul.pagination form {
+  float: left;
+  display: block;
+}
+.im-table-summary {
+  float: left;
+  min-height: @paginationheight;
+  line-height: @paginationheight;
+}

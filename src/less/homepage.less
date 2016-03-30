@@ -13,12 +13,14 @@
     }
   }
   button {
+    .btn;
+    .btn-default;
     min-width: 10em;
     font-family: Roboto, Helvetica, arial, sans-serif;
     font-weight: 500;
     text-transform: uppercase;
     padding: 1em 5em;
-    float:right;
+    // float:right;
     vertical-align: middle;
     background: @cta-color;
     line-height: 0.3em;
@@ -34,8 +36,9 @@
   #search {
     text-align: center;
     padding-bottom: @spacer;
+    padding-top: @spacer;
     button {
-      float:none;
+      float: none;
       margin-left: @spacer;
     }
   }
@@ -51,7 +54,9 @@
       min-height: @moduleHeight;
       flex: 1;
       padding: @spacer/2;
-      h3 {margin-top:0;}
+      h3 {
+        margin-top: 0;
+      }
     }
   }
   .templates li {
@@ -73,8 +78,34 @@
       background: @color-Protein;
     }
   }
-  .bubble div {text-align:center;}
+  .bubble div {
+    text-align: center;
+  }
   textarea {
     width: 100%;
+  }
+}
+//so, for a smaller screen....
+@media (max-width: @tiny-screen) {
+  .homepage {
+    #search {
+      button {
+        clear: both;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 1em;
+        margin-left: 0;
+      }
+      input {
+        clear: both;
+        width: 100%;
+        min-width: auto;
+        box-sizing: border-box;
+        margin-top: 1em;
+      }
+    }
+    .cards .step-container {
+      min-width: 260px;
+    }
   }
 }

@@ -16,6 +16,7 @@
     "tests"
   ],
   "dependencies": {
-    "bootstrap-material-design": "#9b434de6af15aa564ce5562fad20ddc12a58c84b"
+    "bootstrap-material-design": "#9b434de6af15aa564ce5562fad20ddc12a58c84b",
+    "bootstrap": "~3.3.6"
   }
 }

@@ -53,12 +53,15 @@ COPY . /usr/src/app
 
 WORKDIR /usr/src/app
 RUN npm install -g bower grunt-cli
+RUN npm install -g less
 
 RUN echo '{ "allow_root": true }' > /usr/src/app/.bowerrc
 
 RUN bower install
 
+RUN lessc /usr/src/app/src/less/style.less /usr/src/app/resources/public/css/style.css
+
 RUN lein clean
 RUN lein foreign
-RUN lein cljsbuild once min
+RUN lein cljsbuild once dev
 CMD lein run

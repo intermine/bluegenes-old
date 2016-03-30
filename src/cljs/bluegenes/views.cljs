@@ -1,8 +1,13 @@
 (ns bluegenes.views
   (:require [re-frame.core :as re-frame]
+            [reagent.core :as reagent]
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
-            [bluegenes.components.googlesignin :as google-sign-in]
+            [bluegenes.timeline.api :as timeline-api]
+            [clojure.string :as str]
+            [bluegenes.utils.icons :as icons]
+            ; [bluegenes.components.googlesignin :as google-sign-in]
+            [bluegenes.tools.smartidresolver.core :as idresolver]
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
 
@@ -15,25 +20,27 @@
 
 (defn histories-section []
   [ui-card
-  (fn []
+  (fn history-card []
   (let [histories (re-frame/subscribe [:all-histories])]
     [:div
      [:h3 "Choose a starting point:"]
      (for [[key values] @histories]
-       ^{:key key}
-       [:div
-        [:a {:href (str "#/timeline/" (:slug values))} [:h4 (:name values)]]
-        [:span (:description values)]])]))])
+       (cond key (do ;;there's a nil key coming from somewhere that spawns lots of console errors. This cond prevents the errors.
+         ^{:key key}
+         [:div
+          [:h4 [:a {:href (str "#/timeline/" (:slug values))} (:name values)]]
+          [:span (:description values)]])))]))])
 
 (defn list-upload-section []
+  "Nonfunctional (currently) list upload homepage widget"
+  (let [api (timeline-api/build-homepage-api-map {:name "smartidresolver"})]
   [ui-card
-  (let [list-history (re-frame/subscribe [:homepage-list-upload])]
    (fn []
-     [:form {:action "#/timeline/list-upload"}
+     [:div
       [:h3 "I have data I want to know more about:"]
-      [:p "Upload your list of identifiers (Genes, Proteins, etc.)"]
-      [:textarea {:cols 20 :rows 4}]
-      [:button "Go!"]]))])
+      [idresolver/main {:state ["" ""]
+        :api api
+        :upstream-data nil}]])]))
 
 (defn bubble-section []
   [ui-card
@@ -65,15 +72,29 @@
      ]))])
 
 (defn searchbox []
-  "Outputs (currently nonfunctional) search box"
+  "Outputs (currently nonfunctional) search box. TODO: replace with keyword search"
   [ui-card
-   (fn []
-     [:form#search
-      [:h3 "Search:"]
-      [:input {
-        :type "text"
-        :placeholder "Search for a gene, protein, disease, etc..."}]
-      [:button "Search"]])])
+  (let [local-state (reagent/atom nil)]
+    (reagent/create-class
+      {:reagent-render
+        (fn []
+          [:form#search {
+            :on-submit (fn [e]
+              "prevents default behaviours and navigates the user to the search page, with the search input as a query param (trimmed)"
+              (.preventDefault js/e)
+              (aset js/window "location" "href"
+                (str "/#timeline/search?"
+                     (str/trim @local-state))))
+           :method "get"
+           :action "/#/timeline/search"}
+            [:input {
+              :type "text"
+              :value (cond (some? @local-state) @local-state)
+              :placeholder "Search for a gene, protein, disease, etc..."
+              :on-change (fn [val]
+                 (reset! local-state (-> val .-target .-value)))}]
+            [:button "Search"]
+          ])}))])
 
 (defn home-panel []
   (let [name (re-frame/subscribe [:name])]
@@ -108,12 +129,15 @@
       [:div
        [:ul.nav.navbar-nav
         [:li {:class (if (= panel-name "home-panel") "active")} [:a {:href "#"} "Home"]]
-        [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]]
+        ;;don't show timeline in navbar unless we're actually there already, as
+        ;clicking on timeline from elsewhere just gives a blank page
+        (if (= panel-name "timeline-panel")
+          [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]])
         [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]
        [:div
         [:ul.nav.navbar-nav.pull-right.signin
          [:li
-               [google-sign-in/main]
+              ;  [google-sign-in/main]
                ]]]]]]))
 
 
@@ -128,6 +152,8 @@
   (let [active-panel (re-frame/subscribe [:active-panel])]
     (fn []
       [:div
+       [icons/icons]
        [nav-panel]
        (panels @active-panel)
-       [dimmer/main]])))
+       [dimmer/main]
+       ])))

@@ -1,0 +1,142 @@
+@collapsed-height: 75px;
+.step-all {
+  transition: all ease 0.5s;
+  color: white;
+  display: flex;
+  background: #333;
+  flex-direction: column;
+  overflow: hidden;
+  // animation: slideDown .2s ease-out;
+  position: absolute;
+  width: 100%;
+  z-index: 999;
+  box-shadow: 0 1px 5px 0 rgba(0,0,0,0.75);
+  &.open {
+    height: 320px;
+    overflow: hidden;
+  }
+  .categories {
+    display: flex;
+    flex: 1 1 auto;
+    padding: 10px;
+    .category {
+      flex: 0 0 auto;
+      padding: 5px 10px 5px 5px;
+      font-size: 1.3em;
+      color: #bbe9f0;
+      &.disabled {
+        color: #757575;
+      }
+      &.focused {
+        font-weight: bold;
+        color: white;
+      }
+    }
+  }
+  .dash {
+    display: flex;
+    padding: 10px;
+    opacity: 1;
+    height: 350px;
+    border-bottom: 1px solid #bbe9f0;
+    // -webkit-animation: fadeInFromNone 3.5s ease-out;
+    // -moz-animation: fadeInFromNone 0.5s ease-out;
+    // -o-animation: fadeInFromNone 0.5s ease-out;
+    animation: fadeInFromNone 0.2s ease-out;
+    &.hidden {
+      // opacity: 0;
+      transition: all ease 1s;
+      display: none;
+    }
+    .dash-col {
+      margin: 10px;
+      display: flex;
+      flex-direction: column;
+      min-width: 100px;
+      flex: 0 0 auto;
+      .indented {
+        padding-left: 15px;
+      }
+      .heading {
+        color: pink;
+        font-size: 1.3em;
+        padding-bottom: 3px;
+        margin-bottom: 7px;
+        border-bottom: 1px solid pink;
+      }
+      .highlighted {
+        color: pink;
+      }
+    }
+  }
+}
+.prevsteps {
+  //  padding-top: @collapsed-height;
+  padding-top: 1em;
+}
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+@-moz-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+@-o-keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}
+@keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+  }
+  100% {
+    display: block;
+    opacity: 1;
+  }
+}

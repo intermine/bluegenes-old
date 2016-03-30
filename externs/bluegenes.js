@@ -18,6 +18,14 @@ bluegenes.tools.viewtable.core.main = function() {};
 bluegenes.tools.idresolver.core.main = function() {};
 bluegenes.tools.runtemplate.core.main = function() {};
 bluegenes.tools.faketool.core.main = function() {};
+bluegenes.tools.viewtable.core.preview = function() {};
+bluegenes.tools.runtemplate.core.preview = function() {};
+bluegenes.tools.enrichment.core.preview = function() {};
+bluegenes.tools.enrichment.core.main = function() {};
+bluegenes.tools.chooselistcompact.core.preview = function() {};
+bluegenes.tools.chooselistcompact.core.main = function() {};
+bluegenes.tools.smartidresolver.core.main = function() {};
+
 
 // Functions used by imjs
 // TODO: we should create an IMJS externs file for all those cool CLJS hipsters out there.
@@ -27,8 +35,15 @@ imjs.prototype.Service.fetchLists = function() {};
 imjs.prototype.Service.fetchTemplates = function() {};
 imjs.prototype.Service.resolveIds = function() {};
 imjs.prototype.Service.poll = function() {};
+imjs.prototype.Service.search = function() {};
+imjs.prototype.Service.query.count = function() {};
 
 getAuthResponse = function() {};
+
+jQuery.prototype.animate = function(properties, arg2, easing, complete) {};
+
+
+
 
 var imtables = {};
 imtables.loadTable = function() {};

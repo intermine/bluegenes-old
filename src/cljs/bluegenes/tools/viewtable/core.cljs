@@ -10,21 +10,21 @@
 
 (defn get-list-query
   "Construct a query using a collection of object ids."
-  [list]
-  {:from (:type list)
+  [payload]
+  {:from (:type payload)
    :select "*"
-   :where [{:path (:type list)
+   :where [{:path (:type payload)
             :op "IN"
-            :value (:name list)
+            :value (:payload payload)
             :code "A"}]})
 
 (defn get-id-query
   "Construct a query using an intermine list name."
-  [list]
-  {:from (:type list)
+  [payload]
+  {:from (:type payload)
    :select "*"
    :where [{:path "Gene.id"
-            :values (:value list)
+            :values (:payload payload)
             :op "ONE OF"
             :code "A"}]})
 
@@ -37,7 +37,7 @@
     (= "ids" (-> input-data  :data :format))
     (get-id-query (get-in input-data [:data]))
     (= "query" (-> input-data :data :format))
-    (get-in input-data [:data :value])))
+    (get-in input-data [:data :payload])))
 
 (defn update-count
   "Reset an atom with the row count of an imjs query."
@@ -55,31 +55,35 @@
   (let [state (reagent/atom 0)]
     (fn [data]
       (update-count data state)
-      [:h4 (str @state " rows")])))
+      [:div
+       [:div.heading "View Table"]
+       [:div.indented (str @state " rows.")]]
+      )))
 
 (defn inner-table
   "Renders an im-table"
   []
   (let [update-table (fn [comp]
-                       (let [{:keys [state upstream-data api]} (reagent/props comp)
-                             node (reagent/dom-node comp)
-                             target  (.item (.getElementsByClassName node "imtable") 0)
-                             query (normalize-input upstream-data)]
-                         (-> (.loadTable js/imtables
-                                         target
-                                         (clj->js {:start 0 :size 5})
-                                         (clj->js {:service (:service upstream-data) :query query}))
-                             (.then
-                              (fn [e]
-                                (let [clone (.clone (-> e .-query))
-                                      adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
-                                  (-> (js/imjs.Service. (clj->js (:service upstream-data)))
-                                      (.values adj)
-                                      (.then (fn [v]
-                                               ((:has-something api) {:service (:service upstream-data)
-                                                                      :data {:format "ids"
-                                                                             :type (-> e .-query .-root)
-                                                                             :value (js->clj v)}}))))))))))]
+   (let [{:keys [state upstream-data api]} (reagent/props comp)
+         node (reagent/dom-node comp)
+         target  (.item (.getElementsByClassName node "imtable") 0)
+         query (normalize-input upstream-data)]
+     (-> (.loadTable js/imtables
+                     target
+                     (clj->js {:start 0 :size 5})
+                     (clj->js {:service (:service upstream-data) :query query}))
+         (.then
+          (fn [e]
+            (let [clone (.clone (-> e .-query))
+                  adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
+              (-> (js/imjs.Service. (clj->js (:service upstream-data)))
+                  (.values adj)
+                  (.then (fn [v]
+                           ((:has-something api) {:service (:service upstream-data)
+                                                  :data {:format "ids"
+                                                         :type (-> e .-query .-root)
+                                                         :payload (js->clj v)}}))))))))))]
+
     (reagent/create-class
      {:reagent-render (fn []
                         [:div

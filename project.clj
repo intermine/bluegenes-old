@@ -3,6 +3,7 @@
                  [org.clojure/clojurescript "1.7.228"]
                  [reagent "0.5.1"]
                  [re-frame "0.6.0"]
+                 [cljsjs/react "0.14.3-0"] ;;this React lib allow svgs to render properly. Remove if Reagent ever uses React > 0.14
                  [secretary "1.2.3"]
                  [compojure "1.4.0"]
                  [cheshire "5.5.0"]
@@ -11,7 +12,7 @@
                  [json-html "0.3.6"]
                  [environ "1.0.0"]
                  [mount "0.1.9"]
-                 [prismatic/schema "1.0.4"]
+                 [prismatic/schema "1.0.5"]
                  [slugger "1.0.1"]
                  [reagent-forms "0.5.8"]
                  [clj-http "2.0.1"]
@@ -19,6 +20,8 @@
                  [cljs-ajax "0.5.3"]
                  [com.novemberain/monger "3.0.2"]
                  [org.clojure/core.async "0.2.374"]
+                 [prismatic/dommy "1.1.0"]
+                 [cljs-http "0.1.39"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]]
 
   :source-paths ["src/clj"]
@@ -49,7 +52,7 @@
 
   :profiles {
              :dev {:cljsbuild {:builds
-                               {:dev {:source-paths ["src/cljs"]
+                               {:dev {:source-paths ["src/cljc" "src/cljs"]
                                       :figwheel {:on-jsload "bluegenes.core/mount-root"}
                                       :compiler {:main bluegenes.core
                                                  :output-to "resources/public/js/compiled/app.js"
@@ -60,7 +63,7 @@
                                                                  :provides ["intermine.imjs"]}
                                                                 {:file "foreign-libs/imtables.min.js"
                                                                  :provides ["intermine.imtables"]}]}}
-                                :min {:source-paths ["src/cljs"]
+                                :min {:source-paths ["src/cljc" "src/cljs"]
                                       :compiler {:main bluegenes.core
                                                  :output-to "resources/public/js/compiled/app.js"
                                                  :externs ["externs/bluegenes.js"]
