@@ -362,7 +362,7 @@
   "A container for controlling the ID resolution job / proceeding with workflows."
   [state api]
   (fn []
-    [:div
+    [:div.cta
      [:div.btn.btn-primary
       {:class (if (empty? (remove nil? (map #(-> % :product :id) (:identifiers @state)))) "disabled")
        :on-click (fn [e] (handle-values @state api))}
