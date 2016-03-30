@@ -16,6 +16,7 @@
 @import "dashboard";
 @import "outboundlinks";
 @import "smartbox";
+
 @rgba-primary-0: rgba(211,209,198,1);
 /* Main Primary color */
 @rgba-primary-1: rgba(249,242,213,1);
@@ -28,6 +29,10 @@
 @selectedColorText: #fff;
 @stripe-color: #f6f6f6;
 @default-dark-text-color: rgba(0,0,0,0.87);
+
+//useful breakpoint:
+@tiny-screen: 767px;
+
 //define master colours for popular data types. Try to draw from 500 colours
 //here: https://www.google.com/design/spec/style/color.html# to keep the colours
 //visually distinct. They should be used ONLY for data type tagging, not general theming
@@ -72,7 +77,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+//  width: 100%;
   height: 100%;
   background-color: white;
 }
@@ -166,6 +171,7 @@ body {
 }
 .tool-card-container {
   display: flex;
+  flex-wrap:wrap;
 }
 .next-steps-title {
   // background: #3C4750;
@@ -364,6 +370,7 @@ th.jh-key {
   color: #999;
   font-size: small;
 }
+
 #custom-bootstrap-menu.navbar-default .navbar-brand {
   color: rgba(187, 233, 240, 1);
   font-weight: bold;

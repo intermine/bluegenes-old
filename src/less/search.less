@@ -1,5 +1,5 @@
 .search {
-  font-size:1.05em;
+  font-size: 1.05em;
   button,
   input[type=text] {
     float: left;
@@ -43,12 +43,14 @@
   }
   .searchform {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
   }
   .response {
     clear: both;
     display: flex;
     .facets {
+      order: 1;
       @highlight: #ddd;
       margin: 1em;
       .active-filter {
@@ -94,6 +96,7 @@
       }
     }
     .results {
+      order: 2;
       margin: @spacer/2 @spacer/2 @spacer/2 @spacer;
       .result {
         border-bottom: solid 1px #e4e4e4;
@@ -148,7 +151,7 @@
       }
       .default-description {
         text-transform: capitalize;
-        margin-right: 0.5em;
+        margin: 0em 0.25em;
         display: inline-block;
         vertical-align: middle;
       }
@@ -158,11 +161,13 @@
       .description,
       .default-value {
         vertical-align: middle;
-        white-space: nowrap;
         overflow: hidden;
         max-width: 350px;
         display: inline-block;
         text-overflow: ellipsis;
+      }
+      .default-value {
+        white-space: nowrap;
       }
       .name,
       .organism {
@@ -192,5 +197,41 @@
     padding: 0 0.2em;
     border-radius: @border-radius;
     margin: 0.2em;
+  }
+}
+@media (max-width: @tiny-screen) {
+  .search {
+    button {
+      clear: both;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 1em;
+      margin-left: 0;
+    }
+    input[type=text] {
+      clear: both;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 1em;
+      min-width:auto;
+    }
+    .response {
+      flex-wrap: wrap;
+      .facets {
+        order: 2;
+        margin-left: 0;
+      }
+      .results {
+        order: 1;
+        margin-left: 0;
+      }
+      .description span {
+        line-height:1.5em;
+        vertical-align:middle;
+        display: inline-block;
+        max-height: 3em;
+        overflow: hidden;
+      }
+    }
   }
 }
