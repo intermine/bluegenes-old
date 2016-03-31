@@ -74,9 +74,10 @@
 (defn submit-search [event state]
     "prevents default behaviours and navigates the user to the search page, with the search input as a query param (trimmed)"
     (.preventDefault js/event)
+    (.log js/console "Setting global search term to:" @state)
+    (re-frame/dispatch [:set-search-term (str/trim @state)]);;set global search
     (aset js/window "location" "href"
-      (str "/#timeline/search?"
-           (str/trim @state))))
+      "/#timeline/search"))
 
 (defn searchbox []
   "Outputs main top search boc"

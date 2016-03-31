@@ -45,8 +45,8 @@
 
 (defn submit-handler [searchterm api]
   "Adds search term to the state, and searches for the term"
-  (aset js/window "location" "href"
-    (str "/#/timeline/search?" searchterm))
+  ;(aset js/window "location" "href"
+  ;  (str "/#/timeline/search?" searchterm))
     (search searchterm api))
 
 (defn is-active-result? [result]
@@ -103,7 +103,7 @@
   (let [url (aget js/window "location" "href")
         last-section (str/split url #"/search\?")]
     (if (> (count last-section) 1) ;; if there's a query param, eg "someurl.com/#/timeline/search?fkh"
-      (last last-section)
+      (re-frame/dispatch [:set-search-term (last last-section)])
       nil)))
 
 (defn search-form [search-term api]
@@ -117,28 +117,49 @@
           :placeholder "Search for a gene, protein, disease, etc..."
           :value @search-term
           :on-change (fn [val]
-              (reset! search-term (-> val .-target .-value)))}]
+  ;          (reset! search-term (-> val .-target .-value)))}]
+            (re-frame/dispatch [:set-search-term (-> val .-target .-value)]))}]
     [:button "Submit"]]
    [:div.response
       [filters/facet-display search-results api search @search-term]
       [results-display api search-term]]])
 
 (defn ^:export main []
-  (let [search-term (reagent/atom " ")]
+  (let [local-search-term (reagent/atom " ")
+        global-search-term (re-frame/subscribe [:search-term])]
   (reagent/create-class
     {:reagent-render
       (fn render [{:keys [state upstream-data api]}]
-        [search-form search-term api])
-      :component-did-mount (fn [this]
+        (.log js/console "%cRender. Search term is '%s'" "color:hotpink;font-weight:bold;" @global-search-term)
+        [search-form local-search-term api]
+        )
+      :component-will-mount (fn [this]
         (let [passed-in-state (:state (reagent/props this))
               query-string (check-for-query-string-in-url)
               api (:api (reagent/props this))]
-          (reset! search-term (:input passed-in-state))
+          (reset! local-search-term (:input passed-in-state))
           (swap! search-results assoc :query-string query-string)
           ;populate the form from the url if there's a query param
-          (cond (some? query-string)
+          (cond (some? global-search-term)
             (do
-              (reset! search-term query-string)
-              (submit-handler query-string api)
+              (.log js/console "%cMounted. Search term is '%s'" "color:cornflowerblue;font-weight:bold;" @global-search-term)              (reset! local-search-term @global-search-term)
+              (submit-handler @global-search-term api)
               ))))
+      :component-did-update (fn [this]
+                (.log js/console "%cUpdated. Search term is '%s'" "color:lightslategrey;font-weight:bold;" @global-search-term))
+      :component-will-update (fn [this]
+        (let [api (:api (reagent/props this))]
+        (.log js/console "%cYay, I'm gonna update. Search term is '%s'" "color:seagreen;font-weight:bold;" @global-search-term)
+        (.log js/console "%cProps" "color:seagreen;font-weight:bold;" (clj->js (reagent/props this)))
+          (reset! local-search-term @global-search-term)
+          ;(re-frame/dispatch [:set-search-term @local-search-term])
+          (submit-handler @global-search-term api)))
+      :should-component-update (fn [this]
+          "Only update if there's a new search term. Otherwise we end up in a loop of updating forever and ever and ever and.... voom. DOS."
+          (.log js/console "%cShould I update? old search term is '%s', new is '%s'" "color:lightseagreen;font-weight:bold;" @local-search-term @global-search-term)
+          (not= @global-search-term @local-search-term)
+        )
+      :component-will-receive-props (fn [this]
+        (.log js/console "%cwill get props. Search term is '%s'" "color:yellowgreen;font-weight:bold;" @global-search-term))
+
 })))
