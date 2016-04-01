@@ -4,6 +4,7 @@
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
             [bluegenes.timeline.api :as timeline-api]
+            [bluegenes.components.lists :as lists]
             [clojure.string :as str]
             [bluegenes.utils.icons :as icons]
             ; [bluegenes.components.googlesignin :as google-sign-in]
@@ -151,6 +152,7 @@
       [:div
        [:ul.nav.navbar-nav
         [:li {:class (if (= panel-name "home-panel") "active")} [:a {:href "#"} "Home"]]
+        [:li {:class (if (= panel-name "list-panel") "active")} [:a {:href "#/lists"} "Lists"]]
         ;;don't show timeline in navbar unless we're actually there already, as
         ;clicking on timeline from elsewhere just gives a blank page
         (if (= panel-name "timeline-panel")
@@ -169,6 +171,7 @@
 (defmethod panels :home-panel [] [home-panel])
 (defmethod panels :about-panel [] [about-panel])
 (defmethod panels :timeline-panel [] [timeline-views/main-view])
+(defmethod panels :list-panel [] [lists/main-view])
 (defmethod panels :debug-panel [] [debug-panel])
 (defmethod panels :default [] [:div])
 

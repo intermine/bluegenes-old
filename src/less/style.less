@@ -6,8 +6,11 @@
 // Bootswatch Paper theme
 @import "bootswatch";
 @import "overrides";
-// Homepage:
+
+// Homepage and other core pages:
 @import "homepage";
+@import "lists";
+
 // Tool import:
 @import "list-chooser";
 @import "stepdash";
@@ -17,6 +20,7 @@
 @import "outboundlinks";
 @import "smartbox";
 @import "enrichment";
+
 @rgba-primary-0: rgba(211,209,198,1);
 /* Main Primary color */
 @rgba-primary-1: rgba(249,242,213,1);
@@ -109,6 +113,27 @@ body {
   height: 1.2em;
   fill: currentColor;
 }
+
+//mixin used in multiple locations:
+.cards {
+  display: flex;
+  flex-flow: row wrap;
+  align-content: stretch;
+  align-items: stretch;
+  justify-content: space-between;
+  margin-top: @spacer;
+  .step-container {
+    min-width: @moduleWidth;
+    min-height: @moduleHeight;
+    flex: 1;
+    padding: @spacer/2;
+    h3 {
+      margin-top: 0;
+    }
+  }
+}
+
+
 @spinner-color: rgba(0,0,0,0.1);
 @spinner-highlight: rgba(0,0,0,0.5);
 .loader {
