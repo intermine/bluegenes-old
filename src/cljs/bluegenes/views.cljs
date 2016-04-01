@@ -71,20 +71,23 @@
        [:a "See other popular questions and template searches..."]
      ]))])
 
+(defn submit-search [event state]
+    "prevents default behaviours and navigates the user to the search page, with the search input as a query param (trimmed)"
+    (.preventDefault js/event)
+    (.log js/console "Setting global search term to:" @state)
+    (re-frame/dispatch [:set-search-term (str/trim @state)]);;set global search
+    (aset js/window "location" "href"
+      "/#timeline/search"))
+
 (defn searchbox []
-  "Outputs (currently nonfunctional) search box. TODO: replace with keyword search"
+  "Outputs main top search boc"
   [ui-card
   (let [local-state (reagent/atom nil)]
     (reagent/create-class
       {:reagent-render
         (fn []
           [:form#search {
-            :on-submit (fn [e]
-              "prevents default behaviours and navigates the user to the search page, with the search input as a query param (trimmed)"
-              (.preventDefault js/e)
-              (aset js/window "location" "href"
-                (str "/#timeline/search?"
-                     (str/trim @local-state))))
+            :on-submit (fn [event] (submit-search event local-state))
            :method "get"
            :action "/#/timeline/search"}
             [:input {
@@ -119,6 +122,25 @@
      [:h1 "Application State"]
      [:p (json-html/edn->hiccup @state)]]))
 
+(defn navbar-search []
+  "Very similar to the main homepage search but shows on every page and has slightly different markup"
+  (let [local-state (reagent/atom "")]
+  (reagent/create-class
+    {:reagent-render
+    (fn []
+      [:form.navbar-form
+       {:role "search"
+        :on-submit (fn [event] (submit-search event local-state))}
+        [:input.form-control
+         {:placeholder "Search"
+          :type "text"
+          :value @local-state
+          :on-change (fn [val]
+             (reset! local-state (-> val .-target .-value)))}]
+        [:button.btn.btn-default {:type "submit"}
+          [:svg.icon.icon-search [:use {:xlinkHref "#icon-search"}]]]])})))
+
+
 (defn nav-panel []
   (let [active-panel (re-frame/subscribe [:active-panel])
         panel-name (str (clj->js @active-panel))]
@@ -135,7 +157,9 @@
           [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]])
         [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]
        [:div
-        [:ul.nav.navbar-nav.pull-right.signin
+        [:ul.nav.navbar-nav.navbar-right ;.signin
+         [:li
+          [navbar-search]]
          [:li
               ;  [google-sign-in/main]
                ]]]]]]))

@@ -17,6 +17,11 @@
   (fn [db [_ active-panel & args]]
     (assoc db :active-history (:id (first args)))))
 
+(re-frame/register-handler
+ :set-search-term
+ (fn [db [_ search-term & args]]
+   (assoc db :search-term search-term)))
+
 
 (re-frame/register-handler
  :set-active-panel

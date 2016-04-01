@@ -7,6 +7,7 @@
    :available-data {}
    :active-history nil
    :dimmer true
+   :search-term nil
 
    :remote-mines {
      :humanmine {

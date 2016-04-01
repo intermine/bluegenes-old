@@ -4,6 +4,11 @@
               [bluegenes.timeline.subs]))
 
 (re-frame/register-sub
+  :search-term
+  (fn [db]
+    (reaction (:search-term @db))))
+
+(re-frame/register-sub
  :name
  (fn [db]
    (reaction (:name @db))))

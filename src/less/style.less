@@ -16,7 +16,7 @@
 @import "dashboard";
 @import "outboundlinks";
 @import "smartbox";
-
+@import "enrichment";
 @rgba-primary-0: rgba(211,209,198,1);
 /* Main Primary color */
 @rgba-primary-1: rgba(249,242,213,1);
@@ -29,10 +29,8 @@
 @selectedColorText: #fff;
 @stripe-color: #f6f6f6;
 @default-dark-text-color: rgba(0,0,0,0.87);
-
 //useful breakpoint:
 @tiny-screen: 767px;
-
 //define master colours for popular data types. Try to draw from 500 colours
 //here: https://www.google.com/design/spec/style/color.html# to keep the colours
 //visually distinct. They should be used ONLY for data type tagging, not general theming
@@ -62,10 +60,7 @@ body {
   font-family: 'Lora', serif;
   font-family: 'Roboto', sans-serif;
 }
-
 @link-visited-color: #3F51B5;
-
-
 .sec {
   padding: 20px;
 }
@@ -77,7 +72,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-//  width: 100%;
+  //  width: 100%;
   height: 100%;
   background-color: white;
 }
@@ -108,10 +103,10 @@ body {
   display: none;
 }
 .icon {
-  vertical-align:middle;
-  display:inline-block;
+  vertical-align: middle;
+  display: inline-block;
   width: 1.2em;
-  height:1.2em;
+  height: 1.2em;
   fill: currentColor;
 }
 @spinner-color: rgba(0,0,0,0.1);
@@ -171,7 +166,7 @@ body {
 }
 .tool-card-container {
   display: flex;
-  flex-wrap:wrap;
+  flex-wrap: wrap;
 }
 .next-steps-title {
   // background: #3C4750;
@@ -370,14 +365,6 @@ th.jh-key {
   color: #999;
   font-size: small;
 }
-
-#custom-bootstrap-menu.navbar-default .navbar-brand {
-  color: rgba(187, 233, 240, 1);
-  font-weight: bold;
-  font-style: italic;
-  font-size: 1.7em;
-  font-family: 'Lora', serif;
-}
 #custom-bootstrap-menu.navbar-default {
   font-size: 1em;
   background-color: rgba(51, 51, 51, 1);
@@ -385,38 +372,64 @@ th.jh-key {
   border-radius: 0;
   border: none;
   margin-bottom: 0;
-}
-#custom-bootstrap-menu.navbar-default .navbar-nav>li>a {
-  color: rgba(181, 179, 179, 1);
-  background-color: rgba(51, 51, 51, 1);
-  border-top: 3px solid transparent;
-}
-#custom-bootstrap-menu.navbar-default .navbar-nav>li>a:hover,
-#custom-bootstrap-menu.navbar-default .navbar-nav>li>a:focus {
-  color: rgba(250, 250, 250, 1);
-  background-color: rgba(82, 82, 82, 1);
-}
-#custom-bootstrap-menu.navbar-default .navbar-nav>.active>a,
-#custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:hover,
-#custom-bootstrap-menu.navbar-default .navbar-nav>.active>a:focus {
-  color: @default-dark-text-color;
-  border-top: 3px solid #bbe9f0;
-  color: white;
-  background-color: rgba(82, 82, 82, 1);
-}
-#custom-bootstrap-menu.navbar-default .navbar-toggle {
-  border-color: #f7f7f7;
-}
-#custom-bootstrap-menu.navbar-default .navbar-toggle:hover,
-#custom-bootstrap-menu.navbar-default .navbar-toggle:focus {
-  background-color: #f7f7f7;
-}
-#custom-bootstrap-menu.navbar-default .navbar-toggle .icon-bar {
-  background-color: #f7f7f7;
-}
-#custom-bootstrap-menu.navbar-default .navbar-toggle:hover .icon-bar,
-#custom-bootstrap-menu.navbar-default .navbar-toggle:focus .icon-bar {
-  background-color: #333333;
+  .navbar-brand {
+    color: rgba(187, 233, 240, 1);
+    font-weight: bold;
+    font-style: italic;
+    font-size: 1.7em;
+    font-family: 'Lora', serif;
+  }
+  .navbar-nav {
+    &>li>a {
+      color: rgba(181, 179, 179, 1);
+      background-color: rgba(51, 51, 51, 1);
+      border-top: 3px solid transparent;
+      &:hover,
+      &:focus {
+        color: rgba(250, 250, 250, 1);
+        background-color: rgba(82, 82, 82, 1);
+      }
+      &>.active>a {
+        &:hover,
+        &:focus {
+          color: @default-dark-text-color;
+          border-top: 3px solid #bbe9f0;
+          color: white;
+          background-color: rgba(82, 82, 82, 1);
+        }
+      }
+    }
+    .navbar-default .navbar-toggle {
+      border-color: #f7f7f7;
+      &:hover,
+      &:focus {
+        background-color: #f7f7f7;
+        .icon-bar {
+          background-color: #333333;
+        }
+      }
+      .icon-bar {
+        background-color: #f7f7f7;
+      }
+    }
+  }
+  .navbar-form {display:flex;}
+  input[type=text] {
+    margin-left:15px;
+    padding: 0.2em 0.4em;
+    &.form-control {
+      background: white;
+      width: 100%;
+      float: right;
+      border-radius: 2px 0 0 2px;
+    }
+  }
+  button {
+    padding: 7px;
+    margin-right:15px;
+    float:right;
+    border-radius: 0 2px 2px 0;
+  }
 }
 .whoami {
   text-align: right;
