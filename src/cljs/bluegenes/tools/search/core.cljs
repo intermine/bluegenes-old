@@ -67,7 +67,6 @@
       (fn [result]
         (not (is-active-result? result))) (:results @search-results))))
 
-
 (defn results-count []
   "Visual component: outputs the number of results shown."
     [:small " Displaying " (count-current-results) " of " (count-total-results @search-results) " results"])
@@ -80,7 +79,7 @@
 (defn results-display [api search-term]
   "Iterate through results and output one row per result using result-row to format. Filtered results aren't output. "
   [:div.results
-    [:h4 "Results" [results-count]]
+    [:h4 "Results for '" @(re-frame/subscribe [:search-term]) "'"  [results-count]]
     [:form
       (doall (let [state search-results
         ;;active-results might seem redundant, but it outputs the results we have client side
@@ -111,38 +110,39 @@
   [:div.search
     [:form.searchform {:on-submit (fn [e]
       (.preventDefault js/e)
-        (submit-handler @search-term api))}
+      (let [input (.querySelector (.-target e) "input")
+            val (.-value input)]
+        (re-frame/dispatch [:set-search-term val])
+        (submit-handler val api)
+        (set! (.-value input) ""))
+      )}
+
         [:input {
           :type "text"
-          :placeholder "Search for a gene, protein, disease, etc..."
-          :value @search-term
-          :on-change (fn [val]
-  ;          (reset! search-term (-> val .-target .-value)))}]
-            (re-frame/dispatch [:set-search-term (-> val .-target .-value)]))}]
+          :placeholder "Search for a gene, protein, disease, etc..."}]
     [:button "Submit"]]
    [:div.response
       [filters/facet-display search-results api search @search-term]
       [results-display api search-term]]])
 
 (defn ^:export main []
-  (let [local-search-term (reagent/atom " ")
-        global-search-term (re-frame/subscribe [:search-term])]
+  (let [global-search-term (re-frame/subscribe [:search-term])]
   (reagent/create-class
     {:reagent-render
       (fn render [{:keys [state upstream-data api]}]
         (.log js/console "%cRender. Search term is '%s'" "color:hotpink;font-weight:bold;" @global-search-term)
-        [search-form local-search-term api]
+        [search-form global-search-term api]
         )
       :component-will-mount (fn [this]
         (let [passed-in-state (:state (reagent/props this))
               query-string (check-for-query-string-in-url)
               api (:api (reagent/props this))]
-          (reset! local-search-term (:input passed-in-state))
+          ;(reset! local-search-term (:input passed-in-state))
           (swap! search-results assoc :query-string query-string)
           ;populate the form from the url if there's a query param
           (cond (some? global-search-term)
             (do
-              (.log js/console "%cMounted. Search term is '%s'" "color:cornflowerblue;font-weight:bold;" @global-search-term)              (reset! local-search-term @global-search-term)
+              (.log js/console "%cMounted. Search term is '%s'" "color:cornflowerblue;font-weight:bold;" @global-search-term)              ;(reset! local-search-term @global-search-term)
               (submit-handler @global-search-term api)
               ))))
       :component-did-update (fn [this]
@@ -151,13 +151,12 @@
         (let [api (:api (reagent/props this))]
         (.log js/console "%cYay, I'm gonna update. Search term is '%s'" "color:seagreen;font-weight:bold;" @global-search-term)
         (.log js/console "%cProps" "color:seagreen;font-weight:bold;" (clj->js (reagent/props this)))
-          (reset! local-search-term @global-search-term)
           ;(re-frame/dispatch [:set-search-term @local-search-term])
           (submit-handler @global-search-term api)))
       :should-component-update (fn [this]
-          "Only update if there's a new search term. Otherwise we end up in a loop of updating forever and ever and ever and.... voom. DOS."
-          (.log js/console "%cShould I update? old search term is '%s', new is '%s'" "color:lightseagreen;font-weight:bold;" @local-search-term @global-search-term)
-          (not= @global-search-term @local-search-term)
+          ;"Only update if there's a new search term. Otherwise we end up in a loop of updating forever and ever and ever and.... voom. DOS."
+          ;(.log js/console "%cShould I update? old search term is '%s', new is '%s'" "color:lightseagreen;font-weight:bold;" @local-search-term @global-search-term)
+          ;(not= @global-search-term @local-search-term)
         )
       :component-will-receive-props (fn [this]
         (.log js/console "%cwill get props. Search term is '%s'" "color:yellowgreen;font-weight:bold;" @global-search-term))
