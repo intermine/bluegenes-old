@@ -1,6 +1,7 @@
 (ns bluegenes.tools.chooselist.core
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
+            [bluegenes.components.paginator :as paginator]
             [reagent.impl.util :as impl :refer [extract-props]]
             [intermine.imjs :as imjs]))
 
@@ -8,6 +9,7 @@
 
 ; TODO: This should be passed into the tool as a property.
 (def flymine (js/imjs.Service. #js {:root "www.flymine.org/query"}))
+(def pager (reagent/atom {:current-page 1 :rows-per-page 10}))
 
 (defn get-lists
   "Fetch lists from flymine and store them to the list atom.
@@ -17,11 +19,10 @@
    list2 #js{list2-details}}"
   [local-state]
   (-> flymine .fetchLists
-      (.then (fn [im-lists]
-               (reset! local-state (reduce
-                              (fn [col next-list]
-                                (assoc col  (.-name next-list) next-list))
-                              (sorted-map) im-lists))))))
+    (.then (fn [im-lists]
+      (.log js/console "im-lists" (clj->js im-lists))
+      (swap! local-state assoc
+             :results (partition-all (:rows-per-page @pager) im-lists))))))
 
 (defn is-selected [list state]
   "Returns true when a list name matches the most recent state (user chosen) list name"
@@ -51,6 +52,9 @@
                 :payload (.-name list-details)}}
         ((:has-something api)))))
 
+(defn pagination-handler []
+  (.log js/console "lol"))
+
 (defn ^:export main []
   "Output a table representing all lists in a mine.
   When the component is updated then inform the API of its new value."
@@ -59,6 +63,14 @@
      {:reagent-render
       (fn [{:keys [state upstream-data api]}]
         [:div
+        [paginator/main
+         {:current-page (:current-page @pager)
+          :spread 2
+          :rows (count (:results @local-state))
+          :rows-per-page (:rows-per-page @pager)
+          :on-change pagination-handler
+          }]
+
          [:table {:class "list-chooser"}
           [:thead
            [:tr
@@ -66,8 +78,14 @@
             [:th "#"]
             [:th "Name"]]]
           [:tbody
-           (for [[name value] @local-state]
-             ^{:key name} [list-row name value api state])]]])
+          (.log js/console "hi" (clj->js (:results @local-state)))
+           (for [result (first (:results @local-state))]
+             (doall
+              (.log js/console "hi" (clj->js result))
+             ^{:key (.-name result)}
+               [list-row (.-name result) result api state]
+               ))]]
+          ])
       :component-did-mount
       (fn [this]
         (get-lists local-state))
