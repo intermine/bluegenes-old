@@ -54,10 +54,15 @@
       @highlight: #ddd;
       margin: 1em;
       .result-type {
-        border-left:0;
+        border-left: 0;
         line-height: 1.5em;
         background-color: #ccc;
         color: @default-dark-text-color;
+        margin:0;
+        min-width: 4em;
+        line-height: @spacer;
+        min-height: @spacer;
+        vertical-align: middle;
         &.type-Gene {
           background: @color-Gene;
           color: #fff;
@@ -69,7 +74,6 @@
           background: @color-Protein;
         }
       }
-
       .active-filter {
         background: @highlight;
         border-radius: @border-radius;
@@ -87,7 +91,7 @@
         text-align: center;
       }
       table {
-        min-width: 300px;
+        min-width: 200px;
         border-collapse: separate;
         border-spacing: 0 0.2em;
       }
@@ -151,7 +155,7 @@
       flex-grow: 4;
       .default-description {
         text-transform: capitalize;
-        margin: 0em 0.25em;
+        margin: 0 0.25em;
         display: inline-block;
         vertical-align: middle;
       }
@@ -159,12 +163,14 @@
         content: ": ";
       }
       .description,
-      .default-value {
+      .default-value, .description span {
         vertical-align: middle;
         overflow: hidden;
         max-width: 350px;
         display: inline-block;
         text-overflow: ellipsis;
+        height:2em;
+        margin-left:0.2em;
       }
       .default-value {
         white-space: nowrap;
@@ -213,7 +219,7 @@
       width: 100%;
       box-sizing: border-box;
       margin-top: 1em;
-      min-width:auto;
+      min-width: auto;
     }
     .response {
       flex-wrap: wrap;
@@ -226,8 +232,8 @@
         margin-left: 0;
       }
       .description span {
-        line-height:1.5em;
-        vertical-align:middle;
+        line-height: 1.5em;
+        vertical-align: middle;
         display: inline-block;
         max-height: 3em;
         overflow: hidden;
