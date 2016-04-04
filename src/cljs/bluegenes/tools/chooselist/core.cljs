@@ -32,11 +32,11 @@
   (reagent/create-class
    {:reagent-render
     (fn [list-name list-value api state]
-      [:tr {:on-click (fn []
+      [:tr.result {:on-click (fn []
                         ((:append-state api) {:chose (.-name list-value)}))
             :class (if (is-selected list-value state)
                      "selected")}
-       [:td {:class (str "type-" (.-type list-value) " list-type")} (.-type list-value)]
+       [:td [:span {:class (str "type-" (.-type list-value) " result-type")} (.-type list-value)]]
        [:td {:class "count"} (.-size list-value)]
        [:td {:class "list-name"} (.-name list-value)]])}))
 

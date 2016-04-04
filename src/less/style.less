@@ -44,7 +44,7 @@
 @color-Protein: #FFC107;
 @color-Publication: #2196F3;
 @border-radius: 2px;
-.result-type {
+/*.result-type {
   line-height: 1.5em;
   background-color: #ccc;
   color: @default-dark-text-color;
@@ -58,7 +58,30 @@
   &.type-Protein {
     background: @color-Protein;
   }
+}*/
+
+.result-type {
+  display: inline-block;
+  background: rgba(235,235,235,0.87);
+  color: @default-dark-text-color;
+  min-width: 7em;
+  border-radius:@border-radius;
+  text-align: right;
+  margin:0.15em;
+  padding:0 0.2em;
+  border-left: solid 3px #999;
+  &.type-Gene {
+    border-left: solid 3px @color-Gene;
+  }
+  &.type-Publication {
+    border-left: solid 3px @color-Publication;
+  }
+  &.type-Protein {
+    border-left: solid 3px @color-Protein;
+  }
 }
+
+
 body {
   background: @rgba-primary-0;
   background: #D9D9D9;

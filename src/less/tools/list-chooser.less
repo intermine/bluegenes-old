@@ -1,6 +1,18 @@
 .list-chooser {
-  .table;
-  .table-hover;
+
+tr {
+  &:nth-child(even) {
+    background: @stripe-color;
+  }
+  &:hover {
+    background: #FFFDE7;
+  }
+  &.selected {
+    background: #FFECB3;
+  }
+  border-bottom: solid 1px #e4e4e4;
+
+}
 
   .count {
     text-align:right;
@@ -9,18 +21,5 @@
 
   .list-name {
     width:100%;
-  }
-
-  .selected, .selected:hover {
-    background:@selectedColor;
-    color:@selectedColorText;
-    td, td.selected {
-    box-shadow:4px 4px 4px rgba(0,0,0,0.3);
-  }
-    .type-Gene {
-      background : @selectedColorText;
-      color : @selectedColor;
-      border-left:solid @selectedColor 3px;
-    }
   }
 }
