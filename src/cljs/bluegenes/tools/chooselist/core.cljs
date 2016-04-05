@@ -56,9 +56,17 @@
         ((:has-something api)))))
 
 (defn pagination-handler [new-page-num]
-  (.log js/console "hi " new-page-num)
   (swap! pager assoc :current-page (- new-page-num 1))
   )
+
+(defn pagination-control []
+  [paginator/main
+   {:current-page (+ (:current-page @pager) 1)
+    :spread 1
+    :rows (:rows @pager)
+    :rows-per-page (:rows-per-page @pager)
+    :on-change pagination-handler
+    }])
 
 (defn ^:export main []
   "Output a table representing all lists in a mine.
@@ -68,14 +76,6 @@
      {:reagent-render
       (fn [{:keys [state upstream-data api]}]
         [:div
-        [paginator/main
-         {:current-page (+ (:current-page @pager) 1)
-          :spread 1
-          :rows (:rows @pager)
-          :rows-per-page (:rows-per-page @pager)
-          :on-change pagination-handler
-          }]
-
          [:table {:class "list-chooser"}
           [:thead
            [:tr
@@ -87,6 +87,7 @@
              ^{:key (.-name result)}
                [list-row (.-name result) result api state]
             )]]
+            [pagination-control]
           ])
       :component-did-mount
       (fn [this]

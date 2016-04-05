@@ -76,7 +76,7 @@
 
       :reagent-render (fn [{:keys [spread rows rows-per-page on-change current-page]}]
         (println "args for paginator" rows)
-                        [:div.noselect
+                        [:div.noselect.paginator
                          [:nav
                           [:ul.pagination
                            ^{:key "first"} [:li
@@ -114,7 +114,7 @@
                                            [:a {:on-click
                                                 #(updater (inc (count (partition (:rows-per-page @state) (range 1 rows)))))}
                                             [:i.fa.fa-step-forward]]]]]
-                         [:h4 (str "Showing rows "
+                         [:h6 (str "Showing rows "
                                    (inc (* (dec (:current-page @state)) (:rows-per-page @state)))
                                    " to "
                                    (* (:current-page @state) (:rows-per-page @state)))]])})))
