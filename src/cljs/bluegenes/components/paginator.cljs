@@ -66,7 +66,7 @@
   :on-change A function to call with the current page number.
   TODO: Move the selection handlers to their own functions and use let[]
   to reduce calculations on large arrays."
-  [{:keys [spread rows rows-per-page on-change current-page]}]
+  [{:keys [spread rows rows-per-page on-change current-page] :as s}]
   (let [state (reagent/atom {:current-page current-page
                              :spread spread
                              :rows-per-page rows-per-page})
@@ -74,8 +74,8 @@
     (reagent/create-class
      {:display-name "bluegenes.components.paginator/main"
 
-      :reagent-render (fn []
-                        (println "number of rows" rows)
+      :reagent-render (fn [{:keys [spread rows rows-per-page on-change current-page]}]
+        (println "args for paginator" rows)
                         [:div.noselect
                          [:nav
                           [:ul.pagination

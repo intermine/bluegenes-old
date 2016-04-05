@@ -9,7 +9,9 @@
 
 ; TODO: This should be passed into the tool as a property.
 (def flymine (js/imjs.Service. #js {:root "www.flymine.org/query"}))
-(def pager (reagent/atom {:current-page 1 :rows-per-page 10}))
+(def pager (reagent/atom
+            {:current-page 0
+             :rows-per-page 10}))
 
 (defn get-lists
   "Fetch lists from flymine and store them to the list atom.
@@ -20,7 +22,8 @@
   [local-state]
   (-> flymine .fetchLists
     (.then (fn [im-lists]
-      (.log js/console "im-lists" (clj->js im-lists))
+      (.log js/console "im-lists" (clj->js im-lists) (count im-lists))
+      (swap! pager assoc :rows (count im-lists))
       (swap! local-state assoc
              :results (partition-all (:rows-per-page @pager) im-lists))))))
 
@@ -52,8 +55,10 @@
                 :payload (.-name list-details)}}
         ((:has-something api)))))
 
-(defn pagination-handler []
-  (.log js/console "lol"))
+(defn pagination-handler [new-page-num]
+  (.log js/console "hi " new-page-num)
+  (swap! pager assoc :current-page (- new-page-num 1))
+  )
 
 (defn ^:export main []
   "Output a table representing all lists in a mine.
@@ -64,9 +69,9 @@
       (fn [{:keys [state upstream-data api]}]
         [:div
         [paginator/main
-         {:current-page (:current-page @pager)
-          :spread 2
-          :rows (count (:results @local-state))
+         {:current-page (+ (:current-page @pager) 1)
+          :spread 1
+          :rows (:rows @pager)
           :rows-per-page (:rows-per-page @pager)
           :on-change pagination-handler
           }]
@@ -78,13 +83,10 @@
             [:th "#"]
             [:th "Name"]]]
           [:tbody
-          (.log js/console "hi" (clj->js (:results @local-state)))
-           (for [result (first (:results @local-state))]
-             (doall
-              (.log js/console "hi" (clj->js result))
+           (for [result (nth (:results @local-state) (:current-page @pager))]
              ^{:key (.-name result)}
                [list-row (.-name result) result api state]
-               ))]]
+            )]]
           ])
       :component-did-mount
       (fn [this]
