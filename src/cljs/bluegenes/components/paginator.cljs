@@ -34,8 +34,8 @@
 (defn get-numbers-around
   "Get a range around a number +/- the spread adjusted to fall within a range."
   [val spread [mi ma]]
-  (println "get-numbers around called with " ma)
-  (println "val is" val)
+  ;(println "get-numbers around called with " ma)
+  ;(println "val is" val)
   (-> (range (- val spread) (+ val (inc spread)))
       (keep-in-range mi ma)))
 
@@ -75,7 +75,7 @@
      {:display-name "bluegenes.components.paginator/main"
 
       :reagent-render (fn [{:keys [spread rows rows-per-page on-change current-page]}]
-        (println "args for paginator" rows)
+      ;  (println "args for paginator" rows)
                         [:div.noselect.paginator
                          [:nav
                           [:ul.pagination

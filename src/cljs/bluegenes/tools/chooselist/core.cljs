@@ -22,7 +22,8 @@
   [local-state]
   (-> flymine .fetchLists
     (.then (fn [im-lists]
-      (.log js/console "im-lists" (clj->js im-lists) (count im-lists))
+      (.log js/console "im-lists" (clj->js im-lists) )
+
       (swap! pager assoc :rows (count im-lists))
       (swap! local-state assoc
              :results (partition-all (:rows-per-page @pager) im-lists))))))
@@ -76,6 +77,7 @@
      {:reagent-render
       (fn [{:keys [state upstream-data api]}]
         [:div
+        [pagination-control]
          [:table {:class "list-chooser"}
           [:thead
            [:tr
@@ -87,7 +89,6 @@
              ^{:key (.-name result)}
                [list-row (.-name result) result api state]
             )]]
-            [pagination-control]
           ])
       :component-did-mount
       (fn [this]

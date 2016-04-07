@@ -7,7 +7,7 @@
 
 (defn list-upload-section []
   "Quasi-functional ID resolver"
-  (let [api (timeline-api/build-homepage-api-map {:name "smartidresolver"})]
+  (let [api (timeline-api/build-api-map {:name "smartidresolver"})]
   [:div.step-container
     [:div.body
      [:div
@@ -18,7 +18,7 @@
 
 (defn list-chooser-section []
   "Quasi-functional ID resolver"
-  (let [api (timeline-api/build-homepage-api-map {:name "chooselist"})]
+  (let [api (timeline-api/build-api-map {:name "chooselist"})]
   [:div.step-container
     [:div.body
      [:div
@@ -26,7 +26,6 @@
       [chooselist/main {:state ["" ""]
         :api api
         :upstream-data nil}]]]]))
-
 
 (defn main-view []
   [:main.lists-page
