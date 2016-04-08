@@ -14,8 +14,8 @@
 
 (re-frame/register-handler
   :set-active-history
-  (fn [db [_ active-panel & args]]
-    (assoc db :active-history (:id (first args)))))
+  (fn [db [_ active-history & args]]
+    (assoc-in db [:active-history] active-history)))
 
 (re-frame/register-handler
  :set-search-term

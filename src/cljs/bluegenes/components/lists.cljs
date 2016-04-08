@@ -2,6 +2,7 @@
     (:require [re-frame.core :as re-frame]
       [bluegenes.tools.smartidresolver.core :as idresolver]
       [bluegenes.tools.chooselist.core :as chooselist]
+      [bluegenes.tools.viewtable.core :as viewtable]
       [bluegenes.timeline.api :as timeline-api]
 ))
 
@@ -28,7 +29,14 @@
         :upstream-data nil}]]]]))
 
 (defn main-view []
+  (let [api (timeline-api/build-api-map {:name "viewtable"})
+    this-history (re-frame/subscribe [:history "lists"])
+    previous-step (first (:steps @this-history))
+    upstream-data (:produced (last previous-step))
+]
+    (re-frame/dispatch [:set-active-history "lists"])
   [:main.lists-page
+   (.log js/console "Lists" (clj->js upstream-data))
    [:div.cards
       [list-chooser-section]
       [list-upload-section]
@@ -36,7 +44,11 @@
     [:div.step-container
       [:div.body.list-show
        [:div.list
-       "All of your list data in a table"
+
+       [viewtable/main
+        {:state []
+        :api api
+        :upstream-data upstream-data}]
         ]
        [:div.toolbox
         [:div
@@ -51,4 +63,4 @@
               [:use {:xlinkHref "#icon-floppy-disk"}]]
                 " Save list"]]
       ]]
-   ])
+   ]))

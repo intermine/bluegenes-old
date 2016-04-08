@@ -121,7 +121,7 @@
   (let [state (re-frame/subscribe [:app-state])]
     [:div
      [:h1 "Application State"]
-     [:p (json-html/edn->hiccup @state)]]))
+     [:div (json-html/edn->hiccup @state)]]))
 
 (defn navbar-search []
   "Very similar to the main homepage search but shows on every page and has slightly different markup"
