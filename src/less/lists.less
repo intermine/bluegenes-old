@@ -14,4 +14,33 @@
       flex-grow: 1;
     }
   }
+  .cards .step-container {
+    &.active {
+      flex-grow: 5;
+    }
+    &.inactive {
+      flex-grow: 1;
+      max-width: 5em;
+      min-width: auto;
+      padding: 0;
+      .body {
+        padding: 0;
+        margin: 0;
+      }
+      .tool {
+        display: none;
+      }
+      h3 {
+        display: block;
+        min-width: 14em;
+        transform: rotate(90deg);
+        transform-origin: 1em;
+        height: 2em;
+        margin-top: 1em;
+        &:before {
+          content: "+ ";
+        }
+      }
+    }
+  }
 }
