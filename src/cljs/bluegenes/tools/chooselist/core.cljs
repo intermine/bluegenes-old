@@ -8,7 +8,7 @@
 (enable-console-print!)
 
 ; TODO: This should be passed into the tool as a property.
-(def flymine (js/imjs.Service. #js {:root "www.flymine.org/query"}))
+(def flymine {:root "www.flymine.org/query"})
 (def pager (reagent/atom
             {:current-page 0
              :rows-per-page 10}))
@@ -20,7 +20,7 @@
   {list1 #js{list1-details}
    list2 #js{list2-details}}"
   [local-state]
-  (-> flymine .fetchLists
+  (-> (js/imjs.Service. (clj->js flymine)) .fetchLists
     (.then (fn [im-lists]
       (.log js/console "im-lists" (clj->js im-lists) )
 
@@ -38,8 +38,14 @@
    {:reagent-render
     (fn [list-name list-value api state]
       [:tr.result {:on-click (fn []
-                        ((:append-state api) {:chose (.-name list-value)}))
-            :class (if (is-selected list-value state)
+        ((:has-something api)
+         {:data
+          {:format "list"
+            :type (.-type list-value)
+            :payload list-name}
+          :service flymine
+          :shortcut "viewtable"}))
+        :class (if (is-selected list-value state)
                      "selected")}
        [:td [:span {:class (str "type-" (.-type list-value) " result-type")} (.-type list-value)]]
        [:td {:class "count"} (.-size list-value)]
@@ -50,7 +56,7 @@
   then re-emit the output to the API."
   [local-state {:keys [state api]}]
   (when-let [list-details (get @local-state (:chose state))]
-    (-> {:service {:root "www.flymine.org/query"}
+    (-> {:service flymine
          :data {:format "list"
                 :type (.-type list-details)
                 :payload (.-name list-details)}}
