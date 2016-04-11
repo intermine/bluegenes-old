@@ -4,7 +4,7 @@
             [bluegenes.timeline.views :as timeline-views]
             [bluegenes.components.dimmer :as dimmer]
             [bluegenes.timeline.api :as timeline-api]
-            [bluegenes.components.lists :as lists]
+            [bluegenes.components.listentry.core :as lists]
             [clojure.string :as str]
             [bluegenes.utils.icons :as icons]
             ; [bluegenes.components.googlesignin :as google-sign-in]

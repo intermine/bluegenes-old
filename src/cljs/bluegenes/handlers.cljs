@@ -3,6 +3,7 @@
   (:require [re-frame.core :as re-frame :refer [trim-v]]
             [bluegenes.db :as db]
             [bluegenes.timeline.handlers]
+            [bluegenes.components.listentry.handlers]
             [intermine.imjs :as imjs]
             [cljs-http.client :as http]
             [cljs.core.async :refer [chan <!]]))

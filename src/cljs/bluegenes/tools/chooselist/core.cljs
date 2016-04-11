@@ -22,8 +22,6 @@
   [local-state]
   (-> (js/imjs.Service. (clj->js flymine)) .fetchLists
     (.then (fn [im-lists]
-      (.log js/console "im-lists" (clj->js im-lists) )
-
       (swap! pager assoc :rows (count im-lists))
       (swap! local-state assoc
              :results (partition-all (:rows-per-page @pager) im-lists))))))
@@ -38,6 +36,7 @@
    {:reagent-render
     (fn [list-name list-value api state]
       [:tr.result {:on-click (fn []
+        (.log js/console "CLICK" list-name)
         ((:has-something api)
          {:data
           {:format "list"

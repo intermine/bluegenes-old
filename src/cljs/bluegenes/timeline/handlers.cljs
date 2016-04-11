@@ -83,10 +83,6 @@
               (utils/truncate-vector-to-value structure step-id) )))
 
 (defn update-self [db data step-id]
-  (.log js/console (clj->js [:histories
-                 (:active-history db)
-                 :steps
-                 step-id]))
   (update-in db [:histories
                  (:active-history db)
                  :steps
