@@ -60,3 +60,13 @@
  :whoami
  (fn [db]
    (reaction (:whoami @db))))
+
+(re-frame/register-sub
+ :templates
+ (fn [db _]
+   (reaction (get-in @db [:cache :templates]))))
+
+(re-frame/register-sub
+ :models
+ (fn [db _]
+   (reaction (get-in @db [:cache :models]))))
