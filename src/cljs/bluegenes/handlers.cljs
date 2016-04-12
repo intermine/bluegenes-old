@@ -5,6 +5,7 @@
             [bluegenes.timeline.handlers]
             [bluegenes.components.listentry.handlers]
             [intermine.imjs :as imjs]
+            [bluegenes.utils.imcljs :as im]
             [cljs-http.client :as http]
             [cljs.core.async :refer [chan <!]]))
 
@@ -87,3 +88,24 @@
                                 :keywordize-keys? true}))]
          (re-frame/dispatch [:process-histories res])))
    db))
+
+   (re-frame/register-handler
+     :handle-bootstrap-template
+     (fn [db [_ mine-key response]]
+       (assoc-in db [:cache :templates mine-key] response)))
+
+   (re-frame/register-handler
+     :handle-bootstrap-model
+     (fn [db [_ mine-key response]]
+       (assoc-in db [:cache :models mine-key] response)))
+
+   (re-frame/register-handler
+     :bootstrap-app
+     (fn [db _]
+       (println "Bootstrapping Appliation")
+       (doall (map (fn [[mine-key mine-details]]
+                     (go (re-frame/dispatch [:handle-bootstrap-template mine-key (<! (im/templates (:service mine-details))) ]))
+                     (go (re-frame/dispatch [:handle-bootstrap-model mine-key (<! (im/model (:service mine-details))) ]))
+                     )
+                   (get-in db [:remote-mines])))
+       db))

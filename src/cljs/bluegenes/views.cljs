@@ -121,7 +121,7 @@
   (let [state (re-frame/subscribe [:app-state])]
     [:div
      [:h1 "Application State"]
-     [:div (json-html/edn->hiccup @state)]]))
+     [:div (json-html/edn->hiccup (dissoc @state :cache))]]))
 
 (defn navbar-search []
   "Very similar to the main homepage search but shows on every page and has slightly different markup"
@@ -158,7 +158,9 @@
         ;clicking on timeline from elsewhere just gives a blank page
         (if (= panel-name "timeline-panel")
           [:li {:class (if (= panel-name "timeline-panel") "active")} [:a {:href "#/timeline"} "Timeline"]])
-        [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]]
+        ;;this isn't much use for users, just devs. uncomment it if you must for heavy debug sessions.
+        ;[:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]
+        ]
        [:div
         [:ul.nav.navbar-nav.navbar-right ;.signin
          [:li

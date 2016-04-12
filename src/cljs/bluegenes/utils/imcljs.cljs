@@ -255,3 +255,17 @@
         (>! c (first response))
         (>! c (<! (get-local-homologues original-service remote-service q type organism)))
 )))c))
+
+(defn templates [service]
+ "Fetch templates from Intermine and return them over a channel"
+ (let [templates-chan (chan)]
+   (-> (js/imjs.Service. (clj->js service))
+       (.fetchTemplates)
+       (.then (fn [response]
+                (go (>! templates-chan (js->clj response :keywordize-keys true))))))
+   templates-chan))
+
+(defn model [service]
+ "Given a service URL, a type to search for, and an attribute field, return the display name."
+ (go (let [response (<! (http/get (str "http://" (:root service) "/service/model/json") {:with-credentials? false :keywordize-keys true}))]
+       (-> response :body :model :classes))))
