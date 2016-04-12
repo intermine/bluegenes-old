@@ -8,32 +8,37 @@
       [json-html.core :as json-html])
       (:use [json-html.core :only [edn->hiccup]]))
 
-(defn is-active? [node-name active-panel]
-    (contains? @active-panel node-name)) ;;state doesn't have the selected node class in it
+(def active-panel (reagent/atom nil))
 
-(defn is-inactive? [node-name active-panel]
-  (.log js/console node-name @active-panel)
+(defn is-active? [node-name]
+  (and
+    (some? @active-panel)
+    (contains? @active-panel node-name))) ;;state doesn't have the selected node class in it
+
+(defn is-inactive? [node-name]
+;  (.log js/console node-name @active-panel)
   (and
     (some? @active-panel) ;;state isn't empty
-    (not (is-active? active-panel node-name)))) ;;and state doesn't have the selected node class in it
+    (not (is-active? node-name)))) ;;and state doesn't have the selected node class in it
 
-(defn activate-panel [e this-node active-panel]
-  (.log js/console "activating" e this-node active-panel)
-  (let [container (.-currentTarget e)]
-     (reset! active-panel (set (array-seq (.-classList container))))
+(defn activate-panel [e this-node]
+  (let [container (.-currentTarget e)
+        classes (set (array-seq (.-classList container)))]
+;        (.log js/console "activating" this-node "active-panel" (clj->js @active-panel) (clj->js classes))
+      (reset! active-panel classes)
     ))
 
-(defn list-upload-section [active-panel]
+(defn list-upload-section []
   "Quasi-functional ID resolver"
   (let [api (timeline-api/build-list-entry-api-map {:name "smartidresolver"})
         this-node "list-upload-section"]
   [:div.step-container
     {:on-click (fn [e]
-      (activate-panel e this-node active-panel))
+      (activate-panel e this-node))
      :class (str this-node
        (cond
-         (is-active? this-node active-panel) " active"
-         (is-inactive? this-node active-panel) " inactive"))
+         (is-active? this-node) " active"
+         (is-inactive? this-node) " inactive"))
      }
     [:div.body
      [:div
@@ -48,11 +53,11 @@
         this-node "list-chooser-section"]
   [:div.step-container
    {:on-click (fn [e]
-     (activate-panel e this-node active-panel))
+     (activate-panel e this-node))
     :class (str this-node
       (cond
-        (is-active? this-node active-panel) " active"
-        (is-inactive? this-node active-panel) " inactive"))
+        (is-active? this-node) " active"
+        (is-inactive? this-node) " inactive"))
     }
     [:div.body
      [:div
@@ -63,22 +68,17 @@
 
 (defn main-view []
   (let [
-    active-panel (reagent/atom nil)
-    api (timeline-api/build-api-map {:name "viewtable"})
+    api (timeline-api/build-list-entry-api-map {:name "viewtable"})
     upstream-data (re-frame/subscribe [:list-entry-data])
-]
-
-(.log js/console "upstream" (clj->js @upstream-data))
-
+    ]
   [:main.lists-page
    [:div.cards
-      [list-chooser-section active-panel]
-      [list-upload-section active-panel]
+      [list-chooser-section]
+      [list-upload-section]
     ]
     [:div.step-container
       [:div.body.list-show
        [:div.list
-       "Active" (edn->hiccup @active-panel)
        [viewtable/main
         {:state []
         :api api
@@ -91,11 +91,11 @@
             [:use {:xlinkHref "#icon-info"}]]
             "If the list looks right to you, analyse it to learn more or save it for later: "]
 
-          [:button "List analysis ->"]]
-          [:button
+          [:button "List analysis "
             [:svg.icon.icon-floppy-disk
-              [:use {:xlinkHref "#icon-floppy-disk"}]]
-                " Save list"]]
-;         (edn->hiccup upstream-data)
+              [:use {:xlinkHref "#icon-arrow-right"}]]]]
+          [:button "Save list "
+            [:svg.icon.icon-floppy-disk
+              [:use {:xlinkHref "#icon-floppy-disk"}]]]]
       ]]
    ]))
