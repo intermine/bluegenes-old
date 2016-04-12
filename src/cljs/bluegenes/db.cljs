@@ -4,6 +4,10 @@
   {:name "βlueGenes"
    :whoami {:authenticated false}
 
+   :cache {:templates {}
+           :models {}
+           :display-names {:flymine {:primaryIdentifier "Primary Identifier"}}}
+
    :available-data {}
    :active-history nil
    :dimmer true
