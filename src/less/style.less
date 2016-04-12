@@ -2,21 +2,22 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,900,300italic,300,400italic);
 // Base Bootstrap
 @import "../../bower_components/bootstrap/less/bootstrap";
-@import "variables";
+@import "theme/variables";
 // Bootswatch Paper theme
-@import "bootswatch";
+@import "theme/bootswatch";
 @import "overrides";
-// Homepage:
+// Homepage and other core components:
 @import "homepage";
-// Tool import:
-@import "list-chooser";
+@import "lists";
 @import "stepdash";
-@import "search";
-@import "summary";
 @import "dashboard";
-@import "outboundlinks";
-@import "smartbox";
-@import "enrichment";
+// Tool import:
+@import "tools/list-chooser";
+@import "tools/search";
+@import "tools/summary";
+@import "tools/minelinks";
+@import "tools/smartidresolver";
+@import "tools/enrichment";
 @rgba-primary-0: rgba(211,209,198,1);
 /* Main Primary color */
 @rgba-primary-1: rgba(249,242,213,1);
@@ -39,18 +40,23 @@
 @color-Publication: #2196F3;
 @border-radius: 2px;
 .result-type {
-  line-height: 1.5em;
-  background-color: #ccc;
+  display: inline-block;
+  background: rgba(235,235,235,0.87);
   color: @default-dark-text-color;
+  min-width: 7em;
+  border-radius: @border-radius;
+  text-align: right;
+  margin: 0.15em;
+  padding: 0 0.2em;
+  border-left: solid 3px #999;
   &.type-Gene {
-    background: @color-Gene;
-    color: #fff;
+    border-left: solid 3px @color-Gene;
   }
   &.type-Publication {
-    background: @color-Publication;
+    border-left: solid 3px @color-Publication;
   }
   &.type-Protein {
-    background: @color-Protein;
+    border-left: solid 3px @color-Protein;
   }
 }
 body {
@@ -108,6 +114,24 @@ body {
   width: 1.2em;
   height: 1.2em;
   fill: currentColor;
+}
+//mixin used in multiple locations:
+.cards {
+  display: flex;
+  flex-flow: row wrap;
+  align-content: stretch;
+  align-items: stretch;
+  justify-content: space-between;
+  margin-top: @spacer;
+  .step-container {
+    min-width: @moduleWidth;
+    min-height: @moduleHeight;
+    flex: 1;
+    padding: @spacer/2;
+    h3 {
+      margin-top: 0;
+    }
+  }
 }
 @spinner-color: rgba(0,0,0,0.1);
 @spinner-highlight: rgba(0,0,0,0.5);
@@ -413,9 +437,11 @@ th.jh-key {
       }
     }
   }
-  .navbar-form {display:flex;}
+  .navbar-form {
+    display: flex;
+  }
   input[type=text] {
-    margin-left:15px;
+    margin-left: 15px;
     padding: 0.2em 0.4em;
     &.form-control {
       background: white;
@@ -426,8 +452,8 @@ th.jh-key {
   }
   button {
     padding: 7px;
-    margin-right:15px;
-    float:right;
+    margin-right: 15px;
+    float: right;
     border-radius: 0 2px 2px 0;
   }
 }
@@ -483,4 +509,15 @@ ul.pagination form {
   float: left;
   min-height: @paginationheight;
   line-height: @paginationheight;
+}
+
+.paginator {
+  display: flex;
+  justify-content: center;
+  margin: 1em;
+  h6 {
+    margin: 1em;
+    line-height: 1em;
+    height: 1em;
+  }
 }

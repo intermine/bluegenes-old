@@ -34,8 +34,8 @@
 (defn get-numbers-around
   "Get a range around a number +/- the spread adjusted to fall within a range."
   [val spread [mi ma]]
-  (println "get-numbers around called with " ma)
-  (println "val is" val)
+  ;(println "get-numbers around called with " ma)
+  ;(println "val is" val)
   (-> (range (- val spread) (+ val (inc spread)))
       (keep-in-range mi ma)))
 
@@ -66,7 +66,7 @@
   :on-change A function to call with the current page number.
   TODO: Move the selection handlers to their own functions and use let[]
   to reduce calculations on large arrays."
-  [{:keys [spread rows rows-per-page on-change current-page]}]
+  [{:keys [spread rows rows-per-page on-change current-page] :as s}]
   (let [state (reagent/atom {:current-page current-page
                              :spread spread
                              :rows-per-page rows-per-page})
@@ -74,9 +74,9 @@
     (reagent/create-class
      {:display-name "bluegenes.components.paginator/main"
 
-      :reagent-render (fn []
-                        (println "number of rows" rows)
-                        [:div.noselect
+      :reagent-render (fn [{:keys [spread rows rows-per-page on-change current-page]}]
+      ;  (println "args for paginator" rows)
+                        [:div.noselect.paginator
                          [:nav
                           [:ul.pagination
                            ^{:key "first"} [:li
@@ -114,7 +114,7 @@
                                            [:a {:on-click
                                                 #(updater (inc (count (partition (:rows-per-page @state) (range 1 rows)))))}
                                             [:i.fa.fa-step-forward]]]]]
-                         [:h4 (str "Showing rows "
+                         [:h6 (str "Showing rows "
                                    (inc (* (dec (:current-page @state)) (:rows-per-page @state)))
                                    " to "
                                    (* (:current-page @state) (:rows-per-page @state)))]])})))

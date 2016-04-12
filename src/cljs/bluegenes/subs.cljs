@@ -1,7 +1,9 @@
 (ns bluegenes.subs
     (:require-macros [reagent.ratom :refer [reaction]])
     (:require [re-frame.core :as re-frame]
-              [bluegenes.timeline.subs]))
+              [bluegenes.timeline.subs]
+              [bluegenes.components.listentry.subs]
+              ))
 
 (re-frame/register-sub
   :search-term

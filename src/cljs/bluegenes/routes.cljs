@@ -32,6 +32,9 @@
   (defroute "/timeline" []
             (re-frame/dispatch [:set-timeline-panel :timeline-panel]))
 
+  (defroute "/lists" []
+            (re-frame/dispatch [:set-active-panel :list-panel]))
+
   (defroute "/debug" []
             (re-frame/dispatch [:set-active-panel :debug-panel]))
 

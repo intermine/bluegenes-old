@@ -1,0 +1,57 @@
+.lists-page {
+  .toolbox {
+    max-width: 300px;
+    margin-left: @spacer;
+    padding: 0 @spacer/2;
+    background: #eee;
+    button {
+      width:100%;
+      margin-top:@spacer/2;
+      .btn;
+      .btn-default;
+      color: #fff;
+      background-color: @cta-color;
+    }
+  }
+  .list-show {
+    display: flex;
+    .list {
+      flex-grow: 1;
+    }
+  }
+  .cards .step-container {
+    flex-grow:1;
+    &.active {
+      flex-grow: 5;
+      transition:flex 5s ease-in-out 5s,flex-grow 5s, background .3s, height 0.3s;
+    }
+    &.inactive {
+      color:rgba(255,255,255,1);
+      transition:flex 5s ease-in-out 5s,flex-grow 5s,background .3s, height 0.3s;
+      background:#333;
+      flex-grow: 1;
+      max-width: 5em;
+      min-width: auto;
+      padding: 0;
+      .body {
+        padding: 0;
+        margin: 0;
+      }
+      .tool {
+        display: none;
+      }
+      h3 {
+        color:rgba(255,255,255,0.87);
+        display: block;
+        min-width: 14em;
+        transform: rotate(90deg);
+        transform-origin: 1em;
+        height: 2em;
+        margin-top: 1em;
+        &:before {
+          content: "+ ";
+        }
+      }
+    }
+  }
+}

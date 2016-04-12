@@ -97,6 +97,7 @@
   []
   (reagent/create-class
    {:reagent-render (fn [props]
+;      (.log js/console "props" (clj->js props))
                       [inner-table props])
     :should-component-update (fn [this old-argv new-argv]
                                (not (=
