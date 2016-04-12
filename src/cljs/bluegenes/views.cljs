@@ -152,7 +152,8 @@
       [:div
        [:ul.nav.navbar-nav
         [:li {:class (if (= panel-name "home-panel") "active")} [:a {:href "#"} "Home"]]
-        [:li {:class (if (= panel-name "list-panel") "active")} [:a {:href "#/lists"} "Lists"]]
+        ;;uncomment this when list entry points are more polished. they can still be accessed via /lists directly.
+;        [:li {:class (if (= panel-name "list-panel") "active")} [:a {:href "#/lists"} "Lists"]]
         ;;don't show timeline in navbar unless we're actually there already, as
         ;clicking on timeline from elsewhere just gives a blank page
         (if (= panel-name "timeline-panel")
