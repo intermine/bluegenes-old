@@ -8,3 +8,5 @@ out
 .lein-env
 bower_components
 dev-resources
+.idea/
+*.iml
