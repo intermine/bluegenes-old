@@ -5,6 +5,7 @@
             [bluegenes.timeline.handlers]
             [bluegenes.components.listentry.handlers]
             [intermine.imjs :as imjs]
+            [bluegenes.utils.imcljs :as im]
             [cljs-http.client :as http]
             [cljs.core.async :refer [chan <!]]))
 

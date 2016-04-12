@@ -16,33 +16,39 @@
    :remote-mines {
      :humanmine {
        :name "HumanMine"
-       :url "http://www.humanmine.org/humanmine"
-       :service {:root "http://www.humanmine.org/humanmine/service"}
+       :url "beta.humanmine.org/beta"
+       :service {:root "beta.humanmine.org/beta"}
        :organism "H. sapiens"}
+     :flymine {
+       :_id :flymine
+       :name "FlyMine"
+       :url "beta.flymine.org/beta"
+       :service {:root "beta.flymine.org/beta"}
+       :organism "D. melanogaster"}
      :yeastmine {
        :name "YeastMine"
-       :url "http://yeastmine.yeastgenome.org/yeastmine"
-       :service {:root "http://yeastmine.yeastgenome.org/yeastmine/service"}
+       :url "yeastmine.yeastgenome.org/yeastmine"
+       :service {:root "yeastmine.yeastgenome.org/yeastmine"}
        :organism "S. cerevisiae"}
      :zebrafishmine {
        :name "ZebraFishMine"
-       :url "http://www.zebrafishmine.org"
-       :service {:root "http://www.zebrafishmine.org"}
+       :url "www.zebrafishmine.org"
+       :service {:root "www.zebrafishmine.org"}
        :organism "D. rerio"}
      :ratmine {
        :name "RatMine"
-       :url "http://ratmine.mcw.edu/ratmine"
-       :service {:root "http://stearman.hmgc.mcw.edu/ratmine"}
+       :url "ratmine.mcw.edu/ratmine"
+       :service {:root "stearman.hmgc.mcw.edu/ratmine"}
        :organism "R. norvegicus"}
      :mousemine {
        :name "MouseMine"
-       :url "http://www.mousemine.org/mousemine"
-       :service {:root "http://www.mousemine.org/mousemine/service"}
+       :url "www.mousemine.org/mousemine"
+       :service {:root "www.mousemine.org/mousemine"}
        :organism "M. musculus"}
      :modmine {
        :name "ModMine"
-       :url "http://intermine.modencode.org/release-33"
-       :service {:root "http://intermine.modencode.org/release-33"}
+       :url "intermine.modencode.org/release-33"
+       :service {:root "intermine.modencode.org/release-33"}
        :organism "C. elegans"}}
 
    :histories {:id4u {:name "Smart ID Resolver"
