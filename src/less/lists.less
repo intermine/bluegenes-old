@@ -20,13 +20,14 @@
     }
   }
   .cards .step-container {
+    flex-grow:1;
     &.active {
       flex-grow: 5;
-      transition:flex 2s ease-in-out 2s,flex-grow 2s, background .3s;
+      transition:flex 5s ease-in-out 5s,flex-grow 5s, background .3s, height 0.3s;
     }
     &.inactive {
       color:rgba(255,255,255,1);
-      transition:flex 2s ease-in-out 2s,flex-grow 2s,background .3s;
+      transition:flex 5s ease-in-out 5s,flex-grow 5s,background .3s, height 0.3s;
       background:#333;
       flex-grow: 1;
       max-width: 5em;
