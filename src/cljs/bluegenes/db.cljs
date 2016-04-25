@@ -55,6 +55,7 @@
                       :slug "id-resolver"
                       :description "Look up a list of identifiers, e.g. Genes Symbols"
                       :structure [:a1]
+                      :drawer []
                       :steps {:a1 {:_id :a1
                                    :tool "smartidresolver"}
                               :b1 {:_id :b1

@@ -1,0 +1,142 @@
+.timeline-container {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 100%;
+
+
+  @highlight: #bbe9f0;
+  // @highlight: hotpink;
+
+
+  .offset {
+    position: relative;
+    left: -25px;
+  }
+
+  .out {
+    font-size: 2em;
+    color: white;
+    position: relative;
+    left: -25px;
+    top: -10px;
+  }
+
+  div.drawer {
+
+    h3 {color: @highlight; font-weight: bolder; font-size: 2em;}
+    flex: 0 0 300px;
+    color: white;
+    padding: 10px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    background: #333333;
+
+    div.heading {
+      text-align: center;
+
+      .new {
+        padding-top: 10px;
+      }
+    }
+
+      div.item {
+
+        &:hover {
+          background: #4F4F4F;
+        }
+        // border: 1px solid black;
+        display: flex;
+        padding: 5px;
+        align-items: center;
+
+        &:not(:last-child) {
+          border-bottom: 1px dotted @highlight;
+        }
+
+        .ico {
+          // border: 1px solid red;
+          fill: red;
+          color: @highlight;
+        }
+
+        // i, span {
+        //   padding: 5px;
+        // }
+
+
+        .grow {
+          flex: 1 0;
+          padding: 0 10px 0 10px;
+          font-weight: bolder;
+          // font-size: 1.2em;
+        }
+
+
+        span.count {
+          display: flex;
+          flex-direction: column;
+          // border-left: 1px dashed hotpink;
+          padding-left: 10px;
+          align-items: flex-end;
+
+          .big {
+            font-size: 2em;
+          }
+
+          .right {
+            justify-contents: right;
+          }
+        }
+
+
+
+
+      }
+
+  }
+
+  div.prevsteps {
+    flex: 1 1 auto;
+  }
+
+}
+
+
+html,
+body {
+    height: 100%;
+}
+
+#app, .bob {
+  height: 100%;
+}
+
+
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+}
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  font-size: 24px;
+  line-height: 1.33;
+  border-radius: 35px;
+}

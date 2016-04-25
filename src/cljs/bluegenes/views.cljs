@@ -181,7 +181,7 @@
 (defn main-panel []
   (let [active-panel (re-frame/subscribe [:active-panel])]
     (fn []
-      [:div
+      [:div.bob
        [icons/icons]
        [nav-panel]
        (panels @active-panel)

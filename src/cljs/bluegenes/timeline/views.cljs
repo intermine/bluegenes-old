@@ -7,6 +7,7 @@
             [bluegenes.components.stepdash.core :as stepdash]
             [bluegenes.utils.layouthelpers :as layout]
             [bluegenes.components.vertical :as vertical]
+            [bluegenes.components.drawer.core :as drawer]
             [reagent.impl.util :as impl :refer [extract-props]]))
 
 (enable-console-print!)
@@ -90,6 +91,9 @@
       :reagent-render (fn [_id]
                         [:div
                          {:class (if-not in-grid "step-container")}
+                         [:div.btn.btn-primary.btn-circle.btn-lg.offset
+                          [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]]
+
                          ; [:div.toolbar
                          ;  [:ul
                          ;   [:li {:class (if (= @current-tab nil) "active")}
@@ -99,6 +103,7 @@
                          ;    [:a {:data-target "test"
                          ;         :on-click #(swap-tab "data")}
                          ;     "Data"]]]]
+
                          [:div.body
                           [:div {:className (if (= @current-tab "data") "hide")}
                            [step @step-data]]
@@ -144,7 +149,8 @@
        [:h4 (:description @history)]]))
 
 (defn main-view []
-    [:div
+    [:div.timeline-container
     ;  [stepdash/main]
     ;  [nextsteps/main]
+     [drawer/main]
      [previous-steps]])
