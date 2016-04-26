@@ -166,3 +166,24 @@
                       :description (:name tool)
                       :name (:name tool)}))
       )))
+
+
+(re-frame/register-handler
+  :save-research
+  trim-v
+  (fn [db [id]]
+    (let [produced (get-in db [:histories (:active-history db) :steps id :produced])
+          uuid (keyword (rid))
+          update-path [:histories (:active-history db) :saved-research uuid]]
+      (assoc-in db update-path (assoc produced :label "TBD"
+                                               :_id uuid
+                                               :editing true)))))
+
+(re-frame/register-handler
+  :relabel-research
+  trim-v
+  (fn [db [id value]]
+    (update-in db [:histories (:active-history db) :saved-research id]
+               assoc
+               :label value
+               :editing false)))

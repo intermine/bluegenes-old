@@ -3,6 +3,11 @@
   (:require [re-frame.core :as re-frame :refer [trim-v]]))
 
 (re-frame/register-sub
+  :saved-research
+  (fn [db _]
+    (reaction (get-in @db [:histories (:active-history @db) :saved-research]))))
+
+(re-frame/register-sub
  :steps
  (fn [db [_ testvalue]]
    (reaction (get-in @db [:histories (:active-history @db) :steps]))))

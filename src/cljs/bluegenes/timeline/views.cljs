@@ -91,8 +91,11 @@
       :reagent-render (fn [_id]
                         [:div
                          {:class (if-not in-grid "step-container")}
-                         [:div.btn.btn-primary.btn-circle.btn-lg.offset
-                          [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]]
+                         ;[:div (str @step-data)]
+                         (if (:produced @step-data)
+                           [:div.btn.btn-primary.btn-circle.btn-lg.offset
+                            {:on-click #(re-frame/dispatch [:save-research _id])}
+                            [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]])
 
                          ; [:div.toolbar
                          ;  [:ul
