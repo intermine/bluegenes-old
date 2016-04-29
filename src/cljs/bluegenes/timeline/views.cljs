@@ -91,7 +91,11 @@
                                (layout/scroll-to node))))
       :reagent-render (fn [_id]
                         [:div
-                         {:class (if-not in-grid "step-container")}
+                         {:class
+                          ;(if-not in-grid "step-container")
+                          (if-not (= "dashboard" (:tool @step-data)) "step-container")
+                          }
+                         ;(println "loading tool" (:tool @step-data))
                          ;[:div (str @step-data)]
                          (if (:produced @step-data)
                            [:div.btn.btn-primary.btn-circle.btn-lg.offset

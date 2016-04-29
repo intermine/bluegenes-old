@@ -51,7 +51,19 @@
        :service {:root "intermine.modencode.org/release-33"}
        :organism "C. elegans"}}
 
-   :histories {:id4u {:name "Smart ID Resolver"
+   :histories {:dashyboard {:name "Dashboard"
+                :slug "id-resolver"
+                :description "Look up a list of identifiers, e.g. Genes Symbols"
+                :structure [:a1]
+                :saved-research {}
+                :steps {:a1 {:_id :a1
+                             :tool "dashboard"
+                             :state [{:active 0
+                                      :tools [{:tool "smartidresolver"
+                                               :state [{:example "one"}]}
+                                              {:tool "chooselist"
+                                               :state [{:example "two"}]}]}]}}}
+               :id4u {:name "Smart ID Resolver"
                       :slug "id-resolver"
                       :description "Look up a list of identifiers, e.g. Genes Symbols"
                       :structure [:a1]

@@ -79,25 +79,29 @@
   When the component is updated then inform the API of its new value."
   (let [local-state (reagent/atom nil)]
     (reagent/create-class
-     {:reagent-render
-      (fn [{:keys [state upstream-data api]}]
-        [:div
-        [pagination-control]
-         [:table {:class "list-chooser"}
-          [:thead
-           [:tr
-            [:th "Type"]
-            [:th "#"]
-            [:th "Name"]]]
-          [:tbody
-           (for [result (nth (:results @local-state) (:current-page @pager))]
-             ^{:key (.-name result)}
-               [list-row (.-name result) result api state]
-            )]]
+      {:reagent-render
+       (fn [{:keys [state upstream-data api]}]
+         [:div
+          [:div (str "state" state)]
+          [:div.btn {:on-click (fn []
+                                 ((-> api :replace-state)
+                                   {:HELLO "world"}))} "API"]
+          [pagination-control]
+          [:table {:class "list-chooser"}
+           [:thead
+            [:tr
+             [:th "Type"]
+             [:th "#"]
+             [:th "Name"]]]
+           [:tbody
+            (for [result (nth (:results @local-state) (:current-page @pager))]
+              ^{:key (.-name result)}
+              [list-row (.-name result) result api state]
+              )]]
           ])
-      :component-did-mount
-      (fn [this]
-        (get-lists local-state))
-      :component-did-update
-      (fn [this old-props]
-        (did-update-handler local-state (reagent/props this)))})))
+       :component-did-mount
+       (fn [this]
+         (get-lists local-state))
+       :component-did-update
+       (fn [this old-props]
+         (did-update-handler local-state (reagent/props this)))})))
