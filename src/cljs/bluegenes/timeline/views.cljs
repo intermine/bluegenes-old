@@ -65,6 +65,7 @@
   (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe step-args))])
         api (timeline-api/build-api-map step-args)]
     (fn [step-data]
+      ;(println "STEP DATA" step-data)
       (let [global-info nil
             tool-component (-> bluegenes.tools
                                (aget (:tool step-data))
@@ -86,7 +87,7 @@
     (reagent/create-class
      {:component-did-mount (fn [this]
                              (let [node (reagent/dom-node this)]
-                             (if (:scroll-to? @step-data)
+                             '(if (:scroll-to? @step-data)
                                (layout/scroll-to node))))
       :reagent-render (fn [_id]
                         [:div
@@ -138,7 +139,7 @@
   (let [step-path (re-frame/subscribe [:step-path])]
     (fn []
       (into [:div.prevsteps]
-            (for [id @step-path]
+            (for [id (reverse @step-path)]
               (if (vector? id)
                 ^{:key (str "group" (str id))} [steps-dashboard id]
                 ^{:key (str "step-container" id)} [step-container id]))))))

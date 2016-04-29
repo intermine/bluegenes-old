@@ -5,7 +5,13 @@
 (re-frame/register-sub
   :saved-research
   (fn [db _]
-    (reaction (get-in @db [:histories (:active-history @db) :saved-research]))))
+    (let [s (reaction (get-in @db [:histories (:active-history @db) :saved-research]))]
+      (reaction (into (sorted-map-by (fn [key1 key2]
+                              ;(println "looking at key1" key1)
+                              ;(println "looking at key2" key2)
+                              (compare [(get-in @s [key2 :saved]) key2]
+                                       [(get-in @s [key1 :saved]) key1])))
+             @s)))))
 
 (re-frame/register-sub
  :steps

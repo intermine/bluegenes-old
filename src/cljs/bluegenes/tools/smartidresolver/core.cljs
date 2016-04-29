@@ -312,7 +312,7 @@
     (if-not (empty? output)
       ((:has-something api) {:data
                              {:format "ids"
-                              :type "Gene"
+                              :type (:type values)
                               :payload (remove nil? (map #(-> % :product :id) (:identifiers values)))}
                              :service {:root "beta.flymine.org/beta"}
                              :shortcut "viewtable"}))))

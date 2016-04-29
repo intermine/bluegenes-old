@@ -23,7 +23,7 @@
   [payload]
   {:from (:type payload)
    :select "*"
-   :where [{:path "Gene.id"
+   :where [{:path (str (:type payload) ".id")
             :values (:payload payload)
             :op "ONE OF"
             :code "A"}]})
@@ -73,15 +73,19 @@
                      (clj->js {:start 0 :size 5})
                      (clj->js {:service (:service upstream-data) :query query}))
          (.then
-          (fn [e]
-            (let [clone (.clone (-> e .-query))
-                  adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
+          (fn [table]
+
+            (-> table .-history (.on "changed:current" (fn [x]
+                                                        x)))
+
+            (let [clone (.clone (-> table .-query))
+                  adj (.select clone #js [(str (-> table .-query .-root) ".id")])]
               (-> (js/imjs.Service. (clj->js (:service upstream-data)))
                   (.values adj)
                   (.then (fn [v]
                            ((:has-something api) {:service (:service upstream-data)
                                                   :data {:format "ids"
-                                                         :type (-> e .-query .-root)
+                                                         :type (-> table .-query .-root)
                                                          :payload (js->clj v)}}))))))))))]
 
     (reagent/create-class

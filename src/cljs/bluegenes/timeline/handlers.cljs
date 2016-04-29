@@ -156,28 +156,99 @@
       (aset js/window "location" "href" (str "/#timeline/" new-history-id))
       (-> db (assoc :active-history (keyword new-history-id))
           (create-step (keyword new-step-id)
-            {:_id (keyword new-step-id)
-             :state [data]
-             :tool (:name tool)
-             })
+                       {:_id (keyword new-step-id)
+                        :state [data]
+                        :tool (:name tool)
+                        })
           (update-in [:histories (keyword new-history-id)] merge
                      {:slug new-history-id
                       :structure [(keyword new-step-id)]
                       :description (:name tool)
-                      :name (:name tool)}))
-      )))
+                      :name (:name tool)})))))
+
+(defn steps-back-to-beginning
+  "Build a map of only this step and the steps required to replay
+  this step from the root of the workflow. This is useful for forking steps,
+  copying workflows, and trimming siblings and childrens."
+  [steps end]
+  (loop [m {}
+         step-id end]
+    (let [current-step (-> steps step-id)]
+      (if (contains? current-step :subscribe)
+        (recur (assoc m (:_id current-step) current-step)
+               (first (:subscribe current-step)))
+        (assoc m (:_id current-step) current-step)))))
 
 
+(defn update-children [m km]
+  (if (contains? m :subscribe)
+    (update m :subscribe
+            (fn [subscribed-steps]
+              (map (fn [s]
+                     (s km)) subscribed-steps)))
+    m))
+
+(defn apply-new-ids-to-steps
+  "Given a map of steps in a workflow, generates new ids for each step
+  and updates the :subscribe values accordingly."
+  [m km]
+  (let [key-map km]
+    (reduce (fn [new-map [k v]]
+              (assoc new-map (k key-map)
+                             (-> v
+                                 (assoc :_id (k key-map))
+                                 (update-children key-map)))) {} m)))
+
+(defn generate-key-map
+  "Generate a map of existing keys to new UUIDs.
+  {:old-id1 :some-new-uuid
+   :old-id2 :some-other-new-uuid}"
+  [m]
+  (reduce (fn [key-map [k v]]
+            (assoc key-map k (keyword (rid)))) {} m))
+
+(defn index-of
+  "Find the index of the first occurence of an element in a collection."
+  [e coll] (first (keep-indexed #(if (= e %2) %1) coll)))
+
+(defn apply-new-ids-to-structure
+  "Give a vector structure of keywords, a keyword to stop at, and a map
+  of old ids to new ids, prune the structure vector and replace ids accordingly."
+  [structure end key-map]
+  (mapv (fn [x]
+          (x key-map)) (take (inc (index-of end structure)) structure)))
+
+; This SERIOUSLY needs to be refactored. This should be easy. Need more coffee.
 (re-frame/register-handler
   :save-research
   trim-v
   (fn [db [id]]
-    (let [produced (get-in db [:histories (:active-history db) :steps id :produced])
-          uuid (keyword (rid))
-          update-path [:histories (:active-history db) :saved-research uuid]]
-      (assoc-in db update-path (assoc produced :label "TBD"
-                                               :_id uuid
-                                               :editing true)))))
+    (let [steps       (get-in db [:histories (:active-history db) :steps])
+          uuid        (keyword (rid))
+          update-path [:histories (:active-history db) :saved-research uuid]
+          pruned-steps (steps-back-to-beginning steps id)
+          key-map (generate-key-map pruned-steps)
+          new-structure (apply-new-ids-to-structure
+                          (get-in db [:histories (:active-history db) :structure])
+                          id
+                          key-map)]
+      (update-in db update-path assoc
+                 :label "TBD"
+                 :_id uuid
+                 :structure new-structure
+                 :editing true
+                 :saved (.now js/Date)
+                 :steps (-> steps
+                            (steps-back-to-beginning id)
+                            (apply-new-ids-to-steps key-map))))))
+
+
+(re-frame/register-handler
+  :new-search
+  trim-v
+  (fn [db]
+    (println "Creating a new search")
+    db))
 
 (re-frame/register-handler
   :relabel-research
@@ -187,3 +258,22 @@
                assoc
                :label value
                :editing false)))
+
+(re-frame/register-handler
+  :load-research
+  trim-v
+  (fn [db [id value]]
+    (println "assocign research")
+    (update-in db [:histories (:active-history db)]
+               (fn [history]
+                 (assoc history
+                   :steps (get-in db [:histories
+                                                   (:active-history db)
+                                                   :saved-research
+                                                   id
+                                                   :steps])
+                   :structure (get-in db [:histories
+                                          (:active-history db)
+                                          :saved-research
+                                          id
+                                          :structure]) )))))

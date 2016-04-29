@@ -6,7 +6,9 @@
 (defn new []
   (fn []
     [:div.heading
-     [:div.new [:div.btn.btn-default "New Search"]]]))
+     [:div.new [:div.btn.btn-default
+                {:on-click (fn [] (re-frame/dispatch [:new-search]))}
+                "New Search"]]]))
 
 (defn no-research []
   (fn []
@@ -23,22 +25,31 @@
       {:component-did-mount (fn [e]
                               (if-let [tb (sel1 (reagent/dom-node e) :input)]
                                 (.focus tb)))
-       :reagent-render (fn [{:keys [_id label data editing] :as details}]
-                         [:div.item
-                          [:span.fa-2x.ico
-                           [:svg.icon.molecule
-                            [:use {:xlinkHref "#molecule"}]]]
-                          [:span.grow
-                           (if editing
-                             [:input.form-control
-                              {:type "textarea"
-                               :on-key-press (partial handle-key details)
-                               :rows 5
-                               :placeholder "Label your research..."}]
-                             [:span label])]
-                          [:span.count
-                           [:span.big (-> data :payload count)]
-                           [:span.right "Genes"]]])})))
+       :reagent-render      (fn [{:keys [_id label saved data editing structure] :as details}]
+                              ;(println "saved" saved)
+                              [:div.item
+                               {:on-click (fn []
+                                            (if-not editing
+                                              (re-frame/dispatch [:load-research _id])))}
+                               [:span.fa-2x.ico
+                                [:svg.icon.molecule
+                                 [:use {:xlinkHref "#molecule"}]]]
+                               [:span.grow
+                                (if editing
+                                  [:input.form-control
+                                   {:type         "textarea"
+                                    :on-key-press (partial handle-key details)
+                                    :rows         5
+                                    :placeholder  "Label your research..."}]
+                                  [:span label])]
+                               (let [produced (get-in details [:steps (last structure) :produced])]
+                                 ;(println "produced" (-> produced :data :payload count))
+                                 [:span.count
+                                  [:span.big (str (-> produced :data :payload count))]
+                                  [:span.right (str (-> produced :data :type) "s")]]
+
+                                 )
+                               ])})))
 
 (defn main []
   (let [saved-research (re-frame/subscribe [:saved-research])]

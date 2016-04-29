@@ -63,8 +63,7 @@
                                    :subscribe [:a1]
                                    :state [{:widget "go_enrichment_for_gene"
                                             :correction "None"
-                                            :title "Gene Ontology Enrichment"}]}
-                              }}
+                                            :title "Gene Ontology Enrichment"}]}}}
 
                :k {:name "List Analysis"
                    :slug "list-analysis"

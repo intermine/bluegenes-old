@@ -24,7 +24,6 @@
 
 (defn has-something [tool data]
   "Notify the world that the tool has consumable data."
-  ; (println "HAS-SOMETHING sees" tool)
   (re-frame/dispatch [:has-something (keyword (get-id tool)) data]))
 
 (defn is-loading [tool data]
