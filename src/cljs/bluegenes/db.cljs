@@ -14,55 +14,84 @@
    :search-term nil
 
    :remote-mines {
-     :humanmine {
-       :name "HumanMine"
-       :url "beta.humanmine.org/beta"
-       :service {:root "beta.humanmine.org/beta"}
-       :organism "H. sapiens"}
-     :flymine {
-       :_id :flymine
-       :name "FlyMine"
-       :url "beta.flymine.org/beta"
-       :service {:root "beta.flymine.org/beta"}
-       :organism "D. melanogaster"}
-     :yeastmine {
-       :name "YeastMine"
-       :url "yeastmine.yeastgenome.org/yeastmine"
-       :service {:root "yeastmine.yeastgenome.org/yeastmine"}
-       :organism "S. cerevisiae"}
-     :zebrafishmine {
-       :name "ZebraFishMine"
-       :url "www.zebrafishmine.org"
-       :service {:root "www.zebrafishmine.org"}
-       :organism "D. rerio"}
-     :ratmine {
-       :name "RatMine"
-       :url "ratmine.mcw.edu/ratmine"
-       :service {:root "stearman.hmgc.mcw.edu/ratmine"}
-       :organism "R. norvegicus"}
-     :mousemine {
-       :name "MouseMine"
-       :url "www.mousemine.org/mousemine"
-       :service {:root "www.mousemine.org/mousemine"}
-       :organism "M. musculus"}
-     :modmine {
-       :name "ModMine"
-       :url "intermine.modencode.org/release-33"
-       :service {:root "intermine.modencode.org/release-33"}
-       :organism "C. elegans"}}
+                  :humanmine {
+                              :name "HumanMine"
+                              :url "beta.humanmine.org/beta"
+                              :service {:root "beta.humanmine.org/beta"}
+                              :organism "H. sapiens"}
+                  :flymine {
+                            :_id :flymine
+                            :name "FlyMine"
+                            :url "beta.flymine.org/beta"
+                            :service {:root "beta.flymine.org/beta"}
+                            :organism "D. melanogaster"}
+                  :yeastmine {
+                              :name "YeastMine"
+                              :url "yeastmine.yeastgenome.org/yeastmine"
+                              :service {:root "yeastmine.yeastgenome.org/yeastmine"}
+                              :organism "S. cerevisiae"}
+                  :zebrafishmine {
+                                  :name "ZebraFishMine"
+                                  :url "www.zebrafishmine.org"
+                                  :service {:root "www.zebrafishmine.org"}
+                                  :organism "D. rerio"}
+                  :ratmine {
+                            :name "RatMine"
+                            :url "ratmine.mcw.edu/ratmine"
+                            :service {:root "stearman.hmgc.mcw.edu/ratmine"}
+                            :organism "R. norvegicus"}
+                  :mousemine {
+                              :name "MouseMine"
+                              :url "www.mousemine.org/mousemine"
+                              :service {:root "www.mousemine.org/mousemine"}
+                              :organism "M. musculus"}
+                  :modmine {
+                            :name "ModMine"
+                            :url "intermine.modencode.org/release-33"
+                            :service {:root "intermine.modencode.org/release-33"}
+                            :organism "C. elegans"}}
 
    :histories {:dashyboard {:name "Dashboard"
-                :slug "id-resolver"
-                :description "Look up a list of identifiers, e.g. Genes Symbols"
-                :structure [:a1]
-                :saved-research {}
-                :steps {:a1 {:_id :a1
-                             :tool "dashboard"
-                             :state [{:active 0
-                                      :tools [{:tool "smartidresolver"
-                                               :state [{:example "one"}]}
-                                              {:tool "chooselist"
-                                               :state [{:example "two"}]}]}]}}}
+                            :slug "id-resolver"
+                            :description "Look up a list of identifiers, e.g. Genes Symbols"
+                            :structure [:a1]
+                            :saved-research {}
+                            :steps {:a1 {:_id :a1
+                                         :tool "dashboard"
+                                         :state [{:active 0
+                                                  :tools [{:tool "smartidresolver"
+                                                           :state [{:example "one"}]}
+                                                          {:tool "chooselist"
+                                                           :state [{:example "two"}]}]}]}}}
+
+               :enricher {:name "enricher"
+                          :slug "enricher"
+                          :description "Look up a list of identifiers, e.g. Genes Symbols"
+                          :structure [:a1]
+                          :saved-research {}
+                          :steps {:a1 {:_id :a1
+                                       :tool "dashboard"
+                                       :state [{:active 0
+                                                :tools [{:tool "enrichment"
+                                                         :state [{:widget "go_enrichment_for_gene"
+                                                                  :correction "None"
+                                                                  :title "Gene Ontology Enrichment"}]}
+                                                        {:tool "enrichment"
+                                                         :state [{:widget "pathway_enrichment"
+                                                                  :title "Pathway Enrichment"}]}
+                                                        {:tool "enrichment"
+                                                         :state [{:widget "prot_dom_enrichment_for_gene"
+                                                                  :title "Protein Domain Enrichment"}]}
+                                                        {:tool "enrichment"
+                                                         :state [{:widget "prot_dom_enrichment_for_gene"
+                                                                  :title "Protein Domain Enrichment"}]}
+                                                        {:tool "enrichment"
+                                                         :state [{:widget "prot_dom_enrichment_for_gene"
+                                                                  :title "Protein Domain Enrichment"}]}
+                                                        {:tool "enrichment"
+                                                         :state [{:widget "prot_dom_enrichment_for_gene"
+                                                                  :title "Protein Domain Enrichment"}]}]}]}}}
+
                :id4u {:name "Smart ID Resolver"
                       :slug "id-resolver"
                       :description "Look up a list of identifiers, e.g. Genes Symbols"
@@ -120,32 +149,32 @@
                         :description "Search across InterMine for just about anything."
                         :structure [:search-tool [:summary :minelinks :externallinks]]
                         :steps {
-                          :search-tool {
-                            :tool "search"
-                            :_id :search-tool
-                            :title "Search InterMine"
-                            :description "Search"
-                            :state []}
-                          :summary {
-                            :subscribe [:search-tool]
-                            :tool "summary"
-                            :_id :summary
-                            :title "Summary"
-                            :description "Summary"
-                            :state []}
-                          :minelinks {
-                            :subscribe [:search-tool]
-                            :tool "minelinks"
-                            :_id :minelinks
-                            :title "Homologue Links"
-                            :description "Homologue Links"
-                            :state []}
-                          :externallinks {
-                            :subscribe [:search-tool]
-                            :tool "externallinks"
-                            :_id :externallinks
-                            :title "Outbound Links"
-                            :description "Outbound Links"
-                            :state []}
+                                :search-tool {
+                                              :tool "search"
+                                              :_id :search-tool
+                                              :title "Search InterMine"
+                                              :description "Search"
+                                              :state []}
+                                :summary {
+                                          :subscribe [:search-tool]
+                                          :tool "summary"
+                                          :_id :summary
+                                          :title "Summary"
+                                          :description "Summary"
+                                          :state []}
+                                :minelinks {
+                                            :subscribe [:search-tool]
+                                            :tool "minelinks"
+                                            :_id :minelinks
+                                            :title "Homologue Links"
+                                            :description "Homologue Links"
+                                            :state []}
+                                :externallinks {
+                                                :subscribe [:search-tool]
+                                                :tool "externallinks"
+                                                :_id :externallinks
+                                                :title "Outbound Links"
+                                                :description "Outbound Links"
+                                                :state []}
                                 }}
-}})
+               }})

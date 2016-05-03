@@ -35,6 +35,7 @@
   "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
   [ {{:keys [root token]} :service} {:keys [ids list widget maxp correction population]}]
   (println "ids" ids)
+  (println "URL" (str "http://" root "/service/list/enrichment"))
   (go (let [response (<! (http/post (str "http://" root "/service/list/enrichment")
                                    {:with-credentials? false
                                     :keywordize-keys? true

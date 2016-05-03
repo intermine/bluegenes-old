@@ -89,81 +89,59 @@
 (defn table
   "Table to display enrichment results"
   []
-  (fn [{:keys [rows-per-page
-               enrichment-results
-               path-query
-               path-query-for-matches
-               path-constraint]}
-       {:keys [has-something]}
-       upstream-data]
-    (if (empty? enrichment-results)
-      (do
-        [:p "No results"])
-      (do
-        [:div.table-wrapper
-         [:table.table.table-striped.comp-table
-          [table-header]
-          [:tbody
-           (if (> (count enrichment-results) 0)
-             (do
-               (for [row (take 10 enrichment-results)]
-                 (if-not (nil? row)
-                   ^{:key (:identifier row)} [table-row
-                                              row
-                                              path-query
-                                              path-query-for-matches
-                                              path-constraint
-                                              has-something
-                                              upstream-data]))))]]]))))
+  (fn [{:keys [enrichment-results] :as x}]
+    (do
+      [:div.table-wrapper
+       [:table.table.table-striped.comp-table
+        [table-header]
+        [:tbody
+         (if (> (count enrichment-results) 0)
+           (do
+             (for [row (take 10 enrichment-results)]
+               [:tr
+                [:td (:description row)]
+                [:td (:p-value row)]
+                [:td (:matches row)]])))]]])))
 
+(def default-values {:current-page 1
+                     :rows-per-page 20
+                     :widget "enrichment-type"
+                     :title "Generic Displayer"
+                     :maxp 0.05
+                     :format "json"
+                     :population nil
+                     :correction "Bonferroni"})
 
-(defn ^:export main [step-data]
+(defn handle-update [data]
+  (let [{:keys [api upstream-data state]} (reagent/props data)]
+    (go (let [res (<! (im/enrichment
+                        (select-keys upstream-data [:service])
+                        (merge default-values
+                               state
+                               (cond
+                                 (= "list" (:format (:data upstream-data)))
+                                 {:list (:payload (:data upstream-data))}
+                                 (= "ids" (:format (:data upstream-data)))
+                                 {:ids (:payload (:data upstream-data))}))))]
+          ((:replace-state api) (assoc (merge default-values state) :enrichment-results (-> res :results)))))))
+
+(defn ^:export main []
   "Output a table representing all lists in a mine.
   When the component is updated then inform the API of its new value."
-  (let [persistent-state (reagent/atom (merge {:current-page 1
-                                               :rows-per-page 20
-                                               :widget "enrichment-type"
-                                               :title "Generic Displayer"
-                                               :maxp 0.05
-                                               :format "json"
-                                               :population nil
-                                               :correction "Bonferroni"} (:state step-data)))
-        local-state (reagent/atom {:current-page 1
-                                   :rows-per-page 20})]
-
+  (fn [step-data]
     (reagent/create-class
      {:reagent-render
       (fn [step-data]
         [:div.enrichment
          [:h3 (:title (:state step-data))]
-         [enrichment-controls (-> step-data :api :replace-state) persistent-state]
-         [table @local-state (:api step-data) (:upstream-data step-data)]])
-      :component-will-receive-props
-      (fn [this new-props]
-        (let [{:keys [upstream-data api state]} (extract-props new-props)
-              enrichment-type (:widget state)]
-          (swap! persistent-state merge state)
-          (call (:is-loading api) true)
-          (swap! local-state assoc :enrichment-results nil)
-          (println "DATA FORMAT" upstream-data)
-          (go (let [res (<! (im/enrichment
-                             (select-keys upstream-data [:service])
-                             (merge {:widget enrichment-type
-                                     :population (:population @persistent-state)
-                                     :maxp (:maxp @persistent-state)
-                                     :format "json"
-                                     :correction (:correction @persistent-state)}
-                                    (cond
-                                      (= "list" (:format (:data upstream-data)))
-                                      {:list (:payload (:data upstream-data))}
-                                      (= "ids" (:format (:data upstream-data)))
-                                      {:ids (:payload (:data upstream-data))}))))]
+         ;[enrichment-controls (-> step-data :api :replace-state)]
+         [table (:state step-data)]])
+      :component-did-mount handle-update
+      :component-did-update handle-update})))
 
 
-
-                (call (:is-loading api) false)
-             (swap! local-state assoc
-                    :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
-                    :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
-                    :path-constraint (:pathConstraint res)
-                    :enrichment-results (-> res :results))))))})))
+;(swap! local-state assoc
+;       :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
+;       :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
+;       :path-constraint (:pathConstraint res)
+;       :enrichment-results (-> res :results))

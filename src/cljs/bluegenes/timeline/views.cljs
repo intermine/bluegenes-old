@@ -8,6 +8,7 @@
             [bluegenes.utils.layouthelpers :as layout]
             [bluegenes.components.vertical :as vertical]
             [bluegenes.components.drawer.core :as drawer]
+            [bluegenes.components.whatnext.core :as whatnext]
             [reagent.impl.util :as impl :refer [extract-props]]))
 
 (enable-console-print!)
@@ -65,7 +66,7 @@
   (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe step-args))])
         api (timeline-api/build-api-map step-args)]
     (fn [step-data]
-      ;(println "STEP DATA" step-data)
+      ;(println "upstream DATA" @upstream-step-data)
       (let [global-info nil
             tool-component (-> bluegenes.tools
                                (aget (:tool step-data))
@@ -96,7 +97,7 @@
                           (if-not (= "dashboard" (:tool @step-data)) "step-container")
                           }
                          ;(println "loading tool" (:tool @step-data))
-                         ;[:div (str @step-data)]
+                         [:div (str @step-data)]
                          (if (:produced @step-data)
                            [:div.btn.btn-primary.btn-circle.btn-lg.offset
                             {:on-click #(re-frame/dispatch [:save-research _id])}
@@ -142,7 +143,7 @@
   []
   (let [step-path (re-frame/subscribe [:step-path])]
     (fn []
-      (into [:div.prevsteps]
+      (into [:div.prevsteps [whatnext/main]]
             (for [id (reverse @step-path)]
               (if (vector? id)
                 ^{:key (str "group" (str id))} [steps-dashboard id]

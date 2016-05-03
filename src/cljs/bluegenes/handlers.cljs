@@ -79,33 +79,33 @@
                (first response)))))
 
 (re-frame/register-handler
- :load-histories
- trim-v
- (fn [db]
-   "Get histories from the server."
-   (go (let [res (<! (http/get "/api/history"
-                               {:with-credentials? false
-                                :keywordize-keys? true}))]
-         (re-frame/dispatch [:process-histories res])))
-   db))
+  :load-histories
+  trim-v
+  (fn [db]
+    "Get histories from the server."
+    (go (let [res (<! (http/get "/api/history"
+                                {:with-credentials? false
+                                 :keywordize-keys? true}))]
+          (re-frame/dispatch [:process-histories res])))
+    db))
 
-   (re-frame/register-handler
-     :handle-bootstrap-template
-     (fn [db [_ mine-key response]]
-       (assoc-in db [:cache :templates mine-key] response)))
+(re-frame/register-handler
+  :handle-bootstrap-template
+  (fn [db [_ mine-key response]]
+    (assoc-in db [:cache :templates mine-key] response)))
 
-   (re-frame/register-handler
-     :handle-bootstrap-model
-     (fn [db [_ mine-key response]]
-       (assoc-in db [:cache :models mine-key] response)))
+(re-frame/register-handler
+  :handle-bootstrap-model
+  (fn [db [_ mine-key response]]
+    (assoc-in db [:cache :models mine-key] response)))
 
-   (re-frame/register-handler
-     :bootstrap-app
-     (fn [db _]
-       (println "Bootstrapping Appliation")
-       (doall (map (fn [[mine-key mine-details]]
-                     (go (re-frame/dispatch [:handle-bootstrap-template mine-key (<! (im/templates (:service mine-details))) ]))
-                     (go (re-frame/dispatch [:handle-bootstrap-model mine-key (<! (im/model (:service mine-details))) ]))
-                     )
-                   (get-in db [:remote-mines])))
-       db))
+(re-frame/register-handler
+  :bootstrap-app
+  (fn [db _]
+    (println "Bootstrapping Appliation")
+    (doall (map (fn [[mine-key mine-details]]
+                  (go (re-frame/dispatch [:handle-bootstrap-template mine-key (<! (im/templates (:service mine-details)))]))
+                  (go (re-frame/dispatch [:handle-bootstrap-model mine-key (<! (im/model (:service mine-details)))]))
+                  )
+                (get-in db [:remote-mines])))
+    db))

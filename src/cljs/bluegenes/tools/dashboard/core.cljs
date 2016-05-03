@@ -7,10 +7,12 @@
   it some state."
   [name active active-switcher args]
   [:div.step-container
-   {:class (if active "active" "inactive")
+   {
+    ;:class (if active "active" "inactive")
     :on-click active-switcher}
    [:div.body
-    [:h3 "Something"]
+    [:h3 "A Tool"]
+    ;[:div (str "args: " args)]
     [:div.tool [(-> bluegenes.tools (aget name) (aget "core") (aget "main")) args]]]])
 
 (defn replace-state

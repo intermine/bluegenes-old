@@ -20,7 +20,7 @@
     ((:has-something comm) {:data {:format "ids"
                                    :payload (into [] (map #(aget % "id") matches))
                                    :type "Gene"}
-                            :service {:root "www.flymine.org/query"}})))
+                            :service {:root "beta.humanmine.org/beta"}})))
 
 (defn split-ids [values]
   "separate the results from the text area into discrete identifiers"
@@ -30,7 +30,7 @@
 
 (defn submit-handler [values comm]
   "Resolves IDs via IMJS promise"
-  (let [mine (js/imjs.Service. (clj->js {:root "www.flymine.org/query"}))
+  (let [mine (js/imjs.Service. (clj->js {:root "beta.humanmine.org/beta"}))
         query {:identifiers (split-ids values)
          :type "Gene"
          :extra "D. melanogaster"}

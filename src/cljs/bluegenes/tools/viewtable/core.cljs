@@ -70,7 +70,7 @@
          query (normalize-input upstream-data)]
      (-> (.loadTable js/imtables
                      target
-                     (clj->js {:start 0 :size 5})
+                     (clj->js {:start 0 :size 10})
                      (clj->js {:service (:service upstream-data) :query query}))
          (.then
           (fn [table]
