@@ -11,7 +11,7 @@
     ;:class (if active "active" "inactive")
     :on-click active-switcher}
    [:div.body
-    [:h3 "A Tool"]
+    ;[:h3 "A Tool"]
     ;[:div (str "args: " args)]
     [:div.tool [(-> bluegenes.tools (aget name) (aget "core") (aget "main")) args]]]])
 
@@ -23,7 +23,6 @@
 (defn has-something
   "Replace the global state of the dashboard including all tools."
   [api value]
-  (println "inner has something" value)
   ((:has-something api) value))
 
 (defn replace-substate
@@ -45,7 +44,7 @@
       (map-indexed (fn [index {:keys [tool state]}]
                      (load-tool tool
                                 (= index (:active (:state dashboard)))
-                                (partial (:replace-state api) (assoc (:state dashboard) :active index))
+                                (fn [x] (println "clicked")) ;(partial (:replace-state api) (assoc (:state dashboard) :active index))
                                 {:state (last state)
                                  :upstream-data upstream-data
                                  :api {:replace-state (comp (partial replace-state api) (partial replace-substate (:state dashboard) index))

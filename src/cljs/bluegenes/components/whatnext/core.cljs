@@ -61,7 +61,7 @@
      {:on-click #(re-frame/dispatch [:add-step "dashboard" {:active 0
                                                             :tools [{:tool "enrichment"
                                                                      :state [{:widget "go_enrichment_for_gene"
-                                                                              :correction "None"
+                                                                              :correction "Holms-Bonferroni"
                                                                               :title "Gene Ontology Enrichment"}]}
                                                                     {:tool "enrichment"
                                                                      :state [{:widget "pathway_enrichment"
@@ -77,7 +77,8 @@
                                                                               :title "Protein Domain Enrichment"}]}
                                                                     {:tool "enrichment"
                                                                      :state [{:widget "prot_dom_enrichment_for_gene"
-                                                                              :title "Protein Domain Enrichment"}]}]}])}
+                                                                              :title "Protein Domain Enrichment"}]}
+                                                                    ]}])}
      "Analyze List"]))
 
 

@@ -97,7 +97,7 @@
                           (if-not (= "dashboard" (:tool @step-data)) "step-container")
                           }
                          ;(println "loading tool" (:tool @step-data))
-                         [:div (str @step-data)]
+                         ;[:div (str @step-data)]
                          (if (:produced @step-data)
                            [:div.btn.btn-primary.btn-circle.btn-lg.offset
                             {:on-click #(re-frame/dispatch [:save-research _id])}

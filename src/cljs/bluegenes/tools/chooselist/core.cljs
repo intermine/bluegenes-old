@@ -82,10 +82,6 @@
       {:reagent-render
        (fn [{:keys [state upstream-data api]}]
          [:div
-          [:div (str "state" state)]
-          [:div.btn {:on-click (fn []
-                                 ((-> api :replace-state)
-                                   {:HELLO "world"}))} "API"]
           [pagination-control]
           [:table {:class "list-chooser"}
            [:thead

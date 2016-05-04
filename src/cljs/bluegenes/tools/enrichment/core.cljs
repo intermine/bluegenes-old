@@ -16,38 +16,42 @@
 (defn call [f & args]
   (apply f args))
 
-(defn enrichment-controls [api-fn state]
-  (fn []
+(defn enrichment-controls []
+  (fn [{:keys [state replace-state]}]
     [:div
     [:div.row
      [:div.col-xs-6
       [:form
        [:span "Test Correction"]
-       [:select.form-control
-        {:value (:correction @state)
-         :on-change (fn [e]
-                      (api-fn (merge @state {:correction (.. e -target -value) })))}
-        [:option "Holms-Bonferroni"]
-        [:option "Benjamini Hochberg"]
-        [:option "Bonferroni"]
-        [:option "None"]]]]
+       [:div.dropdown
+        [:button.btn.btn-default.dropdown-toggle
+         {:type "button"
+          :data-toggle "dropdown"}
+         (str (:correction state))]
+        [:ul.dropdown-menu
+         [:li [:a {:on-click #(replace-state (merge state {:correction "Holms-Bonferroni"}))} "Holms-Bonferroni"]]
+         [:li [:a {:on-click #(replace-state (merge state {:correction "Benjamini Hochberg"}))} "Benjamini Hochberg"]]
+         [:li [:a {:on-click #(replace-state (merge state {:correction "Bonferroni"}))} "Bonferroni"]]
+         [:li [:a {:on-click #(replace-state (merge state {:correction "None"}))} "None"]]]]]]
      [:div.col-xs-6
       [:form
        [:span "Maximum p-value:"]
-       [:select.form-control
-       {:value (:maxp @state)
-        :on-change (fn [e]
-                     (api-fn (merge @state {:maxp (.. e -target -value) })))}
-        [:option "0.05"]
-        [:option "0.10"]
-        [:option "1.0"]]]]]
+       [:div.dropdown
+        [:button.btn.btn-default.dropdown-toggle
+         {:type "button"
+          :data-toggle "dropdown"}
+         (str (:maxp state))]
+        [:ul.dropdown-menu
+         [:li [:a {:on-click #(replace-state (merge state {:maxp 0.05}))} "0.05"]]
+         [:li [:a {:on-click #(replace-state (merge state {:maxp 0.10}))} "0.10"]]
+         [:li [:a {:on-click #(replace-state (merge state {:maxp 1.00}))} "1.00"]]]]]]]
 
     [:div.row
      [:div.col-xs-12
       [:form.form-group
        [:span "Background"]
        [listdropdown/main {:on-change (fn [listname]
-                                        (api-fn (merge @state {:population listname})))
+                                        (replace-state (merge state {:population listname})))
                            :title "Change"
                            :service {:root "www.flymine.org/query"}}]
       ;  [:input.form-control {:type "text"}]
@@ -66,7 +70,7 @@
   (swap! pager assoc :current-page e))
 
 
-(defn table-row [row path-query path-query-for-matches path-constraint has-something service]
+(defn table-row [{:keys [row path-query path-query-for-matches path-constraint has-something service]}]
   (fn []
     [:tr
      [:td.description
@@ -89,7 +93,7 @@
 (defn table
   "Table to display enrichment results"
   []
-  (fn [{:keys [enrichment-results] :as x}]
+  (fn [enrichment-results]
     (do
       [:div.table-wrapper
        [:table.table.table-striped.comp-table
@@ -112,36 +116,39 @@
                      :population nil
                      :correction "Bonferroni"})
 
-(defn handle-update [data]
-  (let [{:keys [api upstream-data state]} (reagent/props data)]
-    (go (let [res (<! (im/enrichment
-                        (select-keys upstream-data [:service])
-                        (merge default-values
-                               state
-                               (cond
-                                 (= "list" (:format (:data upstream-data)))
-                                 {:list (:payload (:data upstream-data))}
-                                 (= "ids" (:format (:data upstream-data)))
-                                 {:ids (:payload (:data upstream-data))}))))]
-          ((:replace-state api) (assoc (merge default-values state) :enrichment-results (-> res :results)))))))
+(defn handle-update
+  "Fetch enrichment results from Intermine and save the results."
+  [component]
+  (let [{:keys [api upstream-data state]} (reagent/props component)]
+    ; Start with default values for enrichment, then merge in the state
+    (let [replace-state (:replace-state api)
+          enrichment-parameters (merge default-values
+                                       state
+                                       (cond
+                                         (= "list" (:format (:data upstream-data)))
+                                         {:list (:payload (:data upstream-data))}
+                                         (= "ids" (:format (:data upstream-data)))
+                                         {:ids (:payload (:data upstream-data))}))]
+      (go (let [res (<! (im/enrichment (select-keys upstream-data [:service]) enrichment-parameters))]
+            (replace-state (update-in enrichment-parameters [:cache]
+                                      assoc
+                                      :enrichment-results (-> res :results)
+                                      :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
+                                      :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
+                                      :path-constraint (:pathConstraint res))))))))
 
 (defn ^:export main []
   "Output a table representing all lists in a mine.
   When the component is updated then inform the API of its new value."
-  (fn [step-data]
-    (reagent/create-class
-     {:reagent-render
-      (fn [step-data]
-        [:div.enrichment
-         [:h3 (:title (:state step-data))]
-         ;[enrichment-controls (-> step-data :api :replace-state)]
-         [table (:state step-data)]])
-      :component-did-mount handle-update
-      :component-did-update handle-update})))
-
-
-;(swap! local-state assoc
-;       :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
-;       :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
-;       :path-constraint (:pathConstraint res)
-;       :enrichment-results (-> res :results))
+  (reagent/create-class
+    {:reagent-render
+     (fn [step-data]
+       [:div.enrichment
+        [:h3 (:title (:state step-data))]
+        [:div (str "results: " (count (get-in step-data [:state :cache :enrichment-results])))]
+        [enrichment-controls {:state (:state step-data)
+                              :replace-state (-> step-data :api :replace-state)}]
+        [table (-> step-data :state :cache :enrichment-results)]])
+     :component-did-mount handle-update
+     :component-did-update handle-update
+     }))

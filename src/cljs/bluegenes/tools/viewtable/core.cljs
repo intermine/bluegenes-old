@@ -77,7 +77,6 @@
 
             (-> table .-history (.on "changed:current" (fn [x]
                                                         x)))
-
             (let [clone (.clone (-> table .-query))
                   adj (.select clone #js [(str (-> table .-query .-root) ".id")])]
               (-> (js/imjs.Service. (clj->js (:service upstream-data)))
@@ -100,10 +99,10 @@
   "Render the main view of the tool."
   []
   (reagent/create-class
-   {:reagent-render (fn [props]
-;      (.log js/console "props" (clj->js props))
-                      [inner-table props])
-    :should-component-update (fn [this old-argv new-argv]
-                               (not (=
-                                     (dissoc (extract-props old-argv) :api)
-                                     (dissoc (extract-props new-argv) :api))))}))
+    {:reagent-render (fn [props]
+                       ;      (.log js/console "props" (clj->js props))
+                       [inner-table props])
+     :should-component-update (fn [this old-argv new-argv]
+                                (not (=
+                                       (dissoc (extract-props old-argv) :api)
+                                       (dissoc (extract-props new-argv) :api))))}))
