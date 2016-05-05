@@ -1,11 +1,14 @@
 (ns bluegenes.timeline.handlers
-  (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :as re-frame :refer [debug trim-v]]
+  (:require-macros [reagent.ratom :refer [reaction]]
+                   [cljs.core.async.macros :refer [go go-loop]])
+  (:require [re-frame.core :as re-frame :refer [debug trim-v enrich]]
             [bluegenes.db :as db]
             [secretary.core :as secretary]
             [schema.core :as s]
             [bluegenes.schemas :as schemas]
-            [bluegenes.utils :as utils])
+            [bluegenes.utils :as utils]
+            [bluegenes.utils.imcljs :as im]
+            [cljs.core.async :refer [put! chan <! >! timeout close!]])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
@@ -35,6 +38,14 @@
   trim-v
   (fn [db [step-id data]]
     (assoc-in db [:histories (:active-history db) :steps step-id :state] [data])))
+
+(re-frame/register-handler
+  :update-state
+  trim-v
+  (fn [db [step-id f]]
+    (update-in db [:histories (:active-history db) :steps step-id :state
+                   (count (get-in db [:histories (:active-history db) :steps step-id :state]))] f
+               )))
 
 (re-frame/register-handler
   :is-loading
@@ -102,13 +113,63 @@
         (update-in [:histories (:active-history db) :structure] conj uuid)))
     db))
 
+;(doall (map
+;         #(re-frame/dispatch [:handle-parse-produced %])
+;         (-> data :data :payload :select)))
+
 (re-frame/register-handler
-  :has-something
+  :handle-parse-produced
   trim-v
   (fn [db [step-id data]]
+    ;(println "HANDLE parse produced")
+    (update-in db [:histories (:active-history db) :steps step-id :saver]
+               (fnil (fn [pieces]
+                       (conj pieces data)) []))))
+
+(re-frame/register-handler
+  :clear-parse-produced
+  trim-v
+  (fn [db [step-id]]
+    ;(println "CLEAR PARSE PRODUCED")
+    (assoc-in db [:histories (:active-history db) :steps step-id :saver] [])))
+
+(defn sterilize-query [query]
+  ;(println "working on query" query)
+  (update query :select
+          (fn [paths]
+            ;(println "sees paths" paths)
+            (mapv (fn [path]
+                   (if (= (:from query) (first (clojure.string/split path ".")))
+                     path
+                     (str (:from query) "." path))) paths))))
+
+(defn parse-produced [db data step-id]
+  (re-frame/dispatch [:clear-parse-produced step-id])
+  (if (= "query" (-> data :data :format))
+    (do
+      (println "sterilized query" (sterilize-query (-> data :data :payload)))
+      (go-loop [paths (:select (sterilize-query (-> data :data :payload)))]
+              ;(println "WORKING ON PATHS" paths)
+              (let [res (<! (im/get-display-name {:root "www.flymine.org/query"} (first paths)))]
+                (re-frame/dispatch [:handle-parse-produced step-id res]))
+              (if (not-empty (rest paths))
+                (recur (rest paths))))))
+  db)
+
+(defn enricher [db [_ step-id data]]
+  ;(println "ENRICHER FIRING" step-id)
+  ;(println "sees SAVER" (get-in db [:histories (:active-history db) :steps step-id :saver]))
+  (assoc-in db [:histories (:active-history db) :steps step-id :saver] []))
+
+(re-frame/register-handler
+  :has-something
+  (enrich enricher)
+  (fn [db [_ step-id data]]
+    ;(println "has-something" step-id data)
     (s/validate schemas/Payload data)
     (-> db
         (update-self data step-id)
+        (parse-produced data step-id)
         (spawn-shortcut data step-id))))
 
 
@@ -142,23 +203,23 @@
       (-> db
           (update-in [:histories (:active-history db) :steps]
                      (fn [steps] (assoc steps uuid {:tool tool-name
-                                               :_id uuid
-                                               :state [state]
-                                               :subscribe [(last (get-in db [:histories
-                                                                             (:active-history db)
-                                                                             :structure]))]} )))
+                                                    :_id uuid
+                                                    :state [state]
+                                                    :subscribe [(last (get-in db [:histories
+                                                                                  (:active-history db)
+                                                                                  :structure]))]})))
           (update-in [:histories (:active-history db) :structure]
-                         (fn [structure] (conj structure uuid))))
+                     (fn [structure] (conj structure uuid))))
       ;(-> db
-          ;(create-step uuid {:tool tool-name
-          ;                   :_id uuid
-          ;                   :state [(clj->js state)]
-          ;                   :subscribe [(last (get-in db [:histories
-          ;                                                 (:active-history db)
-          ;                                                 :structure]))]})
-          ;(stamp-step last-emitted)
-          ;(clear-available-data)
-          ;)
+      ;(create-step uuid {:tool tool-name
+      ;                   :_id uuid
+      ;                   :state [(clj->js state)]
+      ;                   :subscribe [(last (get-in db [:histories
+      ;                                                 (:active-history db)
+      ;                                                 :structure]))]})
+      ;(stamp-step last-emitted)
+      ;(clear-available-data)
+      ;)
       ;  (clear-data ((create-step db uuid {:tool tool-name
       ;                        :_id uuid
       ;                        :state []

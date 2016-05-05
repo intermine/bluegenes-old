@@ -20,6 +20,7 @@
               [bluegenes.tools.chooselistcompact.core :as chooselistcompact]
               [bluegenes.tools.enrichment.core :as enrichment]
               [bluegenes.tools.dashboard.core :as dashboard]
+              [bluegenes.tools.templatechooser.core :as templatechooser]
               [intermine.imjs :as imjs]))
 
 (enable-console-print!)

@@ -63,11 +63,13 @@
 (defn inner-table
   "Renders an im-table"
   []
+  (println "RENDERING INNER TABLE")
   (let [update-table (fn [comp]
    (let [{:keys [state upstream-data api]} (reagent/props comp)
          node (reagent/dom-node comp)
          target  (.item (.getElementsByClassName node "imtable") 0)
          query (normalize-input upstream-data)]
+     ;(println "about to run" {:service (:service upstream-data) :query query})
      (-> (.loadTable js/imtables
                      target
                      (clj->js {:start 0 :size 10})
@@ -76,21 +78,36 @@
           (fn [table]
 
             (-> table .-history (.on "changed:current" (fn [x]
-                                                        x)))
+                                                        (.log js/console "changed" x))))
+
+            ;(println "ran query" (-> table .-query))
             (let [clone (.clone (-> table .-query))
                   adj (.select clone #js [(str (-> table .-query .-root) ".id")])]
               (-> (js/imjs.Service. (clj->js (:service upstream-data)))
                   (.values adj)
                   (.then (fn [v]
+                           ;((:has-something api) {:service (:service upstream-data)
+                           ;                       :data {:format "ids"
+                           ;                              :type (-> table .-query .-root)
+                           ;                              :payload (js->clj v)}})
+                           ;(.log js/console "table query" (-> table .-query (.toJSON )))
+
                            ((:has-something api) {:service (:service upstream-data)
-                                                  :data {:format "ids"
+                                                  :data {:format "query"
                                                          :type (-> table .-query .-root)
-                                                         :payload (js->clj v)}}))))))))))]
+                                                         :payload (js->clj (-> table .-query (.toJSON ))
+                                                                           :keywordize-keys true)}})
+
+                           )))))))))]
 
     (reagent/create-class
      {:reagent-render (fn []
                         [:div
+
                          [:div.imtable]])
+      :should-component-update (fn [this old new]
+                                 (println "SHOULD I UPDATED")
+                                 false)
       :component-did-update update-table
       :component-did-mount update-table})))
 
@@ -100,9 +117,17 @@
   []
   (reagent/create-class
     {:reagent-render (fn [props]
+                       (println (dissoc props :api))
+                       (println "OUTER TABLE RENDERING")
                        ;      (.log js/console "props" (clj->js props))
                        [inner-table props])
      :should-component-update (fn [this old-argv new-argv]
-                                (not (=
-                                       (dissoc (extract-props old-argv) :api)
-                                       (dissoc (extract-props new-argv) :api))))}))
+                                (println "should component update?")
+                                true
+                                ;(println "DIFF"
+                                ;         (clojure.data/diff (extract-props old-argv)
+                                ;                            (extract-props new-argv)))
+                                ;(not (=
+                                ;       (dissoc (extract-props old-argv) :api :saver :produced)
+                                ;       (dissoc (extract-props new-argv) :api :saver :produced)))
+                                )}))

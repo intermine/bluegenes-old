@@ -9,7 +9,8 @@
             [bluegenes.components.vertical :as vertical]
             [bluegenes.components.drawer.core :as drawer]
             [bluegenes.components.whatnext.core :as whatnext]
-            [reagent.impl.util :as impl :refer [extract-props]]))
+            [reagent.impl.util :as impl :refer [extract-props]]
+            [bluegenes.components.savetodrawer.core :as savetodrawer]))
 
 (enable-console-print!)
 
@@ -98,10 +99,7 @@
                           }
                          ;(println "loading tool" (:tool @step-data))
                          ;[:div (str @step-data)]
-                         (if (:produced @step-data)
-                           [:div.btn.btn-primary.btn-circle.btn-lg.offset
-                            {:on-click #(re-frame/dispatch [:save-research _id])}
-                            [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]])
+
 
                          ; [:div.toolbar
                          ;  [:ul
@@ -114,8 +112,14 @@
                          ;     "Data"]]]]
 
                          [:div.body
+                          (if (:produced @step-data)
+                            [savetodrawer/main (select-keys @step-data [:saver :produced])]
+                            ;[:div.btn.btn-primary.btn-circle.btn-lg.offset
+                            ; {:on-click #(re-frame/dispatch [:save-research _id])}
+                            ; [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]]
+                            )
                           [:div {:className (if (= @current-tab "data") "hide")}
-                           [step @step-data]]
+                           [step (dissoc @step-data :saver :produced)]]
                           [:div {:className (if (= @current-tab nil) "hide")}
                            (json-html/edn->hiccup @step-data)]
                           (if (:loading? @step-data) [tool-dimmer])]])})))

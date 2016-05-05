@@ -13,43 +13,16 @@
    :dimmer true
    :search-term nil
 
-   :remote-mines {
-                  :humanmine {
-                              :name "HumanMine"
+   :remote-mines {:humanmine {:_id :humanmine
+                              :label "HumanMine"
                               :url "beta.humanmine.org/beta"
                               :service {:root "beta.humanmine.org/beta"}
                               :organism "H. sapiens"}
-                  :flymine {
-                            :_id :flymine
-                            :name "FlyMine"
+                  :flymine {:_id :flymine
+                            :label "FlyMine"
                             :url "beta.flymine.org/beta"
                             :service {:root "beta.flymine.org/beta"}
-                            :organism "D. melanogaster"}
-                  :yeastmine {
-                              :name "YeastMine"
-                              :url "yeastmine.yeastgenome.org/yeastmine"
-                              :service {:root "yeastmine.yeastgenome.org/yeastmine"}
-                              :organism "S. cerevisiae"}
-                  :zebrafishmine {
-                                  :name "ZebraFishMine"
-                                  :url "www.zebrafishmine.org"
-                                  :service {:root "www.zebrafishmine.org"}
-                                  :organism "D. rerio"}
-                  :ratmine {
-                            :name "RatMine"
-                            :url "ratmine.mcw.edu/ratmine"
-                            :service {:root "stearman.hmgc.mcw.edu/ratmine"}
-                            :organism "R. norvegicus"}
-                  :mousemine {
-                              :name "MouseMine"
-                              :url "www.mousemine.org/mousemine"
-                              :service {:root "www.mousemine.org/mousemine"}
-                              :organism "M. musculus"}
-                  :modmine {
-                            :name "ModMine"
-                            :url "intermine.modencode.org/release-33"
-                            :service {:root "intermine.modencode.org/release-33"}
-                            :organism "C. elegans"}}
+                            :organism "H. sapiens"}}
 
    :histories {:dashyboard {:name "Dashboard"
                             :slug "id-resolver"
@@ -63,6 +36,14 @@
                                                            :state [{:example "one"}]}
                                                           {:tool "chooselist"
                                                            :state [{:example "two"}]}]}]}}}
+               :templatechooser {:name "templatechooser"
+                                 :slug "templatechooser"
+                                 :description "templatechooser"
+                                 :structure [:zz1]
+                                 :saved-research {}
+                                 :steps {:zz1 {:_id :zz1
+                                               :tool "chooselist"
+                                               :state []}}}
 
                :enricher {:name "enricher"
                           :slug "enricher"

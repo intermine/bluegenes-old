@@ -54,6 +54,16 @@
           ; {:style {:margin-left "auto"}}
           "Debug"])})))
 
+{:_id :k1
+ :tool "templatechooser"
+ :state []}
+
+(defn templatetool []
+  (fn []
+    [:button.btn
+     {:on-click #(re-frame/dispatch [:add-step "templatechooser" {}])}
+     "Run Template"]))
+
 
 (defn listtool []
   (fn []
@@ -88,7 +98,8 @@
     (fn []
       [:div.step-container
        [:div.body
-        [listtool]]
+        [listtool]
+        [templatetool]]
 
        ;[:div.next-steps-title "Next Steps23"]
        [:div.tool-card-container

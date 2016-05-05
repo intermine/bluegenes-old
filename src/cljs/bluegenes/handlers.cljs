@@ -15,6 +15,16 @@
    db/default-db))
 
 (re-frame/register-handler
+  :handle-bootstrap-template
+  (fn [db [_ mine-key response]]
+    (assoc-in db [:cache :templates mine-key] response)))
+
+(re-frame/register-handler
+  :handle-bootstrap-model
+  (fn [db [_ mine-key response]]
+    (assoc-in db [:cache :models mine-key] response)))
+
+(re-frame/register-handler
   :set-active-history
   (fn [db [_ active-history & args]]
     (assoc-in db [:active-history] active-history)))
@@ -105,7 +115,6 @@
     (println "Bootstrapping Appliation")
     (doall (map (fn [[mine-key mine-details]]
                   (go (re-frame/dispatch [:handle-bootstrap-template mine-key (<! (im/templates (:service mine-details)))]))
-                  (go (re-frame/dispatch [:handle-bootstrap-model mine-key (<! (im/model (:service mine-details)))]))
-                  )
+                  (go (re-frame/dispatch [:handle-bootstrap-model mine-key (<! (im/model (:service mine-details)))])))
                 (get-in db [:remote-mines])))
     db))
