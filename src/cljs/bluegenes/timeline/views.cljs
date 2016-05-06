@@ -111,9 +111,11 @@
                          ;         :on-click #(swap-tab "data")}
                          ;     "Data"]]]]
 
+                         ;(println "step data" @step-data)
+
                          [:div.body
                           (if (:produced @step-data)
-                            [savetodrawer/main (select-keys @step-data [:saver :produced])]
+                            [savetodrawer/main (select-keys @step-data [:_id :saver :produced])]
                             ;[:div.btn.btn-primary.btn-circle.btn-lg.offset
                             ; {:on-click #(re-frame/dispatch [:save-research _id])}
                             ; [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]]

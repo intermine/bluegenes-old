@@ -37,8 +37,18 @@
               [:span view]]])]]))
 
 (defn ids-saver []
-  (fn [payload]
-    [:p "ids saver"]))
+  (fn [{:keys [data saver _id] :as step-info}]
+    (println "idsaver got" _id)
+    (println "got saver" saver)
+    [:div.btn.btn-success
+     {:on-click #(re-frame/dispatch [:save-research _id])}
+     [:i.fa.fa-floppy-o]
+     [:span (str " Save "
+                 (count (-> saver first :data :payload))
+                 " "
+                 (-> saver first :data :type)
+                 "s")]
+     ]))
 
 (defn list-saver []
   (fn [payload]
@@ -46,15 +56,13 @@
 
 (defn main []
   (fn [step-data]
-    (let [{:keys [format type payload]} (-> step-data :produced :data)]
+    (let [{:keys [format type payload] :as out} (-> step-data :produced :data)]
       [:div
        ;[:h4 "SAVE TO DRAWER"]
        (cond
-         (= "ids" format) [ids-saver payload]
+         (= "ids" format) [ids-saver step-data]
          (= "query" format) [query-saver (:saver step-data)]
-         (= "list" format) [list-saver payload])])
-
-    ))
+         (= "list" format) [list-saver payload])])))
 
 ;(defn main []
 ;  (fn [step-data]

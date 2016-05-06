@@ -63,7 +63,7 @@
 (defn inner-table
   "Renders an im-table"
   []
-  (println "RENDERING INNER TABLE")
+  ;(println "RENDERING INNER TABLE")
   (let [update-table (fn [comp]
    (let [{:keys [state upstream-data api]} (reagent/props comp)
          node (reagent/dom-node comp)
@@ -106,7 +106,7 @@
 
                          [:div.imtable]])
       :should-component-update (fn [this old new]
-                                 (println "SHOULD I UPDATED")
+                                 ;(println "SHOULD I UPDATED")
                                  false)
       :component-did-update update-table
       :component-did-mount update-table})))
@@ -117,8 +117,8 @@
   []
   (reagent/create-class
     {:reagent-render (fn [props]
-                       (println (dissoc props :api))
-                       (println "OUTER TABLE RENDERING")
+                       ;(println (dissoc props :api))
+                       ;(println "OUTER TABLE RENDERING")
                        ;      (.log js/console "props" (clj->js props))
                        [inner-table props])
      :should-component-update (fn [this old-argv new-argv]

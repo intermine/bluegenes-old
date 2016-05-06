@@ -118,10 +118,9 @@
 ;         (-> data :data :payload :select)))
 
 (re-frame/register-handler
-  :handle-parse-produced
+  :handle-parse-query
   trim-v
   (fn [db [step-id data]]
-    ;(println "HANDLE parse produced")
     (update-in db [:histories (:active-history db) :steps step-id :saver]
                (fnil (fn [pieces]
                        (conj pieces data)) []))))
@@ -139,21 +138,31 @@
           (fn [paths]
             ;(println "sees paths" paths)
             (mapv (fn [path]
-                   (if (= (:from query) (first (clojure.string/split path ".")))
-                     path
-                     (str (:from query) "." path))) paths))))
+                    (if (= (:from query) (first (clojure.string/split path ".")))
+                      path
+                      (str (:from query) "." path))) paths))))
+
+(re-frame/register-handler
+  :handle-parse-ids
+  trim-v
+  (fn [db [step-id data]]
+    (println "handling ids" data)
+    (assoc-in db [:histories (:active-history db) :steps step-id :saver]
+               [data])))
 
 (defn parse-produced [db data step-id]
   (re-frame/dispatch [:clear-parse-produced step-id])
-  (if (= "query" (-> data :data :format))
-    (do
-      (println "sterilized query" (sterilize-query (-> data :data :payload)))
-      (go-loop [paths (:select (sterilize-query (-> data :data :payload)))]
-              ;(println "WORKING ON PATHS" paths)
-              (let [res (<! (im/get-display-name {:root "www.flymine.org/query"} (first paths)))]
-                (re-frame/dispatch [:handle-parse-produced step-id res]))
-              (if (not-empty (rest paths))
-                (recur (rest paths))))))
+  (cond
+    (= "query" (-> data :data :format))
+    (go-loop [paths (:select (sterilize-query (-> data :data :payload)))]
+             ;(println "WORKING ON PATHS" paths)
+             (let [res (<! (im/get-display-name {:root "www.flymine.org/query"} (first paths)))]
+               (re-frame/dispatch [:handle-parse-query step-id res]))
+             (if (not-empty (rest paths))
+               (recur (rest paths))))
+    (= "ids" (-> data :data :format))
+    (re-frame/dispatch [:handle-parse-ids step-id data])
+    )
   db)
 
 (defn enricher [db [_ step-id data]]
