@@ -121,6 +121,7 @@
   :handle-parse-query
   trim-v
   (fn [db [step-id data]]
+    ;(println "handle parse query called" data)
     (update-in db [:histories (:active-history db) :steps step-id :saver]
                (fnil (fn [pieces]
                        (conj pieces data)) []))))
@@ -148,18 +149,43 @@
   (fn [db [step-id data]]
     (println "handling ids" data)
     (assoc-in db [:histories (:active-history db) :steps step-id :saver]
-               [data])))
+              [data])))
+
+(defn deconstruct-query
+  "Deconstructs a query into a map where the keys are unique classes
+  and their values are the queries to return the results."
+  [model query]
+  (let [sterile-query (sterilize-query query)
+        classes       (into [] (comp
+                                 (map (partial im/trim-path-to-class model))
+                                 (distinct)) (:select sterile-query))]
+    (reduce (fn [total next]
+              (assoc total next
+                           (assoc query :select (str next ".id")))) {} classes)))
+
 
 (defn parse-produced [db data step-id]
   (re-frame/dispatch [:clear-parse-produced step-id])
   (cond
     (= "query" (-> data :data :format))
-    (go-loop [paths (:select (sterilize-query (-> data :data :payload)))]
-             ;(println "WORKING ON PATHS" paths)
-             (let [res (<! (im/get-display-name {:root "www.flymine.org/query"} (first paths)))]
-               (re-frame/dispatch [:handle-parse-query step-id res]))
-             (if (not-empty (rest paths))
-               (recur (rest paths))))
+    (let [model               (-> db :cache :models :flymine)
+          deconstructed-query (deconstruct-query (-> db :cache :models :flymine)
+                                                 (-> data :data :payload))]
+
+      (go-loop [paths (seq deconstructed-query)]
+               (let [[path query] (first paths)]
+                 (let [dn    (<! (im/get-display-name {:root "www.flymine.org/query"} path))
+                       count (<! (im/query-count {:root "www.flymine.org/query"} query))]
+                   (re-frame/dispatch [:handle-parse-query
+                                       step-id
+                                       {:display-name dn
+                                        :count count}])))
+
+               ;(println "NEW" (assoc (-> data :data :payload) :select (first paths)))
+
+               (if (not-empty (rest paths))
+                 (recur (rest paths)))))
+
     (= "ids" (-> data :data :format))
     (re-frame/dispatch [:handle-parse-ids step-id data])
     )

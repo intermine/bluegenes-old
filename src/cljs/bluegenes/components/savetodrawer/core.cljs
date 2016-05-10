@@ -31,15 +31,13 @@
      [:div.btn.btn-success.dropdown-toggle {:data-toggle "dropdown"}
       [:i.fa.fa-floppy-o] [:span " Save Data " [:span.caret]]]
      [:ul.dropdown-menu.savetodrawer
-      (for [view payload]
+      (for [{:keys [display-name count]} payload]
         [:li [:a
-              [:span.badge.active "897"]
-              [:span view]]])]]))
+              [:span.badge.active count]
+              [:span (str " " display-name)]]])]]))
 
 (defn ids-saver []
   (fn [{:keys [data saver _id] :as step-info}]
-    (println "idsaver got" _id)
-    (println "got saver" saver)
     [:div.btn.btn-success
      {:on-click #(re-frame/dispatch [:save-research _id])}
      [:i.fa.fa-floppy-o]
@@ -47,8 +45,7 @@
                  (count (-> saver first :data :payload))
                  " "
                  (-> saver first :data :type)
-                 "s")]
-     ]))
+                 "s")]]))
 
 (defn list-saver []
   (fn [payload]

@@ -66,6 +66,19 @@
                (fn [error])))
     c))
 
+(defn query-count
+  "Returns IMJS row-style result"
+  [service query-map]
+  (let [c (chan)]
+    (-> (js/imjs.Service. (clj->js service))
+        (.query (clj->js query-map))
+        (.then (fn [q]
+                 (.count q)))
+        (.then (fn [rows]
+                 (go (>! c (js->clj rows :keywordize-keys true))))
+               (fn [error])))
+    c))
+
 
 
 (defn lists
