@@ -179,6 +179,8 @@
                    (re-frame/dispatch [:handle-parse-query
                                        step-id
                                        {:display-name dn
+                                        :query query
+                                        :service :flymine
                                         :count count}])))
 
                ;(println "NEW" (assoc (-> data :data :payload) :select (first paths)))
@@ -360,7 +362,7 @@
 
 ; This SERIOUSLY needs to be refactored. This should be easy. Need more coffee.
 (re-frame/register-handler
-  :save-research
+  :save-research-old
   trim-v
   (fn [db [id]]
     (let [steps         (get-in db [:histories (:active-history db) :steps])
@@ -378,6 +380,31 @@
                  :structure new-structure
                  :editing true
                  :saved (.now js/Date)
+                 :steps (-> steps
+                            (steps-back-to-beginning id)
+                            (apply-new-ids-to-steps key-map))))))
+
+(re-frame/register-handler
+  :save-research
+  trim-v
+  (fn [db [id data-to-save]]
+    (println "saving researh")
+    (let [steps         (get-in db [:histories (:active-history db) :steps])
+          uuid          (keyword (rid))
+          update-path   [:histories (:active-history db) :saved-research uuid]
+          pruned-steps  (steps-back-to-beginning steps id)
+          key-map       (generate-key-map pruned-steps)
+          new-structure (apply-new-ids-to-structure
+                          (get-in db [:histories (:active-history db) :structure])
+                          id
+                          key-map)]
+      (update-in db update-path assoc
+                 :label "TBD"
+                 :_id uuid
+                 :structure new-structure
+                 :editing true
+                 :when (.now js/Date)
+                 :mydata data-to-save
                  :steps (-> steps
                             (steps-back-to-beginning id)
                             (apply-new-ids-to-steps key-map))))))

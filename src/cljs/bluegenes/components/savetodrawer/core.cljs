@@ -27,14 +27,18 @@
 
 (defn query-saver []
   (fn [payload]
+    (println "PAYLOAD" payload)
     [:div.btn-group
      [:div.btn.btn-success.dropdown-toggle {:data-toggle "dropdown"}
       [:i.fa.fa-floppy-o] [:span " Save Data " [:span.caret]]]
      [:ul.dropdown-menu.savetodrawer
-      (for [{:keys [display-name count]} payload]
-        [:li [:a
-              [:span.badge.active count]
-              [:span (str " " display-name)]]])]]))
+      (for [{:keys [display-name query count]} (:saver payload)]
+        [:li
+         {:on-click #(println "query" query)}
+         ;{:on-click #(re-frame/dispatch [:save-research _id])}
+         [:a
+          [:span.badge.active count]
+          [:span (str " " display-name)]]])]]))
 
 (defn ids-saver []
   (fn [{:keys [data saver _id] :as step-info}]
@@ -53,12 +57,12 @@
 
 (defn main []
   (fn [step-data]
-    (let [{:keys [format type payload] :as out} (-> step-data :produced :data)]
+    (let [{{:keys [format type payload] :as produced} :data} (-> step-data :produced)]
       [:div
        ;[:h4 "SAVE TO DRAWER"]
        (cond
          (= "ids" format) [ids-saver step-data]
-         (= "query" format) [query-saver (:saver step-data)]
+         (= "query" format) [query-saver step-data]
          (= "list" format) [list-saver payload])])))
 
 ;(defn main []
