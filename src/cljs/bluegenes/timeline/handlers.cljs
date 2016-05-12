@@ -134,22 +134,23 @@
     (assoc-in db [:histories (:active-history db) :steps step-id :saver] [])))
 
 (defn sterilize-query [query]
-  ;(println "working on query" query)
+  ;(println "sterilizing query" query)
   (update query :select
           (fn [paths]
             ;(println "sees paths" paths)
-            (mapv (fn [path]
-                    (if (= (:from query) (first (clojure.string/split path ".")))
-                      path
-                      (str (:from query) "." path))) paths))))
+            (if (contains? query :from)
+              (mapv (fn [path]
+                      (if (= (:from query) (first (clojure.string/split path ".")))
+                        path
+                        (str (:from query) "." path))) paths)
+              paths))))
 
 (re-frame/register-handler
   :handle-parse-ids
   trim-v
   (fn [db [step-id data]]
     (println "handling ids" data)
-    (assoc-in db [:histories (:active-history db) :steps step-id :saver]
-              [data])))
+    (assoc-in db [:histories (:active-history db) :steps step-id :saver] [data])))
 
 (defn deconstruct-query
   "Deconstructs a query into a map where the keys are unique classes
@@ -384,11 +385,19 @@
                             (steps-back-to-beginning id)
                             (apply-new-ids-to-steps key-map))))))
 
+(defn payload-is-query? [payload]
+  (= "query" (:format (:data payload))))
+
+(re-frame/register-handler
+  :update-research-count
+  (fn [db [_ id c]]
+    (assoc-in db [:histories (:active-history db) :saved-research id :count] c )))
+
 (re-frame/register-handler
   :save-research
   trim-v
   (fn [db [id data-to-save]]
-    (println "saving researh")
+    (println "saving researh" id data-to-save)
     (let [steps         (get-in db [:histories (:active-history db) :steps])
           uuid          (keyword (rid))
           update-path   [:histories (:active-history db) :saved-research uuid]
@@ -398,13 +407,21 @@
                           (get-in db [:histories (:active-history db) :structure])
                           id
                           key-map)]
+      (if (payload-is-query? data-to-save)
+        (go
+          (println "saving query" (:payload (:data data-to-save)))
+          (let [c (<! (im/query-count
+                        {:root "www.flymine.org/query/service"}
+                        (:payload (:data data-to-save))))]
+            (println "c" c)
+            (re-frame/dispatch [:update-research-count uuid c]))))
       (update-in db update-path assoc
                  :label "TBD"
                  :_id uuid
                  :structure new-structure
                  :editing true
                  :when (.now js/Date)
-                 :mydata data-to-save
+                 :payload data-to-save
                  :steps (-> steps
                             (steps-back-to-beginning id)
                             (apply-new-ids-to-steps key-map))))))

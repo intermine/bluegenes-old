@@ -27,6 +27,7 @@
                                 (.focus tb)))
        :reagent-render      (fn [{:keys [_id label saved data editing structure] :as details}]
                               ;(println "saved" saved)
+                              ;(println "DETAILS" details)
                               [:div.item
                                {:on-click (fn []
                                             (if-not editing
@@ -45,8 +46,8 @@
                                (let [produced (get-in details [:steps (last structure) :produced])]
                                  ;(println "produced" (-> produced :data :payload count))
                                  [:span.count
-                                  [:span.big (str (-> produced :data :payload count))]
-                                  [:span.right (str (-> produced :data :type) "s")]]
+                                  [:span.big (str (-> details :count))]
+                                  [:span.right (str (-> details :payload :data :type) "s")]]
 
                                  )
                                ])})))

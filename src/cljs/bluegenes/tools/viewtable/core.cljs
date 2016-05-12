@@ -1,10 +1,13 @@
 (ns bluegenes.tools.viewtable.core
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [clojure.string :as str]
+            [bluegenes.utils.imcljs :as im]
             [intermine.imtables :as imtables]
             [reagent.impl.util :as impl :refer [extract-props]]
-            [intermine.imjs :as imjs]))
+            [intermine.imjs :as imjs]
+            [cljs.core.async :refer [put! chan <! >! timeout close!]]))
 
 (enable-console-print!)
 
@@ -34,7 +37,7 @@
   (cond
     (= "list" (-> input-data :data :format))
     (get-list-query (get-in input-data [:data]))
-    (= "ids" (-> input-data  :data :format))
+    (= "ids" (-> input-data :data :format))
     (get-id-query (get-in input-data [:data]))
     (= "query" (-> input-data :data :format))
     (get-in input-data [:data :payload])))
@@ -63,53 +66,68 @@
 (defn inner-table
   "Renders an im-table"
   []
-  ;(println "RENDERING INNER TABLE")
-  (let [update-table (fn [comp]
-   (let [{:keys [state upstream-data api]} (reagent/props comp)
-         node (reagent/dom-node comp)
-         target  (.item (.getElementsByClassName node "imtable") 0)
-         query (normalize-input upstream-data)]
-     ;(println "about to run" {:service (:service upstream-data) :query query})
-     (-> (.loadTable js/imtables
-                     target
-                     (clj->js {:start 0 :size 10})
-                     (clj->js {:service (:service upstream-data) :query query}))
-         (.then
-          (fn [table]
+  (let [update-table (fn [component]
+                       (let [{:keys [state upstream-data api]} (reagent/props component)
+                             node   (reagent/dom-node component)
+                             target (.item (.getElementsByClassName node "imtable") 0)
+                             query  (if (nil? state)
+                                      (normalize-input upstream-data)
+                                      state)]
 
-            (-> table .-history (.on "changed:current" (fn [x]
-                                                        (.log js/console "changed" x))))
+                         (-> (.loadTable js/imtables
+                                         target
+                                         (clj->js {:start 0 :size 10})
+                                         (clj->js {:service (:service upstream-data) :query query}))
+                             (.then
+                               (fn [table]
+                                 (-> table .-history (.on "changed:current"
+                                                          (fn [x]
+                                                            (println "REPLACING STATE WITH" (-> x .-attributes .-query (.toJSON)))
+                                                            ((:replace-state api) (js->clj (-> x .-attributes .-query (.toJSON))
+                                                                                           :keywordize-keys true))
+                                                            ;(println "about to send out"
+                                                            ;         {:format "query"
+                                                            ;          :type (-> x .-attributes .-query .-root)
+                                                            ;          :payload (js->clj (-> x .-attributes .-query (.toJSON))
+                                                            ;                            :keywordize-keys true)})
+                                                            ((:has-something api) {:service (:service upstream-data)
+                                                                                   :data {:format "query"
+                                                                                          :type (-> x .-attributes .-query .-root)
+                                                                                          :payload (js->clj (-> x .-attributes .-query (.toJSON))
+                                                                                                            :keywordize-keys true)}})
+                                                            (.log js/console "changed" x))))
 
-            ;(println "ran query" (-> table .-query))
-            (let [clone (.clone (-> table .-query))
-                  adj (.select clone #js [(str (-> table .-query .-root) ".id")])]
-              (-> (js/imjs.Service. (clj->js (:service upstream-data)))
-                  (.values adj)
-                  (.then (fn [v]
-                           ;((:has-something api) {:service (:service upstream-data)
-                           ;                       :data {:format "ids"
-                           ;                              :type (-> table .-query .-root)
-                           ;                              :payload (js->clj v)}})
-                           ;(.log js/console "table query" (-> table .-query (.toJSON )))
+                                 ;(println "ran query" (-> table .-query))
+                                 (let [clone (.clone (-> table .-query))
+                                       adj   (.select clone #js [(str (-> table .-query .-root) ".id")])]
+                                   (-> (js/imjs.Service. (clj->js (:service upstream-data)))
+                                       (.values adj)
+                                       (.then (fn [v]
+                                                ;((:has-something api) {:service (:service upstream-data)
+                                                ;                       :data {:format "ids"
+                                                ;                              :type (-> table .-query .-root)
+                                                ;                              :payload (js->clj v)}})
+                                                ;(.log js/console "table query" (-> table .-query (.toJSON )))
 
-                           ((:has-something api) {:service (:service upstream-data)
-                                                  :data {:format "query"
-                                                         :type (-> table .-query .-root)
-                                                         :payload (js->clj (-> table .-query (.toJSON ))
-                                                                           :keywordize-keys true)}})
+                                                ((:has-something api) {:service (:service upstream-data)
+                                                                       :data {:format "query"
+                                                                              :type (-> table .-query .-root)
+                                                                              :payload (js->clj (-> table .-query (.toJSON))
+                                                                                                :keywordize-keys true)}})
 
-                           )))))))))]
+                                                )))))
+                               (fn [error]
+                                 (println "TABLE HAD AN ERROR" error))))))]
 
     (reagent/create-class
-     {:reagent-render (fn []
-                        [:div
-
-                         [:div.imtable]])
-      :should-component-update (fn [this old new]
-                                 ;(println "SHOULD I UPDATED")
-                                 false)
-      :component-did-update update-table
-      :component-did-mount update-table})))
+      {:reagent-render (fn []
+                         [:div
+                          [:div.imtable]])
+       :should-component-update (fn [this old new]
+                                  ;(println "SHOULD I UPDATED")
+                                  false)
+       :component-did-update update-table
+       :component-did-mount update-table})))
 
 
 (defn ^:export main
@@ -117,9 +135,7 @@
   []
   (reagent/create-class
     {:reagent-render (fn [props]
-                       ;(println (dissoc props :api))
-                       ;(println "OUTER TABLE RENDERING")
-                       ;      (.log js/console "props" (clj->js props))
+                       (println "TABLE IS RE RENDERING")
                        [inner-table props])
      :should-component-update (fn [this old-argv new-argv]
                                 (println "should component update?")

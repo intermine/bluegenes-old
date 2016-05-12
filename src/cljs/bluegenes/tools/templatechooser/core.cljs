@@ -24,13 +24,12 @@
             has-something (-> step-data :api :has-something)]
         [:a.list-group-item
          {:on-click (fn []
-                      (println "query" has-something)
+                      (println "template chooser outputting" has-something)
                       (has-something {:service {:root "www.flymine.org/query"}
                                       :data {:format "query"
                                              :type "Gene"
                                              :payload query}
-                                      :shortcut "viewtable"})
-                      )}
+                                      :shortcut "viewtable"}))}
          [:h4.list-group-item-heading
           (last (clojure.string/split (:title query) "-->"))]
          [:p.list-group-item-text (:description query)]]))))
@@ -42,20 +41,29 @@
     (fn []
       (let [mine-templates       (:flymine @templates)
             mine-model           (:flymine @models)
-            runnable-templates   (into {}  (h/runnable mine-model mine-templates "Gene"))
-            replaced-constraints (into {}  (map (fn [[id query]]
-                                         [id (h/replace-input-constraints
-                                               mine-model
-                                               query
-                                               "Gene"
-                                               (-> step-data :upstream-data :data :payload))])
-                                       runnable-templates))
-            ]
+            runnable-templates   (into {} (h/runnable mine-model mine-templates "Gene"))
+            replaced-constraints (into {}
+                                       (do
+                                         (println "sees payloaddddddddddddddd"
+                                                  (-> step-data :upstream-data :data :payload))
+                                         (cond
+                                           (= "query" (-> step-data :upstream-data :data :format))
+                                           (map (fn [[id query]]
+                                                  [id (h/replace-input-constraints-whole
+                                                        mine-model
+                                                        query
+                                                        "Gene"
+                                                        (-> step-data :upstream-data :data :payload :where first))])
+                                                runnable-templates)
+                                           :else
+                                           (map (fn [[id query]]
+                                                  [id (h/replace-input-constraints
+                                                        mine-model
+                                                        query
+                                                        "Gene"
+                                                        (-> step-data :upstream-data :data :payload))])
+                                                runnable-templates))))]
 
-        ;(println "replaced input constrAINTSINSDGISDNFG" replaced-constraints)
-        ;(println "DISEASE--" (:Gene_disease replaced-constraints))
-        ;(println "end-class" (imcljs/trim-path-to-class mine-model
-        ;                                       "Disease.genes.homologues.homologuess"))
         [:div.list-group
          (for [t replaced-constraints]
            [template {:step-data step-data

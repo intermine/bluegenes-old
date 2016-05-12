@@ -131,7 +131,7 @@
 (defn get-display-name
   "Given a service URL, a type to search for, and an attribute field, return the display name."
   ([service path] (go (let [response (<! (http/get (str "http://" (:root service) "/service/model/" path) {:with-credentials? false :keywordize-keys true}))]
-                          (-> response :body :display))))
+                        (-> response :body :display))))
   ([service type k] (go (let [response (<! (http/get (str "http://" (:root service) "/service/model/" type "." (clj->js k)) {:with-credentials? false :keywordize-keys true}))]
                           (-> response :body :name)))))
 
@@ -318,12 +318,13 @@
   (trim-path-to-class flymine-model Gene.homologues.homologue.name )
   => Gene.homologues.homologue"
   [model path]
-  (let [parts     (mapv keyword (clojure.string/split path "."))
-        is-class? (fn [x] (contains? model x))]
-    (->> (take (- (count parts)
-                  (count (take-while
-                           (fn [i]
-                             (not (is-class? (capitalize-keyword (get parts i)))))
-                           (range (dec (count parts)) -1 -1)))) parts)
-         (map name)
-         (clojure.string/join "."))))
+  (let [parts (map keyword (clojure.string/split path "."))]
+    (loop [parts-remaining parts
+           collected       [(first parts-remaining)]]
+      (let [[parent child] parts-remaining]
+        (if-let [child-reference-type (keyword (get-in (merge (:references ((keyword parent) model))
+                                                              (:collections ((keyword parent) model)))
+                                                       [child :referencedType]))]
+          (recur (conj (rest (rest parts-remaining)) child-reference-type)
+                 (conj collected child))
+          (clojure.string/join "." (map name collected)))))))

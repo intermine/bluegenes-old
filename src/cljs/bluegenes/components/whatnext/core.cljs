@@ -16,10 +16,10 @@
 
 (defn tool-card [[name props]]
   (let [available-data (re-frame/subscribe [:available-data])
-        tool (-> bluegenes.tools
-                 (aget name)
-                 (aget "core")
-                 (aget "preview"))]
+        tool           (-> bluegenes.tools
+                           (aget name)
+                           (aget "core")
+                           (aget "preview"))]
 
     (fn []
       [:div.tool-card
@@ -68,27 +68,28 @@
 (defn listtool []
   (fn []
     [:button.btn
-     {:on-click #(re-frame/dispatch [:add-step "dashboard" {:active 0
-                                                            :tools [{:tool "enrichment"
-                                                                     :state [{:widget "go_enrichment_for_gene"
-                                                                              :correction "Holms-Bonferroni"
-                                                                              :title "Gene Ontology Enrichment"}]}
-                                                                    {:tool "enrichment"
-                                                                     :state [{:widget "pathway_enrichment"
-                                                                              :title "Pathway Enrichment"}]}
-                                                                    {:tool "enrichment"
-                                                                     :state [{:widget "prot_dom_enrichment_for_gene"
-                                                                              :title "Protein Domain Enrichment"}]}
-                                                                    {:tool "enrichment"
-                                                                     :state [{:widget "prot_dom_enrichment_for_gene"
-                                                                              :title "Protein Domain Enrichment"}]}
-                                                                    {:tool "enrichment"
-                                                                     :state [{:widget "prot_dom_enrichment_for_gene"
-                                                                              :title "Protein Domain Enrichment"}]}
-                                                                    {:tool "enrichment"
-                                                                     :state [{:widget "prot_dom_enrichment_for_gene"
-                                                                              :title "Protein Domain Enrichment"}]}
-                                                                    ]}])}
+     {:on-click #(re-frame/dispatch
+                  [:add-step "dashboard" {:active 0
+                                          :tools [{:tool "enrichment"
+                                                   :state [{:widget "go_enrichment_for_gene"
+                                                            :correction "Holms-Bonferroni"
+                                                            :title "Gene Ontology Enrichment"}]}
+                                                  {:tool "enrichment"
+                                                   :state [{:widget "pathway_enrichment"
+                                                            :title "Pathway Enrichment"}]}
+                                                  {:tool "enrichment"
+                                                   :state [{:widget "prot_dom_enrichment_for_gene"
+                                                            :title "Protein Domain Enrichment"}]}
+                                                  {:tool "enrichment"
+                                                   :state [{:widget "prot_dom_enrichment_for_gene"
+                                                            :title "Protein Domain Enrichment"}]}
+                                                  {:tool "enrichment"
+                                                   :state [{:widget "prot_dom_enrichment_for_gene"
+                                                            :title "Protein Domain Enrichment"}]}
+                                                  {:tool "enrichment"
+                                                   :state [{:widget "prot_dom_enrichment_for_gene"
+                                                            :title "Protein Domain Enrichment"}]}
+                                                  ]}])}
      "Analyze List"]))
 
 

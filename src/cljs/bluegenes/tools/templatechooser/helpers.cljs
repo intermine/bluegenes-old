@@ -27,4 +27,14 @@
                                    :values new-value))
                         constraint)) constraints))))
 
+(defn replace-input-constraints-whole
+  [model query class-to-replace new-value]
+  (update-in query [:where]
+             (fn [constraints]
+               (map (fn [constraint]
+                      (if (and (= class-to-replace (im/end-class model (:path constraint)))
+                               (= true (:editable constraint)))
+                        new-value
+                        constraint)) constraints))))
+
 (def runnable (comp with-one-editable-constraint with-constraint-class))
