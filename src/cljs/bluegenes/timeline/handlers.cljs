@@ -133,17 +133,6 @@
     ;(println "CLEAR PARSE PRODUCED")
     (assoc-in db [:histories (:active-history db) :steps step-id :saver] [])))
 
-(defn sterilize-query [query]
-  ;(println "sterilizing query" query)
-  (update query :select
-          (fn [paths]
-            ;(println "sees paths" paths)
-            (if (contains? query :from)
-              (mapv (fn [path]
-                      (if (= (:from query) (first (clojure.string/split path ".")))
-                        path
-                        (str (:from query) "." path))) paths)
-              paths))))
 
 (re-frame/register-handler
   :handle-parse-ids
@@ -152,47 +141,40 @@
     (println "handling ids" data)
     (assoc-in db [:histories (:active-history db) :steps step-id :saver] [data])))
 
-(defn deconstruct-query
-  "Deconstructs a query into a map where the keys are unique classes
-  and their values are the queries to return the results."
-  [model query]
-  (let [sterile-query (sterilize-query query)
-        classes       (into [] (comp
-                                 (map (partial im/trim-path-to-class model))
-                                 (distinct)) (:select sterile-query))]
-    (reduce (fn [total next]
-              (assoc total next
-                           (assoc query :select (str next ".id")))) {} classes)))
+
 
 
 (defn parse-produced [db data step-id]
   (re-frame/dispatch [:clear-parse-produced step-id])
+  (println "parsing produced")
   (cond
     (= "query" (-> data :data :format))
     (let [model               (-> db :cache :models :flymine)
-          deconstructed-query (deconstruct-query (-> db :cache :models :flymine)
-                                                 (-> data :data :payload))]
+          deconstructed-query (im/deconstruct-query (-> db :cache :models :flymine)
+                                                    (-> data :data :payload))]
+      (println "deconstructed query" deconstructed-query)
+      (assoc-in db [:histories (:active-history db) :steps step-id :extra] deconstructed-query)
 
-      (go-loop [paths (seq deconstructed-query)]
-               (let [[path query] (first paths)]
-                 (let [dn    (<! (im/get-display-name {:root "www.flymine.org/query"} path))
-                       count (<! (im/query-count {:root "www.flymine.org/query"} query))]
-                   (re-frame/dispatch [:handle-parse-query
-                                       step-id
-                                       {:display-name dn
-                                        :query query
-                                        :service :flymine
-                                        :count count}])))
+      ;(go-loop [paths (seq deconstructed-query)]
+      ;         (let [[path query] (first paths)]
+      ;           (let [dn    (<! (im/get-display-name {:root "www.flymine.org/query"} path))
+      ;                 count (<! (im/query-count {:root "www.flymine.org/query"} query))]
+      ;             (re-frame/dispatch [:handle-parse-query
+      ;                                 step-id
+      ;                                 {:display-name dn
+      ;                                  :query query
+      ;                                  :service :flymine
+      ;                                  :count count}])))
+      ;         (if (not-empty (rest paths))
+      ;           (recur (rest paths))))
 
-               ;(println "NEW" (assoc (-> data :data :payload) :select (first paths)))
-
-               (if (not-empty (rest paths))
-                 (recur (rest paths)))))
+      )
 
     (= "ids" (-> data :data :format))
-    (re-frame/dispatch [:handle-parse-ids step-id data])
-    )
-  db)
+    (do
+      (re-frame/dispatch [:handle-parse-ids step-id data])
+      db)
+    :else db))
 
 (defn enricher [db [_ step-id data]]
   ;(println "ENRICHER FIRING" step-id)

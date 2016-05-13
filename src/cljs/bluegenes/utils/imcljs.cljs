@@ -328,3 +328,38 @@
           (recur (conj (rest (rest parts-remaining)) child-reference-type)
                  (conj collected child))
           (clojure.string/join "." (map name collected)))))))
+
+(defn sterilize-query [query]
+  ;(println "sterilizing query" query)
+  (update query :select
+          (fn [paths]
+            ;(println "sees paths" paths)
+            (if (contains? query :from)
+              (mapv (fn [path]
+                      (if (= (:from query) (first (clojure.string/split path ".")))
+                        path
+                        (str (:from query) "." path))) paths)
+              paths))))
+
+
+(defn display-name [model class]
+  (get-in model [(if (keyword? class) class (keyword class)) :displayName]))
+
+(defn deconstruct-query
+  "Deconstructs a query into a map. Keys are the unique paths
+  and values include the query to return the values in the path,
+  the display name, and the end class.
+  {:Gene.pathways {:end-class Pathway :display-name Pathway :query ...}}"
+  [model query]
+  (let [sterile-query (sterilize-query query)
+        classes       (into [] (comp
+                                 (map (partial trim-path-to-class model))
+                                 (distinct)) (:select sterile-query))]
+    (reduce (fn [total next]
+              (let [end-class    (end-class model next)
+                    display-name (display-name model end-class)]
+                (assoc total next
+                             {:count "N"
+                              :end-class end-class
+                              :display-name display-name
+                              :query (assoc query :select (str next ".id"))}))) {} classes)))
