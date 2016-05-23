@@ -8,6 +8,8 @@
             [bluegenes.schemas :as schemas]
             [bluegenes.utils :as utils]
             [bluegenes.utils.imcljs :as im]
+            [bluegenes.api :as api]
+            [com.rpl.specter :as specter]
             [cljs.core.async :refer [put! chan <! >! timeout close!]])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
@@ -23,7 +25,7 @@
       (if-not (nil? notify)
         (update-in db [:histories (:active-history db) :steps notify] assoc :input data)
         (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
-                                                                                                   :step step-id}))))))
+                                                                                                   :step    step-id}))))))
 
 (defn rid [] (str (make-random-uuid)))
 
@@ -69,18 +71,18 @@
   trim-v
   (fn [db [tool-name]]
     (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
-          source       (:source last-emitted)
-          data         (:data last-emitted)
-          uuid         (keyword (rid))]
+          source (:source last-emitted)
+          data (:data last-emitted)
+          uuid (keyword (rid))]
       (clear-available-data (link-new-step-to-source (create-step db uuid {
-                                                                           :tool tool-name
-                                                                           :uuid uuid
-                                                                           :title "No title"
+                                                                           :tool        tool-name
+                                                                           :uuid        uuid
+                                                                           :title       "No title"
                                                                            :description "No contents."
-                                                                           :has nil
-                                                                           :input last-emitted
-                                                                           :settled true
-                                                                           :state []})
+                                                                           :has         nil
+                                                                           :input       last-emitted
+                                                                           :settled     true
+                                                                           :state       []})
                                                      (:step source)
                                                      uuid)))))
 
@@ -105,11 +107,11 @@
     (let [uuid (keyword (rid))]
       (->
         (truncate-view db subscribed-to-step-id)
-        (create-step uuid {:tool (:shortcut data)
-                           :_id uuid
+        (create-step uuid {:tool       (:shortcut data)
+                           :_id        uuid
                            :scroll-to? true
-                           :state []
-                           :subscribe [subscribed-to-step-id]})
+                           :state      []
+                           :subscribe  [subscribed-to-step-id]})
         (update-in [:histories (:active-history db) :structure] conj uuid)))
     db))
 
@@ -149,7 +151,7 @@
   (println "parsing produced")
   (cond
     (= "query" (-> data :data :format))
-    (let [model               (-> db :cache :models :flymine)
+    (let [model (-> db :cache :models :flymine)
           deconstructed-query (im/deconstruct-query (-> db :cache :models :flymine)
                                                     (-> data :data :payload))]
       (println "deconstructed query" deconstructed-query)
@@ -202,7 +204,7 @@
                  (:active-history db)
                  :steps
                  (:step (:source source))]
-             assoc :produced {:data (:data source)
+             assoc :produced {:data    (:data source)
                               :service (:service source)}))
 
 
@@ -213,7 +215,7 @@
     (.log js/console "add-step" tool-name state)
     ;(println "active history" (:active-history db))
     (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
-          uuid         (keyword (rid))]
+          uuid (keyword (rid))]
       ;(println "last emitted" {:tool tool-name
       ;                         :_id uuid
       ;                         :state [state]
@@ -222,9 +224,9 @@
       ;                                                       :structure]))]})
       (-> db
           (update-in [:histories (:active-history db) :steps]
-                     (fn [steps] (assoc steps uuid {:tool tool-name
-                                                    :_id uuid
-                                                    :state [state]
+                     (fn [steps] (assoc steps uuid {:tool      tool-name
+                                                    :_id       uuid
+                                                    :state     [state]
                                                     :subscribe [(last (get-in db [:histories
                                                                                   (:active-history db)
                                                                                   :structure]))]})))
@@ -254,12 +256,12 @@
   (fn [db [tool-name state]]
     (.log js/console "add-step" tool-name state)
     (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
-          uuid         (keyword (rid))]
+          uuid (keyword (rid))]
       (println "last emitted" last-emitted)
       (-> db
-          (create-step uuid {:tool tool-name
-                             :_id uuid
-                             :state []
+          (create-step uuid {:tool      tool-name
+                             :_id       uuid
+                             :state     []
                              :subscribe [(:step (:source last-emitted))]})
           (stamp-step last-emitted)
           (clear-available-data))
@@ -281,22 +283,22 @@
       (aset js/window "location" "href" (str "/#timeline/" new-history-id))
       (-> db (assoc :active-history (keyword new-history-id))
           (create-step (keyword new-step-id)
-                       {:_id (keyword new-step-id)
+                       {:_id   (keyword new-step-id)
                         :state [data]
-                        :tool (:name tool)
+                        :tool  (:name tool)
                         })
           (update-in [:histories (keyword new-history-id)] merge
-                     {:slug new-history-id
-                      :structure [(keyword new-step-id)]
+                     {:slug        new-history-id
+                      :structure   [(keyword new-step-id)]
                       :description (:name tool)
-                      :name (:name tool)})))))
+                      :name        (:name tool)})))))
 
 (defn steps-back-to-beginning
   "Build a map of only this step and the steps required to replay
   this step from the root of the workflow. This is useful for forking steps,
   copying workflows, and trimming siblings and childrens."
   [steps end]
-  (loop [m       {}
+  (loop [m {}
          step-id end]
     (let [current-step (-> steps step-id)]
       (if (contains? current-step :subscribe)
@@ -348,11 +350,11 @@
   :save-research-old
   trim-v
   (fn [db [id]]
-    (let [steps         (get-in db [:histories (:active-history db) :steps])
-          uuid          (keyword (rid))
-          update-path   [:histories (:active-history db) :saved-research uuid]
-          pruned-steps  (steps-back-to-beginning steps id)
-          key-map       (generate-key-map pruned-steps)
+    (let [steps (get-in db [:histories (:active-history db) :steps])
+          uuid (keyword (rid))
+          update-path [:histories (:active-history db) :saved-research uuid]
+          pruned-steps (steps-back-to-beginning steps id)
+          key-map (generate-key-map pruned-steps)
           new-structure (apply-new-ids-to-structure
                           (get-in db [:histories (:active-history db) :structure])
                           id
@@ -373,18 +375,18 @@
 (re-frame/register-handler
   :update-research-count
   (fn [db [_ id c]]
-    (assoc-in db [:histories (:active-history db) :saved-research id :count] c )))
+    (assoc-in db [:histories (:active-history db) :saved-research id :count] c)))
 
 (re-frame/register-handler
   :save-research
   trim-v
   (fn [db [id data-to-save]]
     (println "saving researh" id data-to-save)
-    (let [steps         (get-in db [:histories (:active-history db) :steps])
-          uuid          (keyword (rid))
-          update-path   [:histories (:active-history db) :saved-research uuid]
-          pruned-steps  (steps-back-to-beginning steps id)
-          key-map       (generate-key-map pruned-steps)
+    (let [steps (get-in db [:histories (:active-history db) :steps])
+          uuid (keyword (rid))
+          update-path [:histories (:active-history db) :saved-research uuid]
+          pruned-steps (steps-back-to-beginning steps id)
+          key-map (generate-key-map pruned-steps)
           new-structure (apply-new-ids-to-structure
                           (get-in db [:histories (:active-history db) :structure])
                           id
@@ -410,13 +412,13 @@
 
 
 
-(def newsearch {:x1 {:_id :x1
-                     :tool "dashboard"
+(def newsearch {:x1 {:_id   :x1
+                     :tool  "dashboard"
                      :state [{:active 0
-                              :tools [{:tool "smartidresolver"
-                                       :state [{:example "one"}]}
-                                      {:tool "chooselist"
-                                       :state [{:example "two"}]}]}]}})
+                              :tools  [{:tool  "smartidresolver"
+                                        :state [{:example "one"}]}
+                                       {:tool  "chooselist"
+                                        :state [{:example "two"}]}]}]}})
 
 (re-frame/register-handler
   :new-search
@@ -457,3 +459,55 @@
                                           :saved-research
                                           id
                                           :structure]))))))
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(re-frame/register-handler
+  :run-step trim-v
+  (fn [db [location input]]
+    (println "running step")
+    (let [node (get-in db location)
+          run-fn (-> bluegenes.tools
+                     (aget (:tool node))
+                     (aget "core")
+                     (aget "run"))]
+      (run-fn input
+              (:state node)
+              (:cache node)
+              {:has-something (partial api/has-something location)
+               :save-state (partial api/save-state location)
+               :save-cache (partial api/save-cache location)}))
+    db))
+
+(defn subscribers [db location]
+  (let [id (last location)]
+    (specter/select [(butlast location) specter/ALL specter/LAST
+                     #(= id (:subscribe-to %))
+                     :_id] db)))
+
+(re-frame/register-handler
+  :has-something trim-v
+  (fn [db [location data]]
+    (doall
+      (map (fn [subscriber]
+             (re-frame/dispatch [:run-step
+                                 (conj (vec (butlast location)) subscriber)
+                                 data]))
+           (subscribers db location)))
+    (assoc-in db (conj location :output) data)))
+
+(re-frame/register-handler
+  :save-state trim-v
+  (fn [db [location data]]
+    (assoc-in db (conj location :state) data)))
+
+(re-frame/register-handler
+  :save-cache trim-v
+  (fn [db [location data]]
+    (assoc-in db (conj location :cache) data)))

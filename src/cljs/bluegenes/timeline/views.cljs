@@ -47,9 +47,9 @@
   this only supports one item in the subscription (hence the 'first' function.)"
   (let [[starting-point-id] (first (filter (fn [[step value]] (nil? (:subscribe value))) steps))
         find-downstream (fn [parent-id]
-                        (filter (fn [[step value]]
-                                  (not (nil? (some #{parent-id} (:subscribe value)))))
-                                steps))]
+                          (filter (fn [[step value]]
+                                    (not (nil? (some #{parent-id} (:subscribe value)))))
+                                  steps))]
     (loop [id starting-point-id
            step-vec []]
       (let [downstream (find-downstream id)]
@@ -74,10 +74,10 @@
                                (aget "core")
                                (aget "main"))]
         [tool-component
-         {:state (last (:state step-data))
+         {:state         (last (:state step-data))
           :upstream-data (:produced @upstream-step-data)
-          :global-data global-info
-          :api api}]))))
+          :global-data   global-info
+          :api           api}]))))
 
 (defn step-container
   "Create a container with a tool inside. The container includes common
@@ -87,45 +87,45 @@
         current-tab (reagent/atom nil)
         swap-tab (fn [name] (reset! current-tab name))]
     (reagent/create-class
-     {:component-did-mount (fn [this]
-                             (let [node (reagent/dom-node this)]
-                             ;(if (:scroll-to? @step-data)
-                             ;  (layout/scroll-to node))
-                             ))
-      :reagent-render (fn [_id]
-                        [:div
-                         {:class
-                          ;(if-not in-grid "step-container")
-                          (if-not (= "dashboard" (:tool @step-data)) "step-container")
-                          }
-                         ;(println "loading tool" (:tool @step-data))
-                         ;[:div (str @step-data)]
+      {:component-did-mount (fn [this]
+                              (let [node (reagent/dom-node this)]
+                                ;(if (:scroll-to? @step-data)
+                                ;  (layout/scroll-to node))
+                                ))
+       :reagent-render      (fn [_id]
+                              [:div
+                               {:class
+                                ;(if-not in-grid "step-container")
+                                (if-not (= "dashboard" (:tool @step-data)) "step-container")
+                                }
+                               ;(println "loading tool" (:tool @step-data))
+                               ;[:div (str @step-data)]
 
 
-                         ; [:div.toolbar
-                         ;  [:ul
-                         ;   [:li {:class (if (= @current-tab nil) "active")}
-                         ;    [:a {:on-click #(swap-tab nil)}
-                         ;     (:tool @step-data)]]
-                         ;   [:li {:class (if (= @current-tab "data") "active")}
-                         ;    [:a {:data-target "test"
-                         ;         :on-click #(swap-tab "data")}
-                         ;     "Data"]]]]
+                               ; [:div.toolbar
+                               ;  [:ul
+                               ;   [:li {:class (if (= @current-tab nil) "active")}
+                               ;    [:a {:on-click #(swap-tab nil)}
+                               ;     (:tool @step-data)]]
+                               ;   [:li {:class (if (= @current-tab "data") "active")}
+                               ;    [:a {:data-target "test"
+                               ;         :on-click #(swap-tab "data")}
+                               ;     "Data"]]]]
 
-                         ;(println "step data" @step-data)
+                               ;(println "step data" @step-data)
 
-                         [:div.body
-                          (if (:produced @step-data)
-                            [savetodrawer/main (select-keys @step-data [:_id :extra :produced])]
-                            ;[:div.btn.btn-primary.btn-circle.btn-lg.offset
-                            ; {:on-click #(re-frame/dispatch [:save-research _id])}
-                            ; [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]]
-                            )
-                          [:div {:className (if (= @current-tab "data") "hide")}
-                           [step (dissoc @step-data :saver :produced)]]
-                          [:div {:className (if (= @current-tab nil) "hide")}
-                           (json-html/edn->hiccup @step-data)]
-                          (if (:loading? @step-data) [tool-dimmer])]])})))
+                               [:div.body
+                                (if (:produced @step-data)
+                                  [savetodrawer/main (select-keys @step-data [:_id :extra :produced])]
+                                  ;[:div.btn.btn-primary.btn-circle.btn-lg.offset
+                                  ; {:on-click #(re-frame/dispatch [:save-research _id])}
+                                  ; [:svg.icon.molecule.out [:use {:xlinkHref "#leftturn"}]]]
+                                  )
+                                [:div {:className (if (= @current-tab "data") "hide")}
+                                 [step (dissoc @step-data :saver :produced)]]
+                                [:div {:className (if (= @current-tab nil) "hide")}
+                                 (json-html/edn->hiccup @step-data)]
+                                (if (:loading? @step-data) [tool-dimmer])]])})))
 
 (defn steps-dashboard
   "Create a dashboard with a tool inside. The dashboard includes common
@@ -133,40 +133,56 @@
   [ids]
   (let [_ nil]
     (reagent/create-class
-     {:display-name "dashboard"
-      :reagent-render (fn [ids]
-         [:div.step-container
-          [:div.body.dashboard
-           (for [rows (partition-all 3 ids)]
-            ^{:key (str "step-col" id)}
-            (for [id rows]
-             ^{:key (str "step-row" id)} [:div.cell ^{:key (str "step-container" id)} [step-container id true]]
-              )
-            )]])})))
+      {:display-name   "dashboard"
+       :reagent-render (fn [ids]
+                         [:div.step-container
+                          [:div.body.dashboard
+                           (for [rows (partition-all 3 ids)]
+                             ^{:key (str "step-col" id)}
+                             (for [id rows]
+                               ^{:key (str "step-row" id)} [:div.cell ^{:key (str "step-container" id)} [step-container id true]]
+                               )
+                             )]])})))
+
+;(-> bluegenes.tools
+;    (aget (:tool step-data))
+;    (aget "core")
+;    (aget "main"))
+
+(defn cont []
+  (fn [step-data]
+    (let [tool (-> bluegenes.tools
+                   (aget (:tool step-data))
+                   (aget "core")
+                   (aget "main"))]
+      [:div
+       [:h1 (str "cont" (:tool step-data))]
+       [tool step-data]])
+    ))
 
 (defn previous-steps
   "Iterate through the history's structure and create step containers for
   single tools (keyword) or steps dashboards for grouped tools (vector)."
   []
-  (let [step-path (re-frame/subscribe [:step-path])]
+  (let [step-path (re-frame/subscribe [:step-path])
+        steps (re-frame/subscribe [:steps])]
     (fn []
-      (into [:div.prevsteps [whatnext/main]]
+      (into [:div.prevsteps
+             [whatnext/main]]
             (for [id (reverse @step-path)]
-              (if (vector? id)
-                ^{:key (str "group" (str id))} [steps-dashboard id]
-                ^{:key (str "step-container" id)} [step-container id]))))))
+              [cont (get @steps id)])))))
 
 
 (defn history-details []
   "Not used as of yet."
   (let [history (re-frame/subscribe [:history])]
     [:div.step-container
-       [:h2 (:name @history)]
-       [:h4 (:description @history)]]))
+     [:h2 (:name @history)]
+     [:h4 (:description @history)]]))
 
 (defn main-view []
-    [:div.timeline-container
-    ;  [stepdash/main]
-    ;  [nextsteps/main]
-     [drawer/main]
-     [previous-steps]])
+  [:div.timeline-container
+   ;  [stepdash/main]
+   ;  [nextsteps/main]
+   [drawer/main]
+   [previous-steps]])

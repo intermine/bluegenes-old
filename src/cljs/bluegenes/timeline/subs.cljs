@@ -16,12 +16,12 @@
 (re-frame/register-sub
  :steps
  (fn [db [_ testvalue]]
-   (reaction (get-in @db [:histories (:active-history @db) :steps]))))
+   (reaction (get-in @db [:networks (:active-history @db) :nodes]))))
 
 (re-frame/register-sub
  :step-path
  (fn [db [_ testvalue]]
-   (reaction (get-in @db [:histories (:active-history @db) :structure]))))
+   (reaction (get-in @db [:networks (:active-history @db) :view]))))
 
 (re-frame/register-sub
  :to-step
