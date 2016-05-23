@@ -44,27 +44,25 @@
 
 (defn is-selected [list state]
   "Returns true when a list name matches the most recent state (user chosen) list name"
-  (= (.-name list) (:chose state)))
+  (= (:name list) (:payload (:data state))))
 
 (defn list-row []
   "Generates a single list row with  counts and list type."
   (reagent/create-class
     {:reagent-render
      (fn [list-name list-value api state]
+       ;(println "list row called with list value" list-value)
        [:tr.result {:on-click (fn []
-                                (.log js/console "CLICK" list-name)
-                                ((:has-something api)
-                                  {:data
-                                             {:format  "list"
-                                              :type    (.-type list-value)
-                                              :payload list-name}
-                                   :service  flymine
-                                   :shortcut "viewtable"}))
-                    :class    (if (is-selected list-value state)
-                                "selected")}
-        [:td [:span {:class (str "type-" (.-type list-value) " result-type")} (.-type list-value)]]
-        [:td {:class "count"} (.-size list-value)]
-        [:td {:class "list-name"} (.-name list-value)]])}))
+                                (.log js/console "CLICK" list-value)
+                                ((:save-state api)
+                                  {:service {:root "www.flymine.org/query"}
+                                   :data    {:payload (:name list-value)
+                                             :format  "list"
+                                             :type    (:type list-value)}}))
+                    :class    (if (is-selected list-value state) "selected")}
+        [:td [:span {:class (str "type-" (:type list-value) " result-type")} (:type list-value)]]
+        [:td {:class "count"} (:size list-value)]
+        [:td {:class "list-name"} (str (:name list-value))]])}))
 
 (defn did-update-handler
   "When this tool is updated and it has a 'chose' value in its state
@@ -90,11 +88,17 @@
     :on-change     pagination-handler
     }])
 
-(defn ^:export run [input state cache {:keys [save-state save-cache]}]
+(defn ^:export run
+  "This function is called whenever the tool makes a change to its state, or its
+  upstream data changes."
+  [{:keys [input state cache] :as what-changed}
+   {:keys [has-something save-state save-cache]}]
   (cond
-    (nil? cache) (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
-                       (save-cache {:lists lists}))))
-  (save-state {:TESTING 123}))
+    (nil? cache)
+    (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
+                       (save-cache {:lists lists})))
+    (contains? state :data)
+    (has-something state)))
 
 (defn ^:export main []
   "Output a table representing all lists in a mine.
@@ -102,8 +106,8 @@
   (let [local-state (reagent/atom nil)]
     (reagent/create-class
       {:reagent-render
-       (fn [{:keys [state cache upstream-data api] :as step-data}]
-         (println "GOT STEP DATA" cache)
+       (fn [{:keys [state cache api] :as step-data}]
+         ;(println "GOT STEP DATA" api)
          [:div
           [pagination-control]
           [:table {:class "list-chooser"}
@@ -112,15 +116,15 @@
              [:th "Type"]
              [:th "#"]
              [:th "Name"]]]
-           [:tbody
-            (for [result (:lists cache)]
-              [:tr
-               [:td (:type result)]
-               [:td (:size result)]
-               [:td (:name result)]]
-              ;^{:key (.-name result)}
-              ;[list-row (.-name result) result api state]
-              )]]
+           (into [:tbody] (for [result (:lists cache)]
+                            ;[:tr
+                            ; [:td (:type result)]
+                            ; [:td (:size result)]
+                            ; [:td (:name result)]]
+                            [list-row nil result api state]
+                            ;^{:key (.-name result)}
+
+                            ))]
           ])
        :component-did-mount
        (fn [this]

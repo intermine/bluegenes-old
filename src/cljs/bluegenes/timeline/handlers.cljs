@@ -214,24 +214,34 @@
   (fn [db [tool-name state]]
     (.log js/console "add-step" tool-name state)
     ;(println "active history" (:active-history db))
-    (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
+    (let [last-emitted (last (get-in db [:networks (:active-history db) :view]))
           uuid (keyword (rid))]
+      (re-frame/dispatch [:run-step
+                          [:networks (:active-history db) :nodes uuid]])
+      (->
+        db
+        (assoc-in [:networks (:active-history db) :nodes uuid]
+                  {:tool         tool-name
+                   :state        nil
+                   :_id uuid
+                   :subscribe-to last-emitted})
+        (update-in [:networks (:active-history db) :view] conj uuid))
       ;(println "last emitted" {:tool tool-name
       ;                         :_id uuid
       ;                         :state [state]
       ;                         :subscribe [(last (get-in db [:histories
       ;                                                       (:active-history db)
       ;                                                       :structure]))]})
-      (-> db
-          (update-in [:histories (:active-history db) :steps]
-                     (fn [steps] (assoc steps uuid {:tool      tool-name
-                                                    :_id       uuid
-                                                    :state     [state]
-                                                    :subscribe [(last (get-in db [:histories
-                                                                                  (:active-history db)
-                                                                                  :structure]))]})))
-          (update-in [:histories (:active-history db) :structure]
-                     (fn [structure] (conj structure uuid))))
+      ;(-> db
+      ;    (update-in [:histories (:active-history db) :steps]
+      ;               (fn [steps] (assoc steps uuid {:tool      tool-name
+      ;                                              :_id       uuid
+      ;                                              :state     [state]
+      ;                                              :subscribe [(last (get-in db [:histories
+      ;                                                                            (:active-history db)
+      ;                                                                            :structure]))]})))
+      ;    (update-in [:histories (:active-history db) :structure]
+      ;               (fn [structure] (conj structure uuid))))
       ;(-> db
       ;(create-step uuid {:tool tool-name
       ;                   :_id uuid
@@ -470,19 +480,22 @@
 
 (re-frame/register-handler
   :run-step trim-v
-  (fn [db [location input]]
-    (println "running step")
+  (fn [db [location what-changed]]
+    (println "running step" location)
     (let [node (get-in db location)
+          input (get-in db (into (vec (butlast location)) [(:subscribe-to node) :output]))
           run-fn (-> bluegenes.tools
                      (aget (:tool node))
                      (aget "core")
                      (aget "run"))]
-      (run-fn input
-              (:state node)
-              (:cache node)
+      ; built a map of only things have changed
+
+      (run-fn {:input input
+               :state (:state node)
+               :cache (:cache node)}
               {:has-something (partial api/has-something location)
-               :save-state (partial api/save-state location)
-               :save-cache (partial api/save-cache location)}))
+               :save-state    (partial api/save-state location)
+               :save-cache    (partial api/save-cache location)}))
     db))
 
 (defn subscribers [db location]
@@ -494,18 +507,27 @@
 (re-frame/register-handler
   :has-something trim-v
   (fn [db [location data]]
-    (doall
-      (map (fn [subscriber]
-             (re-frame/dispatch [:run-step
-                                 (conj (vec (butlast location)) subscriber)
-                                 data]))
-           (subscribers db location)))
+    (if (not= data (-> (get-in db location) :output))
+      (do
+        (doall
+          (map (fn [subscriber]
+                 (re-frame/dispatch [:run-step
+                                     (conj (vec (butlast location)) subscriber)
+                                     data]))
+               (subscribers db location)))
+        (assoc-in db (conj location :output) data))
+      db)
+
     (assoc-in db (conj location :output) data)))
 
 (re-frame/register-handler
   :save-state trim-v
   (fn [db [location data]]
-    (assoc-in db (conj location :state) data)))
+    (if (not= data (-> (get-in db location) :state))
+      (do
+        (re-frame/dispatch [:run-step location data])
+        (assoc-in db (conj location :state) data))
+      db)))
 
 (re-frame/register-handler
   :save-cache trim-v

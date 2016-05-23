@@ -58,6 +58,12 @@
  :tool "templatechooser"
  :state []}
 
+(defn tabletool []
+  (fn []
+    [:button.btn
+     {:on-click #(re-frame/dispatch [:add-step "viewtable" {}])}
+     "View Table"]))
+
 (defn templatetool []
   (fn []
     [:button.btn
@@ -100,7 +106,8 @@
       [:div.step-container
        [:div.body
         [listtool]
-        [templatetool]]
+        [templatetool]
+        [tabletool]]
 
        ;[:div.next-steps-title "Next Steps23"]
        [:div.tool-card-container

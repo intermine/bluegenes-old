@@ -10,6 +10,7 @@
             [bluegenes.components.drawer.core :as drawer]
             [bluegenes.components.whatnext.core :as whatnext]
             [reagent.impl.util :as impl :refer [extract-props]]
+            [bluegenes.api :as api]
             [bluegenes.components.savetodrawer.core :as savetodrawer]))
 
 (enable-console-print!)
@@ -150,15 +151,22 @@
 ;    (aget "main"))
 
 (defn cont []
-  (fn [step-data]
-    (let [tool (-> bluegenes.tools
-                   (aget (:tool step-data))
-                   (aget "core")
-                   (aget "main"))]
-      [:div
-       [:h1 (str "cont" (:tool step-data))]
-       [tool step-data]])
-    ))
+  (let [active-history (re-frame/subscribe [:active-history])]
+    (fn [step-data]
+      (let [location [:networks @active-history :nodes (:_id step-data)]
+            comms {:has-something (partial api/has-something location)
+                   :save-state (partial api/save-state location)
+                   :save-cache (partial api/save-cache location)}
+            tool (-> bluegenes.tools
+                     (aget (:tool step-data))
+                     (aget "core")
+                     (aget "main"))]
+        [:div.step-container
+         [:div.body.dashboard
+          ;[:h1 (str "cont" (:tool step-data))]
+          [tool (assoc step-data :api comms)]]
+         ])
+      )))
 
 (defn previous-steps
   "Iterate through the history's structure and create step containers for

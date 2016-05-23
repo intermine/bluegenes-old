@@ -41,7 +41,11 @@
   :plugins [[lein-cljsbuild "1.1.2"]
             [lein-figwheel "0.5.0-3"]
             [lein-environ "1.0.0"]
-            [lein-shell "0.5.0"]]
+            [lein-shell "0.5.0"]
+            [lein-less "1.7.5"]]
+
+  :less {:source-paths ["src/less"]
+         :target-path "resources/public/css"}
 
   :min-lein-version "2.5.0"
 
