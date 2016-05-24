@@ -217,7 +217,7 @@
     (let [last-emitted (last (get-in db [:networks (:active-history db) :view]))
           uuid (keyword (rid))]
       (re-frame/dispatch [:run-step
-                          [:networks (:active-history db) :nodes uuid]])
+                          [:networks (:active-history db) :nodes uuid] [:state :input]])
       (->
         db
         (assoc-in [:networks (:active-history db) :nodes uuid]
@@ -481,7 +481,7 @@
 (re-frame/register-handler
   :run-step trim-v
   (fn [db [location keyv]]
-    (println "running step" location)
+    (println "RUN-STEP handler called with location" location "and keyv" keyv)
     (let [node (get-in db location)
           input (get-in db (into (vec (butlast location)) [(:subscribe-to node) :output]))
           run-fn (-> bluegenes.tools
@@ -491,13 +491,17 @@
 
       ; built a map of only things have changed
 
+      (println "INPUT" input)
+
 
       (run-fn (if (nil? keyv)
                 {:input input
-                 :state (:state node)
-                 :cache (:cache node)}
-                (reduce (fn [total next]
-                          (assoc total next (next node))) {} keyv))
+                :state (:state node)
+                :cache (:cache node)}
+                (cond-> {}
+                        (some? (some #{:input} keyv)) (assoc :input input)
+                        (some? (some #{:state} keyv)) (assoc :state (:state node))
+                        (some? (some #{:cache} keyv)) (assoc :cache (:cache node))))
               {:has-something (partial api/has-something location)
                :save-state    (partial api/save-state location)
                :save-cache    (partial api/save-cache location)}))
@@ -512,6 +516,7 @@
 (re-frame/register-handler
   :has-something trim-v
   (fn [db [location data]]
+    (println "has somethinv called")
     (if (not= data (-> (get-in db location) :output))
       (do
         (doall

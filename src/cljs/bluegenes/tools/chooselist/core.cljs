@@ -93,6 +93,7 @@
   upstream data changes."
   [{:keys [input state cache] :as what-changed}
    {:keys [has-something save-state save-cache]}]
+  (println "Choose List Run Called" input state)
   (cond
     (nil? cache)
     (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
