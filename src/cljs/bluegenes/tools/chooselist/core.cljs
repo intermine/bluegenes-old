@@ -91,14 +91,16 @@
 (defn ^:export run
   "This function is called whenever the tool makes a change to its state, or its
   upstream data changes."
-  [{:keys [input state cache] :as what-changed}
-   {:keys [has-something save-state save-cache]}]
-  (println "Choose List Run Called" input state)
-  (cond
-    (nil? cache)
+  [snapshot
+   {:keys [input state cache] :as what-changed}
+   {:keys [has-something save-state save-cache] :as api}]
+  (println "Choose List Run Called" what-changed)
+
+  (if (nil? (:cache snapshot))
     (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
-                       (save-cache {:lists lists})))
-    (contains? state :data)
+          (save-cache {:lists lists}))))
+
+  (if (contains? state :data)
     (has-something state)))
 
 (defn ^:export main []

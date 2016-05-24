@@ -209,7 +209,7 @@
 
 
 (re-frame/register-handler
-  :add-step
+  :add-step-temp
   trim-v
   (fn [db [tool-name state]]
     (.log js/console "add-step" tool-name state)
@@ -223,7 +223,7 @@
         (assoc-in [:networks (:active-history db) :nodes uuid]
                   {:tool         tool-name
                    :state        nil
-                   :_id uuid
+                   :_id          uuid
                    :subscribe-to last-emitted})
         (update-in [:networks (:active-history db) :view] conj uuid))
       ;(println "last emitted" {:tool tool-name
@@ -478,73 +478,75 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(re-frame/register-handler
-  :run-step trim-v
-  (fn [db [location keyv]]
-    (println "RUN-STEP handler called with location" location "and keyv" keyv)
-    (let [node (get-in db location)
-          input (get-in db (into (vec (butlast location)) [(:subscribe-to node) :output]))
-          run-fn (-> bluegenes.tools
-                     (aget (:tool node))
-                     (aget "core")
-                     (aget "run"))]
-
-      ; built a map of only things have changed
-
-      (println "INPUT" input)
-
-
-      (run-fn (if (nil? keyv)
-                {:input input
-                :state (:state node)
-                :cache (:cache node)}
-                (cond-> {}
-                        (some? (some #{:input} keyv)) (assoc :input input)
-                        (some? (some #{:state} keyv)) (assoc :state (:state node))
-                        (some? (some #{:cache} keyv)) (assoc :cache (:cache node))))
-              {:has-something (partial api/has-something location)
-               :save-state    (partial api/save-state location)
-               :save-cache    (partial api/save-cache location)}))
-    db))
-
-(defn subscribers [db location]
+(defn subscribers
+  "Returns a vector of ids that are subscribed to the current location."
+  [db location]
   (let [id (last location)]
     (specter/select [(butlast location) specter/ALL specter/LAST
                      #(= id (:subscribe-to %))
                      :_id] db)))
 
-(re-frame/register-handler
-  :has-something trim-v
-  (fn [db [location data]]
-    (println "has somethinv called")
-    (if (not= data (-> (get-in db location) :output))
-      (do
-        (doall
-          (map (fn [subscriber]
-                 (re-frame/dispatch [:run-step
-                                     (conj (vec (butlast location)) subscriber)
-                                     [:input]]))
-               (subscribers db location)))
-        (assoc-in db (conj location :output) data))
-      db)
-
-    (assoc-in db (conj location :output) data)))
+(defn get-changes
+  "Returns a new map of where the value of the key in the
+  new map is different from the value of the key in the old map."
+  [old-m new-m]
+  (reduce (fn [total [k v]]
+            (if (not= (k old-m) (k new-m))
+              (assoc total k v)
+              total)) {} new-m))
 
 (re-frame/register-handler
-  ; The holy grail function. Figure this out!
-  :reconcile trim-v
-  (fn [db [function]]))
+  :run-step trim-v
+  (fn [db [location diffmap]]
+    (let [node (get-in db location)
+          run-fn (-> bluegenes.tools (aget (:tool node)) (aget "core") (aget "run"))]
+      (run-fn
+        node
+        (if (nil? diffmap) node diffmap)
+        {:has-something (partial api/has-something location)
+         :save-state    (partial api/save-state location)
+         :save-cache    (partial api/save-cache location)}))
+    db))
 
 (re-frame/register-handler
-  :save-state trim-v
-  (fn [db [location data]]
-    (if (not= data (-> (get-in db location) :state))
-      (do
-        (re-frame/dispatch [:run-step location [:state]])
-        (assoc-in db (conj location :state) data))
-      db)))
+  :update-node trim-v
+  (fn [db [location update-fn]]
+    (let [snapshot (get-in db location)
+          updated (update-fn snapshot)
+          diffed (get-changes snapshot updated)]
+
+      ; If something has changed then re-run the tool with
+      ; the new data (only the difference)
+      (if-not (empty? diffed)
+        (do
+          (re-frame/dispatch [:run-step location diffed])
+
+          ; If the difference map contains an :output key then we must
+          ; feed it as an input to each subscriber and re-run them.
+          (if (contains? diffed :output)
+            (mapv
+              (fn [subscriber]
+                (re-frame/dispatch [:update-node
+                                    (conj (vec (butlast location)) subscriber)
+                                    #(assoc % :input (:output diffed))]))
+              (subscribers db location)))))
+
+      (assoc-in db location updated))))
 
 (re-frame/register-handler
-  :save-cache trim-v
-  (fn [db [location data]]
-    (assoc-in db (conj location :cache) data)))
+  :add-step
+  trim-v
+  (fn [db [tool-name]]
+    (let [last-emitted (last (get-in db [:networks (:active-history db) :view]))
+          uuid (keyword (rid))
+          previous-output (get-in db [:networks (:active-history db) :nodes last-emitted :output])
+          node {:tool         tool-name
+                :state        nil
+                :_id          uuid
+                :input        previous-output
+                :subscribe-to last-emitted}]
+      (re-frame/dispatch [:run-step [:networks (:active-history db) :nodes uuid] node])
+      (->
+        db
+        (assoc-in [:networks (:active-history db) :nodes uuid] node)
+        (update-in [:networks (:active-history db) :view] conj uuid)))))

@@ -133,13 +133,15 @@
 (defn ^:export run
   "This function is called whenever the tool makes a change to its state, or its
   upstream data changes."
-  [{:keys [input state cache] :as what-changed}
+  [snapshot
+   {:keys [input state cache] :as what-changed}
    {:keys [has-something save-state save-cache]}]
-  (println "VIEW TABLE IS RUNNING with input" input)
-  (save-state {:service (:service input)
-               :data    {:payload (normalize-input input)
-                         :format  "query"
-                         :type    "Gene"}})
+  (println "VIEW TABLE IS RUNNING with input" what-changed)
+  (if input
+    (save-state {:service (:service input)
+                 :data    {:payload (normalize-input input)
+                           :format  "query"
+                           :type    "Gene"}}))
   ;(cond
   ;  (nil? cache)
   ;  (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
@@ -183,7 +185,9 @@
 
 (defn ^:export main []
   (fn [{:keys [state]}]
-    [mytable state]))
+    [mytable state]
+    ;[:div [:h1 "BOO"]]
+    ))
 
 (defn ^:export main2
   "Render the main view of the tool."
