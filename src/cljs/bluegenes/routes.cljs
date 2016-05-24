@@ -29,6 +29,11 @@
             (do
               (re-frame/dispatch [:set-timeline-panel :timeline-panel id])))
 
+  (defroute "/timeline/:pid/:nid" [pid nid]
+            (do
+              (println "ROUTING")
+              (re-frame/dispatch [:set-timeline-panel :timeline-panel pid nid])))
+
   (defroute "/timeline" []
             (re-frame/dispatch [:set-timeline-panel :timeline-panel]))
 

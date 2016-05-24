@@ -7,6 +7,7 @@
             [intermine.imjs :as imjs]
             [bluegenes.utils.imcljs :as im]
             [cljs-http.client :as http]
+            [com.rpl.specter :as s]
             [cljs.core.async :refer [chan <!]]))
 
 (re-frame/register-handler
@@ -30,6 +31,12 @@
     (assoc-in db [:active-history] active-history)))
 
 (re-frame/register-handler
+  :set-active-network
+  (fn [db [_ active-network & args]]
+    (assoc-in db [:active-network] active-network)))
+
+
+(re-frame/register-handler
   :set-search-term
   (fn [db [_ search-term & args]]
     (assoc db :search-term search-term)))
@@ -45,12 +52,23 @@
 
 (re-frame/register-handler
   :set-timeline-panel trim-v
-  (fn [db [active-panel & [slug]]]
+  (fn [db [active-panel & [project-slug network-slug]]]
     ;Look up the UUID of the history based on the slug (friendly) name
     ;TODO - if the slug doesn't exist then check for the UUID directly
-    (let [uuid (first (keep #(when (= (:slug (val %)) slug) (key %)) (:networks db)))]
-      (println "GOT UUID" uuid)
-      (assoc db :active-panel active-panel :active-history uuid))))
+    (let [uuid (first (keep #(when (= (:slug (val %)) project-slug) (key %)) (:projects db)))]
+
+      (let [network-location (vec (butlast (s/select-one [:projects s/ALL s/LAST
+                                                          #(= project-slug (:slug %))
+                                                          (s/collect-one :_id)
+                                                          :networks s/ALL s/LAST
+                                                          #(= network-slug (:slug %))
+                                                          (s/collect-one :_id)]
+                                                         db)))]
+        (assoc db :active-panel active-panel :active-network network-location))
+
+
+
+      )))
 
 (re-frame/register-handler
   :activate-dimmer

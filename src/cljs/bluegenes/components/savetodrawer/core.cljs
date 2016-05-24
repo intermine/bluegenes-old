@@ -73,15 +73,16 @@
 (defn list-saver []
   (fn [payload]
     [:div.btn.btn-success
-     ;{:on-click #(re-frame/dispatch [:save-research])}
+     ;{:on-click #(println "has payload" (dissoc payload :cache))}
+     {:on-click #(re-frame/dispatch [:save-research (:_id payload)])}
      [:i.fa.fa-floppy-o]
      [:span (str " Save List")]]))
 
 (defn main []
-  (fn [output]
-    (let [format (-> output :data :format)]
+  (fn [step-data]
+    (let [format (-> step-data :output :data :format)]
       [:div
        (cond
-         (= "ids" format) [ids-saver output]
-         (= "query" format) [query-saver output]
-         (= "list" format) [list-saver output])])))
+         (= "ids" format) [ids-saver step-data]
+         (= "query" format) [query-saver step-data]
+         (= "list" format) [list-saver step-data])])))

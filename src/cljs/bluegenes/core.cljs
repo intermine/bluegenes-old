@@ -38,5 +38,5 @@
   (routes/app-routes)
   (re-frame/dispatch-sync [:initialize-db])
   (re-frame/dispatch [:bootstrap-app])  (re-frame/dispatch [:load-histories])
-  (re-frame/dispatch [:run-step [:networks :network1 :nodes :node1]])
+  (re-frame/dispatch [:run-step [:projects :project1 :networks :network1 :nodes :node1]])
   (mount-root))

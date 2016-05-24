@@ -440,6 +440,11 @@
                                    (swap! local-state assoc :organisms organisms))))})))
 
 
+
+(defn run [snapshot input api]
+  (println "ID Resolver is running" snapshot))
+
+
 (defn ^:export main [step-data]
   "Output a table representing all lists in a mine.
   When the component is updated then inform the API of its new value."

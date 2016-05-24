@@ -30,6 +30,11 @@
   (fn [db _]
     (reaction (:active-history @db))))
 
+(re-frame/register-sub
+  :active-network
+  (fn [db _]
+    (reaction (:active-network @db))))
+
 
 (re-frame/register-sub
   :dimmer

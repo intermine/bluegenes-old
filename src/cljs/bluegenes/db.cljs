@@ -13,21 +13,19 @@
    :dimmer         true
    :search-term    nil
 
-   :networks       {:network1
-                    {:_id   :network1
-                     :slug  "network1"
-                     :view  [:node1]
-                     :nodes {:node1 {:_id          :node1
-                                     :tool         "chooselist"
-                                     :subscribe-to nil}
-                             ;:node2 {:_id          :node2
-                             ;        :tool         "toolb"
-                             ;        :subscribe-to :node1}
-                             ;:node3 {:_id          :node3
-                             ;        :tool         "toolc"
-                             ;        :subscribe-to :node2}
-                             }
-                     }}
+
+
+   ;:active-network [:projects :project1 :networks :network1]
+
+   :projects       {:project1 {:_id :project1
+                               :slug "project1"
+                               :title "I am a project."
+                               :networks {:network1 {:_id   :network1
+                                                     :slug  "network1"
+                                                     :view  [:node1]
+                                                     :nodes {:node1 {:_id          :node1
+                                                                     :tool         "chooselist"
+                                                                     :subscribe-to nil}}}}}}
 
    :remote-mines   {:humanmine {:_id      :humanmine
                                 :label    "HumanMine"

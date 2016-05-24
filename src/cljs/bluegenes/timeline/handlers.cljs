@@ -392,15 +392,16 @@
   trim-v
   (fn [db [id data-to-save]]
     (println "saving researh" id data-to-save)
-    (let [steps (get-in db [:histories (:active-history db) :steps])
+    (let [steps (get-in db [:networks (:active-history db) :nodes])
           uuid (keyword (rid))
-          update-path [:histories (:active-history db) :saved-research uuid]
+          update-path [:networks (:active-history db) :saved-research uuid]
           pruned-steps (steps-back-to-beginning steps id)
           key-map (generate-key-map pruned-steps)
           new-structure (apply-new-ids-to-structure
-                          (get-in db [:histories (:active-history db) :structure])
+                          (get-in db [:networks (:active-history db) :structure])
                           id
                           key-map)]
+      (println "pruned steps" pruned-steps)
       (if (payload-is-query? data-to-save)
         (go
           (println "saving query" (:payload (:data data-to-save)))
@@ -498,6 +499,7 @@
 (re-frame/register-handler
   :run-step trim-v
   (fn [db [location diffmap]]
+    (println "run step given location" location)
     (let [node (get-in db location)
           run-fn (-> bluegenes.tools (aget (:tool node)) (aget "core") (aget "run"))]
       (run-fn
@@ -511,6 +513,7 @@
 (re-frame/register-handler
   :update-node trim-v
   (fn [db [location update-fn]]
+    (println "update node given location" location)
     (let [snapshot (get-in db location)
           updated (update-fn snapshot)
           diffed (get-changes snapshot updated)]
@@ -537,16 +540,17 @@
   :add-step
   trim-v
   (fn [db [tool-name]]
-    (let [last-emitted (last (get-in db [:networks (:active-history db) :view]))
+    (let [[project network] (get-in db [:active-network])
+          last-emitted (last (get-in db [:projects project :networks network :view]))
           uuid (keyword (rid))
-          previous-output (get-in db [:networks (:active-history db) :nodes last-emitted :output])
+          previous-output (get-in db [:projects project :networks network :nodes last-emitted :output])
           node {:tool         tool-name
                 :state        nil
                 :_id          uuid
                 :input        previous-output
                 :subscribe-to last-emitted}]
-      (re-frame/dispatch [:run-step [:networks (:active-history db) :nodes uuid] node])
+      (re-frame/dispatch [:run-step [:projects project :networks network :nodes uuid] node])
       (->
         db
-        (assoc-in [:networks (:active-history db) :nodes uuid] node)
-        (update-in [:networks (:active-history db) :view] conj uuid)))))
+        (assoc-in [:projects project :networks network :nodes uuid] node)
+        (update-in [:projects project :networks network :view] conj uuid)))))

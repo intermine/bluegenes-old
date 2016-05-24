@@ -151,9 +151,10 @@
 ;    (aget "main"))
 
 (defn cont []
-  (let [active-history (re-frame/subscribe [:active-history])]
+  (let [[project network] (deref (re-frame/subscribe [:active-network]))]
     (fn [step-data]
-      (let [location [:networks @active-history :nodes (:_id step-data)]
+      ;(println "PROJECT")
+      (let [location [:projects project :networks network :nodes (:_id step-data)]
             comms {:has-something (partial api/has-something location)
                    :save-state (partial api/save-state location)
                    :save-cache (partial api/save-cache location)}
@@ -162,7 +163,7 @@
                      (aget "core")
                      (aget "main"))]
         [:div.step-container
-         [savetodrawer/main (:output step-data)]
+         [savetodrawer/main step-data]
          [:div.body
           ;[:h1 (str "cont" (:tool step-data))]
           [tool (assoc step-data :api comms)]]
