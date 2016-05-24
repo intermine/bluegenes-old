@@ -480,7 +480,7 @@
 
 (re-frame/register-handler
   :run-step trim-v
-  (fn [db [location what-changed]]
+  (fn [db [location keyv]]
     (println "running step" location)
     (let [node (get-in db location)
           input (get-in db (into (vec (butlast location)) [(:subscribe-to node) :output]))
@@ -488,11 +488,16 @@
                      (aget (:tool node))
                      (aget "core")
                      (aget "run"))]
+
       ; built a map of only things have changed
 
-      (run-fn {:input input
-               :state (:state node)
-               :cache (:cache node)}
+
+      (run-fn (if (nil? keyv)
+                {:input input
+                 :state (:state node)
+                 :cache (:cache node)}
+                (reduce (fn [total next]
+                          (assoc total next (next node))) {} keyv))
               {:has-something (partial api/has-something location)
                :save-state    (partial api/save-state location)
                :save-cache    (partial api/save-cache location)}))
@@ -513,7 +518,7 @@
           (map (fn [subscriber]
                  (re-frame/dispatch [:run-step
                                      (conj (vec (butlast location)) subscriber)
-                                     data]))
+                                     [:input]]))
                (subscribers db location)))
         (assoc-in db (conj location :output) data))
       db)
@@ -521,11 +526,16 @@
     (assoc-in db (conj location :output) data)))
 
 (re-frame/register-handler
+  ; The holy grail function. Figure this out!
+  :reconcile trim-v
+  (fn [db [function]]))
+
+(re-frame/register-handler
   :save-state trim-v
   (fn [db [location data]]
     (if (not= data (-> (get-in db location) :state))
       (do
-        (re-frame/dispatch [:run-step location data])
+        (re-frame/dispatch [:run-step location [:state]])
         (assoc-in db (conj location :state) data))
       db)))
 
