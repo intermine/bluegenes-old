@@ -74,7 +74,9 @@
     (save-state {:service (:service input)
                  :data    {:payload (normalize-input input)
                            :format  "query"
-                           :type    "Gene"}})))
+                           :type    "Gene"}})
+    (if state
+      (has-something state))))
 
 (defn somefn [component]
   (let [{:keys [state api]} (reagent/props component)

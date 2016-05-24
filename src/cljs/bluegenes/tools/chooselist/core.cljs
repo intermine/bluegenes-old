@@ -94,8 +94,6 @@
   [snapshot
    {:keys [input state cache] :as what-changed}
    {:keys [has-something save-state save-cache] :as api}]
-  (println "Choose List Run Called" what-changed)
-
   (if (nil? (:cache snapshot))
     (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
           (save-cache {:lists lists}))))

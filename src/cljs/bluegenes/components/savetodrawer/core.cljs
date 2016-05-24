@@ -27,7 +27,6 @@
 
 (defn query-saver []
   (fn [payload]
-    (println "QUERY SAVER PAYLOAD" (:extra payload))
     [:div.btn-group
      [:div.btn.btn-success.dropdown-toggle {:data-toggle "dropdown"}
       [:i.fa.fa-floppy-o] [:span " Save Data " [:span.caret]]]
@@ -73,18 +72,16 @@
 
 (defn list-saver []
   (fn [payload]
-    [:p "list saver"]))
+    [:div.btn.btn-success
+     ;{:on-click #(re-frame/dispatch [:save-research])}
+     [:i.fa.fa-floppy-o]
+     [:span (str " Save List")]]))
 
 (defn main []
-  (fn [step-data]
-    (let [{{:keys [format type payload] :as produced} :data} (-> step-data :produced)]
+  (fn [output]
+    (let [format (-> output :data :format)]
       [:div
-       ;[:h4 "SAVE TO DRAWER"]
-       [:div (str "payload" payload)]
-       [:ul
-        (for [s (:saver step-data)]
-          [:li (str s)])]
        (cond
-         (= "ids" format) [ids-saver step-data]
-         (= "query" format) [query-saver step-data]
-         (= "list" format) [list-saver payload])])))
+         (= "ids" format) [ids-saver output]
+         (= "query" format) [query-saver output]
+         (= "list" format) [list-saver output])])))

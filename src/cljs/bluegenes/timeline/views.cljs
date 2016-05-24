@@ -162,7 +162,8 @@
                      (aget "core")
                      (aget "main"))]
         [:div.step-container
-         [:div.body.dashboard
+         [savetodrawer/main (:output step-data)]
+         [:div.body
           ;[:h1 (str "cont" (:tool step-data))]
           [tool (assoc step-data :api comms)]]
          ])
