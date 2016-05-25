@@ -31,6 +31,11 @@
     (reaction (:active-history @db))))
 
 (re-frame/register-sub
+  :active-project
+  (fn [db _]
+    (reaction (:active-project @db))))
+
+(re-frame/register-sub
   :active-network
   (fn [db _]
     (reaction (:active-network @db))))

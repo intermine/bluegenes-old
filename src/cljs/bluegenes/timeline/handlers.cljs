@@ -355,6 +355,12 @@
   (mapv (fn [x]
           (x key-map)) (take (inc (index-of end structure)) structure)))
 
+(defn trimmed-structure
+  "Give a vector structure of keywords, a keyword to stop at, and a map
+  of old ids to new ids, prune the structure vector and replace ids accordingly."
+  [structure end]
+  (take (inc (index-of end structure)) structure))
+
 ; This SERIOUSLY needs to be refactored. This should be easy. Need more coffee.
 (re-frame/register-handler
   :save-research-old
@@ -392,34 +398,26 @@
   trim-v
   (fn [db [id data-to-save]]
     (println "saving researh" id data-to-save)
-    (let [steps (get-in db [:networks (:active-history db) :nodes])
+    (let [steps (get-in db [:projects (:active-project db)
+                            :networks (:active-network db):nodes])
           uuid (keyword (rid))
-          update-path [:networks (:active-history db) :saved-research uuid]
+          update-path [:projects (:active-project db) :networks uuid]
           pruned-steps (steps-back-to-beginning steps id)
-          key-map (generate-key-map pruned-steps)
-          new-structure (apply-new-ids-to-structure
-                          (get-in db [:networks (:active-history db) :structure])
-                          id
-                          key-map)]
+          new-structure (trimmed-structure
+                          (get-in db [:projects (:active-project db)
+                                      :networks (:active-network db) :view])
+                          id)]
       (println "pruned steps" pruned-steps)
-      (if (payload-is-query? data-to-save)
-        (go
-          (println "saving query" (:payload (:data data-to-save)))
-          (let [c (<! (im/query-count
-                        {:root "www.flymine.org/query/service"}
-                        (:payload (:data data-to-save))))]
-            (println "c" c)
-            (re-frame/dispatch [:update-research-count uuid c]))))
+
       (update-in db update-path assoc
                  :label "TBD"
                  :_id uuid
-                 :structure new-structure
+                 :view new-structure
                  :editing true
                  :when (.now js/Date)
                  :payload data-to-save
-                 :steps (-> steps
-                            (steps-back-to-beginning id)
-                            (apply-new-ids-to-steps key-map))))))
+                 :nodes (-> steps
+                            (steps-back-to-beginning id))))))
 
 
 
@@ -447,7 +445,8 @@
   :relabel-research
   trim-v
   (fn [db [id value]]
-    (update-in db [:histories (:active-history db) :saved-research id]
+    (update-in db [:projects (:active-project db)
+                   :networks id]
                assoc
                :label value
                :editing false)))
@@ -456,20 +455,23 @@
   :load-research
   trim-v
   (fn [db [id value]]
-    (println "assocign research")
-    (update-in db [:histories (:active-history db)]
-               (fn [history]
-                 (assoc history
-                   :steps (get-in db [:histories
-                                      (:active-history db)
-                                      :saved-research
-                                      id
-                                      :steps])
-                   :structure (get-in db [:histories
-                                          (:active-history db)
-                                          :saved-research
-                                          id
-                                          :structure]))))))
+    (println "LOADING RESEARCH ID" id)
+    (assoc db :active-network id)
+
+    ;(update-in db [:histories (:active-history db)]
+    ;           (fn [history]
+    ;             (assoc history
+    ;               :steps (get-in db [:histories
+    ;                                  (:active-history db)
+    ;                                  :saved-research
+    ;                                  id
+    ;                                  :steps])
+    ;               :structure (get-in db [:histories
+    ;                                      (:active-history db)
+    ;                                      :saved-research
+    ;                                      id
+    ;                                      :structure]))))
+    ))
 
 
 
@@ -522,14 +524,14 @@
       ; the new data (only the difference)
       (if-not (empty? diffed)
         (do
-          (re-frame/dispatch [:run-step location diffed])
+          (re-frame/dispatch ^:flush-dom [:run-step location diffed])
 
           ; If the difference map contains an :output key then we must
           ; feed it as an input to each subscriber and re-run them.
           (if (contains? diffed :output)
             (mapv
               (fn [subscriber]
-                (re-frame/dispatch [:update-node
+                (re-frame/dispatch ^:flush-dom [:update-node
                                     (conj (vec (butlast location)) subscriber)
                                     #(assoc % :input (:output diffed))]))
               (subscribers db location)))))
@@ -540,7 +542,8 @@
   :add-step
   trim-v
   (fn [db [tool-name]]
-    (let [[project network] (get-in db [:active-network])
+    (let [project (get-in db [:active-project])
+          network (get-in db [:active-network])
           last-emitted (last (get-in db [:projects project :networks network :view]))
           uuid (keyword (rid))
           previous-output (get-in db [:projects project :networks network :nodes last-emitted :output])
@@ -549,7 +552,7 @@
                 :_id          uuid
                 :input        previous-output
                 :subscribe-to last-emitted}]
-      (re-frame/dispatch [:run-step [:projects project :networks network :nodes uuid] node])
+      (re-frame/dispatch ^:flush-dom [:run-step [:projects project :networks network :nodes uuid] node])
       (->
         db
         (assoc-in [:projects project :networks network :nodes uuid] node)

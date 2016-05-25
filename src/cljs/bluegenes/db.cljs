@@ -22,9 +22,17 @@
                                :title "I am a project."
                                :networks {:network1 {:_id   :network1
                                                      :slug  "network1"
+                                                     :label "Network 1"
                                                      :view  [:node1]
                                                      :nodes {:node1 {:_id          :node1
                                                                      :tool         "chooselist"
+                                                                     :subscribe-to nil}}}
+                                          :network2 {:_id   :network2
+                                                     :slug  "network2"
+                                                     :label "Network 2"
+                                                     :view  [:node1]
+                                                     :nodes {:node1 {:_id          :node1
+                                                                     :tool         "smartidresolver"
                                                                      :subscribe-to nil}}}}}}
 
    :remote-mines   {:humanmine {:_id      :humanmine

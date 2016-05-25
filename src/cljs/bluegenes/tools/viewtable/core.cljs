@@ -82,19 +82,20 @@
   (let [{:keys [state api]} (reagent/props component)
         node (reagent/dom-node component)
         target (.item (.getElementsByClassName node "imtable") 0)]
-    (-> (.loadTable js/imtables
-                    target
-                    (clj->js {:start 0 :size 10})
-                    (clj->js {:service (:service state) :query (:payload (:data state))}))
-        (.then (fn [table]
-                 (-> table .-history (.on "changed:current"
-                                          (fn [x]
-                                            ((:save-state api)
-                                              {:service (:service state)
-                                               :data    {:payload (js->clj (-> x .-attributes .-query (.toJSON)) :keywordize-keys true)
-                                                         :format  "query"
-                                                         :type    "Gene"}})))))
-               (fn [error] (println "TABLE ERROR" error))))))
+
+    (if state (-> (.loadTable js/imtables
+                              target
+                              (clj->js {:start 0 :size 10})
+                              (clj->js {:service (:service state) :query (:payload (:data state))}))
+                  (.then (fn [table]
+                           (-> table .-history (.on "changed:current"
+                                                    (fn [x]
+                                                      ((:save-state api)
+                                                        {:service (:service state)
+                                                         :data    {:payload (js->clj (-> x .-attributes .-query (.toJSON)) :keywordize-keys true)
+                                                                   :format  "query"
+                                                                   :type    "Gene"}})))))
+                         (fn [error] (println "TABLE ERROR" error)))))))
 
 (defn mytable []
   (reagent/create-class

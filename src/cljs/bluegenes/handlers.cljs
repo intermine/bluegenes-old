@@ -57,14 +57,17 @@
     ;TODO - if the slug doesn't exist then check for the UUID directly
     (let [uuid (first (keep #(when (= (:slug (val %)) project-slug) (key %)) (:projects db)))]
 
-      (let [network-location (vec (butlast (s/select-one [:projects s/ALL s/LAST
+      (let [[project network] (vec (butlast (s/select-one [:projects s/ALL s/LAST
                                                           #(= project-slug (:slug %))
                                                           (s/collect-one :_id)
                                                           :networks s/ALL s/LAST
                                                           #(= network-slug (:slug %))
                                                           (s/collect-one :_id)]
                                                          db)))]
-        (assoc db :active-panel active-panel :active-network network-location))
+        (println "sees project" project)
+        (assoc db :active-panel active-panel
+                  :active-project project
+                  :active-network network))
 
 
 

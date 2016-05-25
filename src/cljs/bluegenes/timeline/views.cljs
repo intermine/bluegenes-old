@@ -151,10 +151,11 @@
 ;    (aget "main"))
 
 (defn cont []
-  (let [[project network] (deref (re-frame/subscribe [:active-network]))]
+  (let [project (re-frame/subscribe [:active-project])
+        network (re-frame/subscribe [:active-network])]
     (fn [step-data]
       ;(println "PROJECT")
-      (let [location [:projects project :networks network :nodes (:_id step-data)]
+      (let [location [:projects @project :networks @network :nodes (:_id step-data)]
             comms {:has-something (partial api/has-something location)
                    :save-state (partial api/save-state location)
                    :save-cache (partial api/save-cache location)}
