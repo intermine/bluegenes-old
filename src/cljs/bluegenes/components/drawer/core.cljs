@@ -26,15 +26,17 @@
       {:component-did-mount (fn [e]
                               (if-let [tb (sel1 (reagent/dom-node e) :input)]
                                 (.focus tb)))
-       :reagent-render      (fn [{:keys [_id label saved data editing view] :as details}]
+       :reagent-render      (fn [{:keys [payload _id label saved data editing view slug] :as details}]
                               ;(println "saved" saved)
                               ;(println "DETAILS" details)
                               (println "active network" @active-network)
                               [:div.item
-                               {:on-click (fn []
-                                            (if-not editing
-                                              (re-frame/dispatch [:load-research _id])))
-                                :class (if (= _id @active-network) "active")}
+                               ;{:on-click (fn []
+                               ;             (if-not editing
+                               ;               (re-frame/dispatch [:load-research _id])))
+                               ; :class (if (= _id @active-network) "active")}
+
+
                                [:span.fa-2x.ico
                                 [:svg.icon.molecule
                                  [:use {:xlinkHref "#molecule"}]]]
@@ -45,13 +47,13 @@
                                     :on-key-press (partial handle-key details)
                                     :rows         5
                                     :placeholder  "Label your research..."}]
-                                  [:span label])]
+                                  [:span [:a {:href (str "/#/timeline/project1/data/" slug)} label]])]
                                (let [produced (get-in details [:nodes (last view) :output])]
                                  (println "produced" produced)
                                  ;(println "produced" (-> produced :data :payload count))
                                  [:span.count
-                                  [:span.big (str (-> details :count))]
-                                  [:span.right (str (-> produced :data :type) "s")]]
+                                  [:span.big (str (-> payload :count))]
+                                  [:span.right (str (-> payload :data :type) "s")]]
 
                                  )
                                ])})))

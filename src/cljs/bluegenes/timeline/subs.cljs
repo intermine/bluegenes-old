@@ -5,13 +5,19 @@
 (re-frame/register-sub
   :saved-research
   (fn [db _]
-    (reaction (get-in @db [:projects (:active-project @db) :networks]))))
+    (reaction (get-in @db [:projects (:active-project @db) :saved-data]))))
 
 (re-frame/register-sub
  :steps
  (fn [db [_ testvalue]]
    (reaction (get-in @db [:projects (:active-project @db)
                           :networks (:active-network @db) :nodes]))))
+
+(re-frame/register-sub
+  :active-data
+  (fn [db [_ testvalue]]
+    (reaction (get-in @db [:projects (:active-project @db)
+                           :saved-data (:active-data @db)]))))
 
 (re-frame/register-sub
  :step-path

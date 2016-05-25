@@ -9,6 +9,7 @@
             [bluegenes.components.vertical :as vertical]
             [bluegenes.components.drawer.core :as drawer]
             [bluegenes.components.whatnext.core :as whatnext]
+            [bluegenes.tools.viewtable.core :as viewtable]
             [reagent.impl.util :as impl :refer [extract-props]]
             [bluegenes.api :as api]
             [bluegenes.components.savetodrawer.core :as savetodrawer]))
@@ -190,6 +191,22 @@
     [:div.step-container
      [:h2 (:name @history)]
      [:h4 (:description @history)]]))
+
+
+
+
+(defn saved-data-view []
+  (let [active-project (re-frame/subscribe [:active-project])
+        active-data (re-frame/subscribe [:active-data])]
+    [:div.timeline-container
+     ;  [stepdash/main]
+     ;  [nextsteps/main]
+     [drawer/main]
+     [:div.prevsteps [:div.step-container
+       [viewtable/main {:state {:service (:service (:payload @active-data))
+                                :data    {:payload (viewtable/normalize-input (:payload @active-data))}}}]]]
+     ])
+  )
 
 (defn main-view []
   [:div.timeline-container

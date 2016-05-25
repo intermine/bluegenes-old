@@ -55,6 +55,7 @@
   (fn [db [active-panel & [project-slug network-slug]]]
     ;Look up the UUID of the history based on the slug (friendly) name
     ;TODO - if the slug doesn't exist then check for the UUID directly
+    (println "***** SET timeline panel" project-slug network-slug)
     (let [uuid (first (keep #(when (= (:slug (val %)) project-slug) (key %)) (:projects db)))]
 
       (let [[project network] (vec (butlast (s/select-one [:projects s/ALL s/LAST
@@ -65,13 +66,29 @@
                                                           (s/collect-one :_id)]
                                                          db)))]
         (println "sees project" project)
-        (assoc db :active-panel active-panel
+        (assoc db :active-panel [active-panel project-slug network-slug]
                   :active-project project
-                  :active-network network))
+                  :active-network network)))))
 
+(re-frame/register-handler
+  :set-saved-data-panel trim-v
+  (fn [db [active-panel project-slug network-slug]]
+    ;Look up the UUID of the history based on the slug (friendly) name
+    ;TODO - if the slug doesn't exist then check for the UUID directly
+    (println "***** SET SAVED DATA PANEL" project-slug network-slug)
+    (let [uuid (first (keep #(when (= (:slug (val %)) project-slug) (key %)) (:projects db)))]
 
-
-      )))
+      (let [[project did] (vec (butlast (s/select-one [:projects s/ALL s/LAST
+                                                           #(= project-slug (:slug %))
+                                                           (s/collect-one :_id)
+                                                           :saved-data s/ALL s/LAST
+                                                           #(= network-slug (:slug %))
+                                                           (s/collect-one :_id)]
+                                                          db)))]
+        (println "sees project" project did)
+        (assoc db :active-panel [active-panel]
+                  :active-project project
+                  :active-data did)))))
 
 (re-frame/register-handler
   :activate-dimmer

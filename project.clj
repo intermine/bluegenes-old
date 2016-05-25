@@ -14,6 +14,7 @@
                  [mount "0.1.9"]
                  [prismatic/schema "1.0.5"]
                  [slugger "1.0.1"]
+                 [funcool/cuerdas "0.7.0"]
                  [reagent-forms "0.5.8"]
                  [clj-http "2.0.1"]
                  [com.taoensso/timbre "4.1.0"]

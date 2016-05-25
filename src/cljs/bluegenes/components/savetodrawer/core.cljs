@@ -72,9 +72,11 @@
 
 (defn list-saver []
   (fn [payload]
+    (println "list saver sees payload" (:output payload))
     [:div.btn.btn-success
      ;{:on-click #(println "has payload" (dissoc payload :cache))}
-     {:on-click #(re-frame/dispatch [:save-research (:_id payload)])}
+
+     {:on-click #(re-frame/dispatch [:save-research (:_id payload) (:output payload)])}
      [:i.fa.fa-floppy-o]
      [:span (str " Save List")]]))
 

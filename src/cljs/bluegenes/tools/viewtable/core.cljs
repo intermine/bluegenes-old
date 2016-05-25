@@ -83,10 +83,25 @@
         node (reagent/dom-node component)
         target (.item (.getElementsByClassName node "imtable") 0)]
 
+
+    (println "DOM NODE" target)
+
+    ;(if state
+    ;  (do
+    ;    ;(println "HAS STATE" state)
+    ;    (.loadTable js/imtables
+    ;                target
+    ;                nil
+    ;                (clj->js {:service {:root "www.flymine.org/query"}
+    ;                          :query   (:payload (:data state))}))))
+
+
+
     (if state (-> (.loadTable js/imtables
                               target
                               (clj->js {:start 0 :size 10})
-                              (clj->js {:service (:service state) :query (:payload (:data state))}))
+                              (clj->js {:service (:service state)
+                                        :query (:payload (:data state))}))
                   (.then (fn [table]
                            (-> table .-history (.on "changed:current"
                                                     (fn [x]
@@ -95,7 +110,10 @@
                                                          :data    {:payload (js->clj (-> x .-attributes .-query (.toJSON)) :keywordize-keys true)
                                                                    :format  "query"
                                                                    :type    "Gene"}})))))
-                         (fn [error] (println "TABLE ERROR" error)))))))
+                         (fn [error] (println "TABLE ERROR" error)))
+                  ))
+    )
+  )
 
 (defn mytable []
   (reagent/create-class
@@ -105,4 +123,6 @@
 
 (defn ^:export main []
   (fn [{:keys [state api] :as step-data}]
-    [mytable (select-keys step-data [:api :state])]))
+    (println "VIEW TABLE RUNNING WITH" step-data)
+    [mytable (select-keys step-data [:api :state])]
+    ))

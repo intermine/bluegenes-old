@@ -20,6 +20,9 @@
    :projects       {:project1 {:_id :project1
                                :slug "project1"
                                :title "I am a project."
+                               :saved-data {:sd1 {:_id :sd1
+                                                  :label "My Favorite Genes"
+                                                  :slug "myfavgenes"}}
                                :networks {:network1 {:_id   :network1
                                                      :slug  "network1"
                                                      :label "Network 1"

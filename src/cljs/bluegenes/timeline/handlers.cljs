@@ -10,6 +10,7 @@
             [bluegenes.utils.imcljs :as im]
             [bluegenes.api :as api]
             [com.rpl.specter :as specter]
+            [cuerdas.core :as cue]
             [cljs.core.async :refer [put! chan <! >! timeout close!]])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
@@ -401,23 +402,21 @@
     (let [steps (get-in db [:projects (:active-project db)
                             :networks (:active-network db):nodes])
           uuid (keyword (rid))
-          update-path [:projects (:active-project db) :networks uuid]
-          pruned-steps (steps-back-to-beginning steps id)
+          update-path [:projects (:active-project db) :saved-data uuid]
           new-structure (trimmed-structure
                           (get-in db [:projects (:active-project db)
                                       :networks (:active-network db) :view])
                           id)]
-      (println "pruned steps" pruned-steps)
+
 
       (update-in db update-path assoc
                  :label "TBD"
                  :_id uuid
-                 :view new-structure
+                 ;:view new-structure
                  :editing true
                  :when (.now js/Date)
-                 :payload data-to-save
-                 :nodes (-> steps
-                            (steps-back-to-beginning id))))))
+                 ;:nodes (-> steps (steps-back-to-beginning id))
+                 :payload data-to-save))))
 
 
 
@@ -446,32 +445,25 @@
   trim-v
   (fn [db [id value]]
     (update-in db [:projects (:active-project db)
-                   :networks id]
+                   :saved-data id]
                assoc
                :label value
+               :slug (cue/slugify value)
                :editing false)))
+
+(re-frame/register-handler
+  :load-search
+  trim-v
+  (fn [db [id value]]
+    (println "LOADING RESEARCH ID" id)
+    (assoc db :active-network id)))
 
 (re-frame/register-handler
   :load-research
   trim-v
   (fn [db [id value]]
     (println "LOADING RESEARCH ID" id)
-    (assoc db :active-network id)
-
-    ;(update-in db [:histories (:active-history db)]
-    ;           (fn [history]
-    ;             (assoc history
-    ;               :steps (get-in db [:histories
-    ;                                  (:active-history db)
-    ;                                  :saved-research
-    ;                                  id
-    ;                                  :steps])
-    ;               :structure (get-in db [:histories
-    ;                                      (:active-history db)
-    ;                                      :saved-research
-    ;                                      id
-    ;                                      :structure]))))
-    ))
+    (assoc db :active-network id)))
 
 
 

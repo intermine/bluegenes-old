@@ -34,6 +34,11 @@
               (println "ROUTING")
               (re-frame/dispatch [:set-timeline-panel :timeline-panel pid nid])))
 
+  (defroute "/timeline/:pid/data/:did" [pid did]
+            (do
+              (println "DATA ROUTING" pid did)
+              (re-frame/dispatch [:set-saved-data-panel :saved-data-panel pid did])))
+
   (defroute "/timeline" []
             (re-frame/dispatch [:set-timeline-panel :timeline-panel]))
 

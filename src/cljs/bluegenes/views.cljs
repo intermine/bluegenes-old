@@ -7,50 +7,50 @@
             [bluegenes.components.listentry.core :as lists]
             [clojure.string :as str]
             [bluegenes.utils.icons :as icons]
-            ; [bluegenes.components.googlesignin :as google-sign-in]
+    ; [bluegenes.components.googlesignin :as google-sign-in]
             [bluegenes.tools.smartidresolver.core :as idresolver]
             [json-html.core :as json-html])
   (:use [json-html.core :only [edn->hiccup]]))
 
-  (defn ui-card [contents header-text]
-    "pass homepage elements to ui-card as a function / form-2 component to wrap them in the correct boilerplate html."
-    ;TODO: conditional header text item (?)
-    [:div.step-container
-    [:div.body
+(defn ui-card [contents header-text]
+  "pass homepage elements to ui-card as a function / form-2 component to wrap them in the correct boilerplate html."
+  ;TODO: conditional header text item (?)
+  [:div.step-container
+   [:div.body
     [contents]]])
 
 (defn histories-section []
   [ui-card
-  (fn history-card []
-  (let [histories (re-frame/subscribe [:all-histories])]
-    [:div
-     [:h3 "Choose a starting point:"]
-     (for [[key values] @histories]
-       (cond key (do ;;there's a nil key coming from somewhere that spawns lots of console errors. This cond prevents the errors.
-         ^{:key key}
-         [:div
-          [:h4 [:a {:href (str "#/timeline/" (:slug values))} (:name values)]]
-          [:span (:description values)]])))]))])
+   (fn history-card []
+     (let [histories (re-frame/subscribe [:all-histories])]
+       [:div
+        [:h3 "Choose a starting point:"]
+        (for [[key values] @histories]
+          (cond key (do                                     ;;there's a nil key coming from somewhere that spawns lots of console errors. This cond prevents the errors.
+                      ^{:key key}
+                      [:div
+                       [:h4 [:a {:href (str "#/timeline/" (:slug values))} (:name values)]]
+                       [:span (:description values)]])))]))])
 
 (defn list-upload-section []
   "Nonfunctional (currently) list upload homepage widget"
   (let [api (timeline-api/build-homepage-api-map {:name "smartidresolver"})]
-  [ui-card
-   (fn []
-     [:div
-      [:h3 "I have data I want to know more about:"]
-      [idresolver/main {:state ["" ""]
-        :api api
-        :upstream-data nil}]])]))
+    [ui-card
+     (fn []
+       [:div
+        [:h3 "I have data I want to know more about:"]
+        [idresolver/main {:state         ["" ""]
+                          :api           api
+                          :upstream-data nil}]])]))
 
 (defn bubble-section []
   [ui-card
    (fn []
      [:div.bubble
-       [:h3 "Explore our data:"]
-       [:p "Start by clicking a bubble"]
-       [:div [:img {:src "img/bubble.png"}]
-      ]])])
+      [:h3 "Explore our data:"]
+      [:p "Start by clicking a bubble"]
+      [:div [:img {:src "img/bubble.png"}]
+       ]])])
 
 (defn templates-section []
   "Outputs the templates 'answer a question' in the homepage"
@@ -58,59 +58,59 @@
   ; single gene/protein/organism entry point (I think?). Will need to add the
   ; history details to app db, too
   [ui-card
-  (let [templates (re-frame/subscribe [:homepage-template-histories])]
-    (fn []
-      [:div
+   (let [templates (re-frame/subscribe [:homepage-template-histories])]
+     (fn []
+       [:div
         [:h3 "Answer a question:"]
         [:ul.templates
-          (for [[key values] @templates]
-            ^{:key key}
-            [:li
-              {:class (:type values)}
-              (:description values)]
-         )]
-       [:a "See other popular questions and template searches..."]
-     ]))])
+         (for [[key values] @templates]
+           ^{:key key}
+           [:li
+            {:class (:type values)}
+            (:description values)]
+           )]
+        [:a "See other popular questions and template searches..."]
+        ]))])
 
 (defn submit-search [event state]
-    "prevents default behaviours and navigates the user to the search page, with the search input as a query param (trimmed)"
-    (.preventDefault js/event)
-    (.log js/console "Setting global search term to:" @state)
-    (re-frame/dispatch [:set-search-term (str/trim @state)]);;set global search
-    (aset js/window "location" "href"
-      "/#timeline/search"))
+  "prevents default behaviours and navigates the user to the search page, with the search input as a query param (trimmed)"
+  (.preventDefault js/event)
+  (.log js/console "Setting global search term to:" @state)
+  (re-frame/dispatch [:set-search-term (str/trim @state)])  ;;set global search
+  (aset js/window "location" "href"
+        "/#timeline/search"))
 
 (defn searchbox []
   "Outputs main top search boc"
   [ui-card
-  (let [local-state (reagent/atom nil)]
-    (reagent/create-class
-      {:reagent-render
+   (let [local-state (reagent/atom nil)]
+     (reagent/create-class
+       {:reagent-render
         (fn []
           [:form#search {
-            :on-submit (fn [event] (submit-search event local-state))
-           :method "get"
-           :action "/#/timeline/search"}
-            [:input {
-              :type "text"
-              :value (cond (some? @local-state) @local-state)
-              :placeholder "Search for a gene, protein, disease, etc..."
-              :on-change (fn [val]
-                 (reset! local-state (-> val .-target .-value)))}]
-            [:button "Search"]
-          ])}))])
+                         :on-submit (fn [event] (submit-search event local-state))
+                         :method    "get"
+                         :action    "/#/timeline/search"}
+           [:input {
+                    :type        "text"
+                    :value       (cond (some? @local-state) @local-state)
+                    :placeholder "Search for a gene, protein, disease, etc..."
+                    :on-change   (fn [val]
+                                   (reset! local-state (-> val .-target .-value)))}]
+           [:button "Search"]
+           ])}))])
 
 (defn home-panel []
   (let [name (re-frame/subscribe [:name])]
     (fn []
       [:main.homepage
-        [searchbox]
-        [:div.cards
-          [bubble-section]
-          [histories-section]
-          [list-upload-section]
-          [templates-section]
-         ]])))
+       [searchbox]
+       [:div.cards
+        [bubble-section]
+        [histories-section]
+        [list-upload-section]
+        [templates-section]
+        ]])))
 
 (defn about-panel []
   (fn []
@@ -126,20 +126,20 @@
 (defn navbar-search []
   "Very similar to the main homepage search but shows on every page and has slightly different markup"
   (let [local-state (reagent/atom "")]
-  (reagent/create-class
-    {:reagent-render
-    (fn []
-      [:form.navbar-form
-       {:role "search"
-        :on-submit (fn [event] (submit-search event local-state))}
-        [:input.form-control
-         {:placeholder "Search"
-          :type "text"
-          :value @local-state
-          :on-change (fn [val]
-             (reset! local-state (-> val .-target .-value)))}]
-        [:button.btn.btn-default {:type "submit"}
-          [:svg.icon.icon-search [:use {:xlinkHref "#icon-search"}]]]])})))
+    (reagent/create-class
+      {:reagent-render
+       (fn []
+         [:form.navbar-form
+          {:role      "search"
+           :on-submit (fn [event] (submit-search event local-state))}
+          [:input.form-control
+           {:placeholder "Search"
+            :type        "text"
+            :value       @local-state
+            :on-change   (fn [val]
+                           (reset! local-state (-> val .-target .-value)))}]
+          [:button.btn.btn-default {:type "submit"}
+           [:svg.icon.icon-search [:use {:xlinkHref "#icon-search"}]]]])})))
 
 
 (defn nav-panel []
@@ -153,7 +153,7 @@
        [:ul.nav.navbar-nav
         [:li {:class (if (= panel-name "home-panel") "active")} [:a {:href "#"} "Home"]]
         ;;uncomment this when list entry points are more polished. they can still be accessed via /lists directly.
-;        [:li {:class (if (= panel-name "list-panel") "active")} [:a {:href "#/lists"} "Lists"]]
+        ;        [:li {:class (if (= panel-name "list-panel") "active")} [:a {:href "#/lists"} "Lists"]]
         ;;don't show timeline in navbar unless we're actually there already, as
         ;clicking on timeline from elsewhere just gives a blank page
         (if (= panel-name "timeline-panel")
@@ -162,18 +162,19 @@
         [:li {:class (if (= panel-name "debug-panel") "active")} [:a {:href "#/debug"} "Debug"]]
         ]
        [:div
-        [:ul.nav.navbar-nav.navbar-right ;.signin
+        [:ul.nav.navbar-nav.navbar-right                    ;.signin
          [:li
           [navbar-search]]
          [:li
-              ;  [google-sign-in/main]
-               ]]]]]]))
+          ;  [google-sign-in/main]
+          ]]]]]]))
 
 
 (defmulti panels identity)
 (defmethod panels :home-panel [] [home-panel])
 (defmethod panels :about-panel [] [about-panel])
 (defmethod panels :timeline-panel [] [timeline-views/main-view])
+(defmethod panels :saved-data-panel [] [timeline-views/saved-data-view])
 (defmethod panels :list-panel [] [lists/main-view])
 (defmethod panels :debug-panel [] [debug-panel])
 (defmethod panels :default [] [:div])
@@ -184,6 +185,9 @@
       [:div.bob
        [icons/icons]
        [nav-panel]
-       (panels @active-panel)
+       (if (vector? @active-panel)
+         (panels (first @active-panel) (rest @active-panel))
+         (panels @active-panel))
+
        [dimmer/main]
        ])))
