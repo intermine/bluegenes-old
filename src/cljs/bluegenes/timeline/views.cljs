@@ -9,6 +9,7 @@
             [bluegenes.components.vertical :as vertical]
             [bluegenes.components.drawer.core :as drawer]
             [bluegenes.components.whatnext.core :as whatnext]
+            [bluegenes.components.queryoperations.view :as query-operations]
             [bluegenes.tools.viewtable.core :as viewtable]
             [reagent.impl.util :as impl :refer [extract-props]]
             [bluegenes.api :as api]
@@ -207,6 +208,16 @@
                                 :data    {:payload (viewtable/normalize-input (:payload @active-data))}}}]]]
      ])
   )
+
+(defn operations []
+  [:div.timeline-container
+   [drawer/main]
+   [:div.prevsteps
+    [:div.step-container
+     [:div.body
+      [query-operations/main]]]]
+
+   ])
 
 (defn main-view []
   [:div.timeline-container

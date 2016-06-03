@@ -21,7 +21,10 @@
               [bluegenes.tools.enrichment.core :as enrichment]
               [bluegenes.tools.dashboard.core :as dashboard]
               [bluegenes.tools.templatechooser.core :as templatechooser]
-              [intermine.imjs :as imjs]))
+              [intermine.imjs :as imjs]
+              [devtools.core :as devtools]))
+
+(devtools/install!)
 
 (enable-console-print!)
 

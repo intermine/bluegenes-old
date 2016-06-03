@@ -174,6 +174,7 @@
 (defmethod panels :home-panel [] [home-panel])
 (defmethod panels :about-panel [] [about-panel])
 (defmethod panels :timeline-panel [] [timeline-views/main-view])
+(defmethod panels :operations-panel [] [timeline-views/operations])
 (defmethod panels :saved-data-panel [] [timeline-views/saved-data-view])
 (defmethod panels :list-panel [] [lists/main-view])
 (defmethod panels :debug-panel [] [debug-panel])

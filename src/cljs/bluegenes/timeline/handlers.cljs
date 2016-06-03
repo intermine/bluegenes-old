@@ -11,7 +11,11 @@
             [bluegenes.api :as api]
             [com.rpl.specter :as specter]
             [cuerdas.core :as cue]
-            [cljs.core.async :refer [put! chan <! >! timeout close!]])
+            [cljs.core.async :refer [put! chan <! >! timeout close!]]
+            [taoensso.timbre :as timbre
+             :refer-macros (log trace debug info warn error fatal report
+                                logf tracef debugf infof warnf errorf fatalf reportf
+                                spy get-env log-env)])
   (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
 (enable-console-print!)
@@ -400,7 +404,7 @@
   (fn [db [id data-to-save]]
     (println "saving researh" id data-to-save)
     (let [steps (get-in db [:projects (:active-project db)
-                            :networks (:active-network db):nodes])
+                            :networks (:active-network db) :nodes])
           uuid (keyword (rid))
           update-path [:projects (:active-project db) :saved-data uuid]
           new-structure (trimmed-structure
@@ -493,7 +497,7 @@
 (re-frame/register-handler
   :run-step trim-v
   (fn [db [location diffmap]]
-    (println "run step given location" location)
+    ;(println "run step given location" location)
     (let [node (get-in db location)
           run-fn (-> bluegenes.tools (aget (:tool node)) (aget "core") (aget "run"))]
       (run-fn
@@ -505,9 +509,20 @@
     db))
 
 (re-frame/register-handler
+  :calculate-export trim-v
+  (fn [db [location output]]
+    (cond (= "query_ignorefornow" (:format (:data output)))
+          (let [m (get-in db [:cache :models :flymine])]
+            (.log js/console "HAS DECONSTRUCTED" (im/deconstruct-query m (:payload (:data output))))
+            (assoc-in db (conj location :export) (im/deconstruct-query m (:payload (:data output)))))
+          :else
+          (assoc-in db (conj location :export) output)
+          )))
+
+(re-frame/register-handler
   :update-node trim-v
   (fn [db [location update-fn]]
-    (println "update node given location" location)
+    ;(println "update node given location" location)
     (let [snapshot (get-in db location)
           updated (update-fn snapshot)
           diffed (get-changes snapshot updated)]
@@ -521,12 +536,23 @@
           ; If the difference map contains an :output key then we must
           ; feed it as an input to each subscriber and re-run them.
           (if (contains? diffed :output)
-            (mapv
-              (fn [subscriber]
-                (re-frame/dispatch ^:flush-dom [:update-node
-                                    (conj (vec (butlast location)) subscriber)
-                                    #(assoc % :input (:output diffed))]))
-              (subscribers db location)))))
+            (do
+              ; Deconstruct the output to individual parts for exporting
+              ; (saving to the drawer)
+
+              (re-frame/dispatch [:calculate-export location (:output diffed)])
+
+
+
+
+
+              ; Give all subscribers their new input and run them.
+              (mapv
+                (fn [subscriber]
+                  (re-frame/dispatch ^:flush-dom [:update-node
+                                                  (conj (vec (butlast location)) subscriber)
+                                                  #(assoc % :input (:output diffed))]))
+                (subscribers db location))))))
 
       (assoc-in db location updated))))
 

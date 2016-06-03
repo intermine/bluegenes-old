@@ -24,7 +24,8 @@
                  [prismatic/dommy "1.1.0"]
                  [cljs-http "0.1.39"]
                  [com.rpl/specter "0.10.0"]
-                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]]
+                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [binaryage/devtools "0.6.1"]]
 
   :source-paths ["src/clj"]
 

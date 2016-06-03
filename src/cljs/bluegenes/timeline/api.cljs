@@ -2,11 +2,8 @@
     (:require [re-frame.core :as re-frame])
     (:use [cljs-uuid-utils.core :only [make-random-uuid]]))
 
-(enable-console-print!)
-
 (defn rid []
   (str (make-random-uuid)))
-
 
 (defn get-id [tool]
   "Returns the ID of a tool or starts a new history and returns the ID if it's not part of a history yet"

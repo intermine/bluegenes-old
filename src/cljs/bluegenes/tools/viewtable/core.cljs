@@ -84,7 +84,7 @@
         target (.item (.getElementsByClassName node "imtable") 0)]
 
 
-    (println "DOM NODE" target)
+    ;(println "DOM NODE" target)
 
     ;(if state
     ;  (do
@@ -123,6 +123,6 @@
 
 (defn ^:export main []
   (fn [{:keys [state api] :as step-data}]
-    (println "VIEW TABLE RUNNING WITH" step-data)
+    ;(println "VIEW TABLE RUNNING WITH" step-data)
     [mytable (select-keys step-data [:api :state])]
     ))

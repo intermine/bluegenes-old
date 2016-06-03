@@ -15,6 +15,12 @@
     [:div.heading
      [:span "No saved data."]]))
 
+(defn operations []
+  (fn []
+    [:div.heading
+     [:div.btn.btn-primary
+      {:on-click (fn [] (re-frame/dispatch [:set-active-panel :operations-panel]))} "Operations"]]))
+
 
 
 (defn item []
@@ -29,7 +35,7 @@
        :reagent-render      (fn [{:keys [payload _id label saved data editing view slug] :as details}]
                               ;(println "saved" saved)
                               ;(println "DETAILS" details)
-                              (println "active network" @active-network)
+                              ;(println "active network" @active-network)
                               [:div.item
                                ;{:on-click (fn []
                                ;             (if-not editing
@@ -68,4 +74,5 @@
          (do
            (for [[id details] @saved-research]
             ^{:key id} [item details])))
+       [operations]
        [new]])))

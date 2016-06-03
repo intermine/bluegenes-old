@@ -286,6 +286,11 @@
   (go (let [response (<! (http/get (str "http://" (:root service) "/service/model/json") {:with-credentials? false :keywordize-keys true}))]
         (-> response :body :model :classes))))
 
+(defn all-summary-fields [service]
+  "Given a service URL, a type to search for, and an attribute field, return the display name."
+  (go (let [response (<! (http/get (str "http://" (:root service) "/service/summaryfields") {:with-credentials? false :keywordize-keys true}))]
+        (-> response :body :classes))))
+
 (defn end-class
   "Returns the deepest class from a query path.
   Example:
@@ -354,7 +359,8 @@
   (let [sterile-query (sterilize-query query)
         classes       (into [] (comp
                                  (map (partial trim-path-to-class model))
-                                 (distinct)) (:select sterile-query))]
+                                 (distinct))
+                            (:select sterile-query))]
     (reduce (fn [total next]
               (let [end-class    (end-class model next)
                     display-name (display-name model end-class)]
