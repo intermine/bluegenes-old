@@ -56,8 +56,12 @@
                                 (.log js/console "CLICK" list-value)
                                 ((:save-state api)
                                   {:service {:root "www.flymine.org/query"}
-                                   :data    {:payload (:name list-value)
-                                             :format  "list"
+                                   :data    {:payload {:select "*"
+                                                       :from "Gene"
+                                                       :where [{:path "Gene"
+                                                                :op "IN"
+                                                                :value (:name list-value)}]}
+                                             :format  "query"
                                              :type    (:type list-value)}}))
                     :class    (if (is-selected list-value state) "selected")}
         [:td [:span {:class (str "type-" (:type list-value) " result-type")} (:type list-value)]]
