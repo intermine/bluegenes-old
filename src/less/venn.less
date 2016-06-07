@@ -1,0 +1,40 @@
+@stroke-width: 5px;
+
+@on-color: #72D9FF;
+@off-color: #DAE7EC;
+@on: #00aeef;
+
+svg.venn {
+   //  background-color: green;
+
+    circle.circle1 {
+        fill: @off-color;
+        &.on {
+            fill: @on;
+        }
+        &:hover {
+            fill: @on-color;
+        }
+    }
+
+    circle.circle2 {
+        fill: @off-color;
+        &.on {
+                    fill: @on;
+                }
+        &:hover {
+            fill: @on-color;
+        }
+    }
+    path.overlap {
+        stroke-width: 2px;
+        stroke: white;
+        fill: @off-color;
+        &.on {
+                    fill: @on;
+                }
+        &:hover {
+            fill: @on-color;
+        }
+    }
+}

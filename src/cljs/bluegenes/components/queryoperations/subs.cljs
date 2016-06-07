@@ -5,20 +5,22 @@
 (re-frame/register-sub
   :qop-1
   (fn [db [_]]
-    (let [id (reaction (get-in @db [:projects (:active-project @db)
-                                    :networks (:active-network @db)
-                                    :query-operations :1]))]
-      (reaction (get-in @db [:projects (:active-project @db)
-                             :saved-data @id])))))
+    (let [qop (reaction (get-in @db [:projects (:active-project @db)
+                                     :networks (:active-network @db)
+                                     :query-operations :1]))]
+      (reaction (assoc (get-in @db [:projects (:active-project @db)
+                              :saved-data (:id @qop)])
+                  :keep (:keep @qop))))))
 
 (re-frame/register-sub
   :qop-2
   (fn [db [_]]
-    (let [id (reaction (get-in @db [:projects (:active-project @db)
-                                    :networks (:active-network @db)
-                                    :query-operations :2]))]
-      (reaction (get-in @db [:projects (:active-project @db)
-                             :saved-data @id])))))
+    (let [qop (reaction (get-in @db [:projects (:active-project @db)
+                                     :networks (:active-network @db)
+                                     :query-operations :2]))]
+      (reaction (assoc (get-in @db [:projects (:active-project @db)
+                              :saved-data (:id @qop)])
+                  :keep (:keep @qop))))))
 
 (re-frame/register-sub
   :qop-op
@@ -26,3 +28,5 @@
     (reaction (get-in @db [:projects (:active-project @db)
                            :networks (:active-network @db)
                            :query-operations :operation]))))
+
+

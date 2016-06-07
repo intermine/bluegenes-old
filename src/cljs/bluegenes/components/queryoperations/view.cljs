@@ -2,6 +2,7 @@
   (:require [re-frame.core :as re-frame]
             [bluegenes.components.queryoperations.handlers]
             [bluegenes.components.queryoperations.subs]
+            [bluegenes.components.venn.view :as venn]
             [reagent.core :as reagent]
             [dommy.core :as dommy :refer-macros [sel sel1]]))
 
@@ -59,5 +60,6 @@
   (fn []
     [:div
      [:h1 "Query Operations"]
-     [available-research]]))
+     [available-research]
+     [venn/main]]))
 

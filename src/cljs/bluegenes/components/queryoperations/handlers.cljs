@@ -23,9 +23,24 @@
 (re-frame/register-handler
   :set-qop trim-v
   (fn [db [position id]]
-    (assoc-in db [:projects (:active-project db)
-                  :networks (:active-network db)
-                  :query-operations (keyword (str position))] id)))
+    (update-in db
+               [:projects (:active-project db)
+                :networks (:active-network db)
+                :query-operations (keyword (str position))]
+               assoc
+               :id id
+               :keep false)))
+
+(re-frame/register-handler
+  :toggle-qop trim-v
+  (fn [db [position]]
+    (println "toggling position" position)
+    (let [location [:projects (:active-project db)
+                    :networks (:active-network db)
+                    :query-operations (keyword (str position))
+                    :keep]]
+      (update-in db location not))))
+
 
 (re-frame/register-handler
   :set-qop-op trim-v
