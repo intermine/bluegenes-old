@@ -74,5 +74,4 @@
          (do
            (for [[id details] @saved-research]
             ^{:key id} [item details])))
-       [operations]
-       [new]])))
+       [operations]])))

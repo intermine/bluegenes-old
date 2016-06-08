@@ -1,5 +1,5 @@
 (ns bluegenes.timeline.views
-  (:require [re-frame.core :as re-frame]
+  (:require [re-frame.core :as re-frame :refer [subscribe dispatch]]
             [reagent.core :as reagent]
             [json-html.core :as json-html]
             [bluegenes.timeline.api :as timeline-api]
@@ -35,7 +35,7 @@
                         (filter (fn [[step value]]
                                   (not (nil? (some #{parent-id} (:subscribe value)))))
                                 steps))]
-    (loop [id starting-point-id
+    (loop [id       starting-point-id
            step-vec []]
       (let [[children] (find-children id)]
         (if (nil? children)
@@ -53,7 +53,7 @@
                           (filter (fn [[step value]]
                                     (not (nil? (some #{parent-id} (:subscribe value)))))
                                   steps))]
-    (loop [id starting-point-id
+    (loop [id       starting-point-id
            step-vec []]
       (let [downstream (find-downstream id)]
         (println "downstream" downstream)
@@ -68,10 +68,10 @@
   to an upstream step to have access to its input. "
   [step-args]
   (let [upstream-step-data (re-frame/subscribe [:to-step (first (:subscribe step-args))])
-        api (timeline-api/build-api-map step-args)]
+        api                (timeline-api/build-api-map step-args)]
     (fn [step-data]
       ;(println "upstream DATA" @upstream-step-data)
-      (let [global-info nil
+      (let [global-info    nil
             tool-component (-> bluegenes.tools
                                (aget (:tool step-data))
                                (aget "core")
@@ -86,9 +86,9 @@
   "Create a container with a tool inside. The container includes common
   functionality such as data tabs, notes, etc."
   [_id & [in-grid]]
-  (let [step-data (re-frame/subscribe [:to-step _id])
+  (let [step-data   (re-frame/subscribe [:to-step _id])
         current-tab (reagent/atom nil)
-        swap-tab (fn [name] (reset! current-tab name))]
+        swap-tab    (fn [name] (reset! current-tab name))]
     (reagent/create-class
       {:component-did-mount (fn [this]
                               (let [node (reagent/dom-node this)]
@@ -158,13 +158,13 @@
     (fn [step-data]
       ;(println "PROJECT")
       (let [location [:projects @project :networks @network :nodes (:_id step-data)]
-            comms {:has-something (partial api/has-something location)
-                   :save-state (partial api/save-state location)
-                   :save-cache (partial api/save-cache location)}
-            tool (-> bluegenes.tools
-                     (aget (:tool step-data))
-                     (aget "core")
-                     (aget "main"))]
+            comms    {:has-something (partial api/has-something location)
+                      :save-state    (partial api/save-state location)
+                      :save-cache    (partial api/save-cache location)}
+            tool     (-> bluegenes.tools
+                         (aget (:tool step-data))
+                         (aget "core")
+                         (aget "main"))]
         [:div.step-container
          [savetodrawer/main step-data]
          [:div.body
@@ -178,12 +178,26 @@
   single tools (keyword) or steps dashboards for grouped tools (vector)."
   []
   (let [step-path (re-frame/subscribe [:step-path])
-        steps (re-frame/subscribe [:steps])]
+        steps     (re-frame/subscribe [:steps])]
     (fn []
       (into [:div.prevsteps
              [whatnext/main]]
             (for [id (reverse @step-path)]
               [cont (get @steps id)])))))
+(defn tabs []
+  (let [networks       (subscribe [:networks])
+        active-network (subscribe [:active-network])]
+    (fn []
+      [:div.tabber
+       [:ul.nav.nav-tabs
+        (for [[id details] @networks]
+          (doall
+            (println "test" @active-network id)
+            [:li {:on-click #(dispatch [:set-active-network id])
+                  :class    (if (= @active-network id) "active")}
+             [:a (:label details)]]))
+        [:li [:div.btn.btn-primary
+              {:on-click #(dispatch [:new-network])} "New"]]]])))
 
 
 (defn history-details []
@@ -198,14 +212,16 @@
 
 (defn saved-data-view []
   (let [active-project (re-frame/subscribe [:active-project])
-        active-data (re-frame/subscribe [:active-data])]
+        active-data    (re-frame/subscribe [:active-data])]
     [:div.timeline-container
      ;  [stepdash/main]
      ;  [nextsteps/main]
      [drawer/main]
-     [:div.prevsteps [:div.step-container
-       [viewtable/main {:state {:service (:service (:payload @active-data))
-                                :data    {:payload (viewtable/normalize-input (:payload @active-data))}}}]]]
+     [:div.stretchme
+      [tabs]
+      [:div.prevsteps [:div.step-container
+                       [viewtable/main {:state {:service (:service (:payload @active-data))
+                                                :data    {:payload (viewtable/normalize-input (:payload @active-data))}}}]]]]
      ])
   )
 
@@ -215,13 +231,15 @@
    [:div.prevsteps
     [:div.step-container
      [:div.body
-      [query-operations/main]]]]
+      [query-operations/main]]]]])
 
-   ])
 
 (defn main-view []
   [:div.timeline-container
    ;  [stepdash/main]
    ;  [nextsteps/main]
    [drawer/main]
-   [previous-steps]])
+   [:div.stretchme
+    [tabs]
+    [previous-steps]]
+   ])

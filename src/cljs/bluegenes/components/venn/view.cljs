@@ -20,15 +20,20 @@
 
 
 (defn overlap []
-  (let [intersection-points (maths/circle-intersections (:x anchor1) 0 radius (:x anchor2) 0 radius)]
-    [:path.overlap {:d (clojure.string/join
-                         " "
-                         ["M" (nth intersection-points 1) (nth intersection-points 3)
-                          "A" radius radius 0 0 1
-                          (nth intersection-points 0) (nth intersection-points 2)
-                          "A" radius radius 0 0 1
-                          (nth intersection-points 1) (nth intersection-points 3)
-                          "Z"])}]))
+  (let [intersection-points (maths/circle-intersections (:x anchor1) 0 radius (:x anchor2) 0 radius)
+        keep-middle (re-frame/subscribe [:qop-middle])]
+    (fn []
+      (println "MIDDLE" @keep-middle)
+      [:path.overlap {:on-click #(re-frame/dispatch [:toggle-qop-middle])
+                      :class    (if @keep-middle "on")
+                     :d        (clojure.string/join
+                                 " "
+                                 ["M" (nth intersection-points 1) (nth intersection-points 3)
+                                  "A" radius radius 0 0 1
+                                  (nth intersection-points 0) (nth intersection-points 2)
+                                  "A" radius radius 0 0 1
+                                  (nth intersection-points 1) (nth intersection-points 3)
+                                  "Z"])}])))
 
 (defn circle2 []
   (let [representing (re-frame/subscribe [:qop-2])]
@@ -57,7 +62,5 @@
 
 (defn main []
   (fn []
-    [:div
-     [:h1 "VENN"]
-     [svg]]))
+    [svg]))
 

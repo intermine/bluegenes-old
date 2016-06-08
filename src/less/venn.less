@@ -5,36 +5,63 @@
 @on: #00aeef;
 
 svg.venn {
-   //  background-color: green;
-
-    circle.circle1 {
-        fill: @off-color;
-        &.on {
-            fill: @on;
-        }
-        &:hover {
-            fill: @on-color;
-        }
+   circle {
+    fill: @off-color;
+    stroke-width: 2px;
+    stroke: white;
+    &.on {
+        fill: @on;
     }
-
-    circle.circle2 {
-        fill: @off-color;
-        &.on {
-                    fill: @on;
-                }
-        &:hover {
-            fill: @on-color;
-        }
+    &:hover {
+         stroke: #006A92;
     }
+ }
+
+
     path.overlap {
         stroke-width: 2px;
         stroke: white;
         fill: @off-color;
         &.on {
-                    fill: @on;
-                }
+            fill: @on;
+        }
         &:hover {
-            fill: @on-color;
+            stroke: #006A92;
         }
     }
+}
+
+.query-operations-container {
+    display: flex;
+    // align-items: center;
+    // border: 1px solid pink;
+
+    .child {
+      flex: 0 0 auto;
+        // border: 1px solid blue;
+    }
+}
+
+.tabber {
+
+    input {
+      color: white;
+    }
+
+    // flex: 0 0 300px;
+    color: white;
+    padding: 10px;
+    // width: 200px;
+    // display: flex;
+    // flex-direction: column;
+    background: #333333;
+
+    .nav-tabs > li > a, .nav-tabs > li > a:focus {
+      color: white;
+      font-size: 1.2em;
+    }
+}
+
+.stretchme {
+    flex: 1 0;
 }

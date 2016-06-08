@@ -26,6 +26,11 @@
                           :networks (:active-network @db) :view]))))
 
 (re-frame/register-sub
+  :networks
+  (fn [db [_]]
+    (reaction (get-in @db [:projects (:active-project @db) :networks]))))
+
+(re-frame/register-sub
  :to-step
  (fn [db [_ step-id]]
    (reaction (get-in @db [:histories (:active-history @db) :steps step-id]))))

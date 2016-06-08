@@ -20,18 +20,6 @@
 
 (enable-console-print!)
 
-
-(re-frame/register-handler
-  :has-something-old
-  trim-v
-  (fn [db [step-id data]]
-    (let [notify (get-in db [:histories (:active-history db) :steps step-id :notify])]
-      ; If our tool has other tools to notify then push the data direclty to them
-      (if-not (nil? notify)
-        (update-in db [:histories (:active-history db) :steps notify] assoc :input data)
-        (update-in db [:histories (:active-history db)] assoc :available-data (assoc data :source {:history (:active-history db)
-                                                                                                   :step    step-id}))))))
-
 (defn rid [] (str (make-random-uuid)))
 
 (re-frame/register-handler
@@ -120,9 +108,7 @@
         (update-in [:histories (:active-history db) :structure] conj uuid)))
     db))
 
-;(doall (map
-;         #(re-frame/dispatch [:handle-parse-produced %])
-;         (-> data :data :payload :select)))
+
 
 (re-frame/register-handler
   :handle-parse-query
@@ -230,64 +216,7 @@
                    :state        nil
                    :_id          uuid
                    :subscribe-to last-emitted})
-        (update-in [:networks (:active-history db) :view] conj uuid))
-      ;(println "last emitted" {:tool tool-name
-      ;                         :_id uuid
-      ;                         :state [state]
-      ;                         :subscribe [(last (get-in db [:histories
-      ;                                                       (:active-history db)
-      ;                                                       :structure]))]})
-      ;(-> db
-      ;    (update-in [:histories (:active-history db) :steps]
-      ;               (fn [steps] (assoc steps uuid {:tool      tool-name
-      ;                                              :_id       uuid
-      ;                                              :state     [state]
-      ;                                              :subscribe [(last (get-in db [:histories
-      ;                                                                            (:active-history db)
-      ;                                                                            :structure]))]})))
-      ;    (update-in [:histories (:active-history db) :structure]
-      ;               (fn [structure] (conj structure uuid))))
-      ;(-> db
-      ;(create-step uuid {:tool tool-name
-      ;                   :_id uuid
-      ;                   :state [(clj->js state)]
-      ;                   :subscribe [(last (get-in db [:histories
-      ;                                                 (:active-history db)
-      ;                                                 :structure]))]})
-      ;(stamp-step last-emitted)
-      ;(clear-available-data)
-      ;)
-      ;  (clear-data ((create-step db uuid {:tool tool-name
-      ;                        :_id uuid
-      ;                        :state []
-      ;                        :subscribe [(:step source)]})))
-      ;  (.log js/console "source" (clj->js source))
-      ;  (.log js/console "data" (clj->js data))
-      )))
-
-(re-frame/register-handler
-  :add-step-old
-  trim-v
-  (fn [db [tool-name state]]
-    (.log js/console "add-step" tool-name state)
-    (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
-          uuid (keyword (rid))]
-      (println "last emitted" last-emitted)
-      (-> db
-          (create-step uuid {:tool      tool-name
-                             :_id       uuid
-                             :state     []
-                             :subscribe [(:step (:source last-emitted))]})
-          (stamp-step last-emitted)
-          (clear-available-data))
-      ;  (clear-data ((create-step db uuid {:tool tool-name
-      ;                        :_id uuid
-      ;                        :state []
-      ;                        :subscribe [(:step source)]})))
-      ;  (.log js/console "source" (clj->js source))
-      ;  (.log js/console "data" (clj->js data))
-      )))
-
+        (update-in [:networks (:active-history db) :view] conj uuid)))))
 
 (re-frame/register-handler
   :start-new-history
@@ -307,6 +236,20 @@
                       :structure   [(keyword new-step-id)]
                       :description (:name tool)
                       :name        (:name tool)})))))
+
+(re-frame/register-handler
+  :new-network trim-v
+  (fn [db]
+    (let [active-project (:active-project db)
+          id             (keyword (rid))]
+      (assoc-in db [:projects active-project :networks id]
+                {:_id   id
+                 :slug  "madeup"
+                 :label "MADE UP Network"
+                 :view  [:node1]
+                 :nodes {:node1 {:_id          :node1
+                                 :tool         "chooselist"
+                                 :subscribe-to nil}}}))))
 
 (defn steps-back-to-beginning
   "Build a map of only this step and the steps required to replay
@@ -541,10 +484,6 @@
               ; (saving to the drawer)
 
               (re-frame/dispatch [:calculate-export location (:output diffed)])
-
-
-
-
 
               ; Give all subscribers their new input and run them.
               (mapv

@@ -6,13 +6,17 @@
             [goog.history.EventType :as EventType]
             [re-frame.core :as re-frame]))
 
+
+
 (defn hook-browser-navigation! []
   (doto (History.)
     (events/listen
       EventType/NAVIGATE
       (fn [event]
+        (println "EVENT" event)
         (secretary/dispatch! (.-token event))))
     (.setEnabled true)))
+
 
 (defn app-routes []
   (secretary/set-config! :prefix "#")
@@ -23,7 +27,6 @@
 
   (defroute "/about" []
             (re-frame/dispatch [:set-active-panel :about-panel]))
-
 
   (defroute "/timeline/:id" [id]
             (do
@@ -49,4 +52,17 @@
             (re-frame/dispatch [:set-active-panel :debug-panel]))
 
   ;; --------------------
-  (hook-browser-navigation!))
+  (hook-browser-navigation!)
+  )
+;
+;(defn nav! [token]
+;  (.setToken history token))
+
+;(def history (doto (History.)
+;               (events/listen
+;                 EventType/NAVIGATE
+;                 (fn [event]
+;                   (println "EVENT" event)
+;                   (secretary/dispatch! (.-token event))))
+;               (.setEnabled true)))
+

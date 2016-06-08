@@ -33,6 +33,7 @@
 (re-frame/register-handler
   :set-active-network
   (fn [db [_ active-network & args]]
+    (re-frame/dispatch [:run-step [:projects :project1 :networks active-network :nodes :node1]])
     (assoc-in db [:active-network] active-network)))
 
 
