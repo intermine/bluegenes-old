@@ -1,33 +1,33 @@
 (ns bluegenes.components.queryoperations.view
-  (:require [re-frame.core :as re-frame]
+  (:require [re-frame.core :as re-frame :refer [subscribe dispatch]]
             [bluegenes.components.queryoperations.handlers]
             [bluegenes.components.queryoperations.subs]
             [bluegenes.components.venn.view :as venn]))
 
 (defn dropdown-research [position]
-  (let [saved-research (re-frame/subscribe [:saved-research])]
+  (let [saved-research (subscribe [:saved-research])
+        lists (subscribe [:lists])]
     (fn [position]
      [:div
       [:div.btn-group
        [:div.btn.btn-primary.dropdown-toggle {:data-toggle "dropdown"}
          [:span "Choose " [:span.caret]]]
-       [:div.dropdown-menu
-        [:div.col-sm-6
-         [:h4 "Saved Data"]
-         [:ul.list-unstyled
-          (for [[id details]  @saved-research]
-            (do
-              [:li
-               {:on-click (fn [] (re-frame/dispatch [:set-qop position id]))}
-               [:a (:label details)]]))]]
-        [:div.col-sm-6
-         [:h4 "Lists"]
-         [:ul.list-unstyled.col-sm-6
-          (for [[id details]  @saved-research]
-            (do
-              [:li
-               {:on-click (fn [] (re-frame/dispatch [:set-qop position id]))}
-               [:a (:label details)]]))]]
+       [:div.dropdown-menu.scrollable-menu
+        [:h4 "Saved Data"]
+        [:ul.list-unstyled
+         (for [[id details]  @saved-research]
+           (do
+             [:li
+              {:on-click (fn [] (re-frame/dispatch [:set-qop position id :saved-data]))}
+              [:a (:label details)]]))]
+        [:h4 "Lists"]
+        [:ul.list-unstyled
+         (for [details (:flymine @lists)]
+           (do
+             [:li
+              {:on-click (fn [] (re-frame/dispatch [:set-qop position (:name details) :list :flymine]))}
+              [:a (:title details)]]))]
+
 
         ]]])))
 

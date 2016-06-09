@@ -80,3 +80,8 @@
  :models
  (fn [db _]
    (reaction (get-in @db [:cache :models]))))
+
+(re-frame/register-sub
+  :lists
+  (fn [db _]
+    (reaction (get-in @db [:cache :lists]))))

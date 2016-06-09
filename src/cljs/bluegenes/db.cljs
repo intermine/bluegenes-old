@@ -43,13 +43,13 @@
 
    :remote-mines   {:humanmine {:_id      :humanmine
                                 :label    "HumanMine"
-                                :url      "beta.humanmine.org/beta"
-                                :service  {:root "beta.humanmine.org/beta"}
+                                :url      "www.humanmine.org/humanmine"
+                                :service  {:root "www.humanmine.org/humanmine"}
                                 :organism "H. sapiens"}
                     :flymine   {:_id      :flymine
                                 :label    "FlyMine"
-                                :url      "beta.flymine.org/beta"
-                                :service  {:root "beta.flymine.org/beta"}
+                                :url      "www.flymine.org/query"
+                                :service  {:root "www.flymine.org/query"}
                                 :organism "H. sapiens"}}
 
    ;:histories      {:dashyboard      {:name           "Dashboard"

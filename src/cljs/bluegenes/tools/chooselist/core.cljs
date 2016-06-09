@@ -98,9 +98,9 @@
   [snapshot
    {:keys [input state cache] :as what-changed}
    {:keys [has-something save-state save-cache] :as api}]
-  (if (nil? (:cache snapshot))
-    (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
-          (save-cache {:lists lists}))))
+  ;(if (nil? (:cache snapshot))
+  ;  (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
+  ;        (save-cache {:lists lists}))))
 
   (if (contains? state :data)
     (has-something state)))
@@ -111,7 +111,8 @@
   (let [local-state (reagent/atom nil)]
     (reagent/create-class
       {:reagent-render
-       (fn [{:keys [state cache api] :as step-data}]
+       (fn [{:keys [state cache api global-cache] :as step-data}]
+         ;(println "has cache" global-cache)
          ;(println "CHOOSE LIST IS RENDERING" step-data)
          ;(println "GOT STEP DATA" api)
          [:div
@@ -122,7 +123,7 @@
              [:th "Type"]
              [:th "#"]
              [:th "Name"]]]
-           (into [:tbody] (for [result (:lists cache)]
+           (into [:tbody] (for [result (:flymine (:lists global-cache))]
                             ;[:tr
                             ; [:td (:type result)]
                             ; [:td (:size result)]

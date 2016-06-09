@@ -22,13 +22,15 @@
 
 (re-frame/register-handler
   :set-qop trim-v
-  (fn [db [position id]]
+  (fn [db [position id type service]]
+    (println "TYPE" service)
     (update-in db
                [:projects (:active-project db)
                 :query-operations :targets (keyword (str position))]
                assoc
                :id id
-               :keep false)))
+               :type type
+               :service service)))
 
 (re-frame/register-handler
   :toggle-qop trim-v
@@ -103,30 +105,6 @@
   (fn [db]
     (let [states (get-in db [:projects (:active-project db) :query-operations :states])]
       (println "looking at states" states)
-      ;
-      ;(def subtraction-query
-      ;  {:select          "*"
-      ;   :from            "Gene"
-      ;   :constraintLogic "(A AND B) OR (C AND D)"
-      ;   :where           [{:path  "Gene"
-      ;                      :op    "IN"
-      ;                      :value "FlyMine_AlzheimersUseCase"
-      ;                      :code  "A"}
-      ;                     {:path  "Gene"
-      ;                      :op    "NOT IN"
-      ;                      :value "PL FlyTF_putativeTFs"
-      ;                      :code  "B"}
-      ;                     {:path  "Gene"
-      ;                      :op    "IN"
-      ;                      :value "PL FlyTF_putativeTFs"
-      ;                      :code  "C"}
-      ;                     {:path  "Gene"
-      ;                      :op    "NOT IN"
-      ;                      :value "FlyMine_AlzheimersUseCase"
-      ;                      :code  "D"}]})
-      ;
-      ;(go (println "query" (<! (im/query-count {:root "www.flymine.org/query"} q1))))
-
       (assoc-in db [:projects (:active-project db) :query-operations :operation]
                 (cond
                   (and (= true (-> states :1 :keep))
@@ -146,44 +124,28 @@
                        (= true (-> states :middle))) "intersection")))))
 
 
+(defn convert-list-to-query [db item]
+  (first (filter #(= (:id item) (:name %)) (get-in db [:cache :lists (:service item)]))))
+
 (re-frame/register-handler
   :run-qop trim-v
   (fn [db]
-
-
-
-
     (let [uuid        (keyword (rid))
           update-path [:projects (:active-project db) :saved-data uuid]
           t1id        (get-in db [:projects (:active-project db)
-                                  :query-operations :targets :1 :id])
+                                  :query-operations :targets :1])
           t2id        (get-in db [:projects (:active-project db)
-                                  :query-operations :targets :2 :id])
-          t1          (get-in db [:projects (:active-project db)
-                                  :saved-data t1id])
+                                  :query-operations :targets :2])
+          t1          (if (= :list (:type t1id))
+                        (convert-list-to-query db t1id)
+                        (get-in db [:projects (:active-project db)
+                                    :saved-data (:id t1id) :payload :data :payload]))
           t2          (get-in db [:projects (:active-project db)
-                                  :saved-data t2id])
+                                  :saved-data (:id t2id) :payload :data :payload])
           op          (get-in db [:projects (:active-project db)
                                   :query-operations :operation])]
 
-      (println "HAS AN OP" op)
-
-      (println "payload" (case op
-                           "union" (combine-queries
-                                     (get-in t1 [:payload :data :payload])
-                                     (get-in t2 [:payload :data :payload]))
-                           "intersection" (intersect-queries
-                                            (get-in t1 [:payload :data :payload])
-                                            (get-in t2 [:payload :data :payload]))
-                           "asymmetric-left" (asymmetric-left-queries
-                                               (get-in t1 [:payload :data :payload])
-                                               (get-in t2 [:payload :data :payload]))
-                           "asymmetric-right" (asymmetric-right-queries
-                                                (get-in t1 [:payload :data :payload])
-                                                (get-in t2 [:payload :data :payload]))
-                           "subtract" nil))
-
-      (println "OP" op)
+      (println "t1" t1)
 
       (update-in db update-path assoc
                  :label "TBD"
@@ -194,18 +156,10 @@
                            :data    {:format  "query"
                                      :type    "Gene"
                                      :payload (case op
-                                                "union" (combine-queries
-                                                          (get-in t1 [:payload :data :payload])
-                                                          (get-in t2 [:payload :data :payload]))
-                                                "intersection" (intersect-queries
-                                                                 (get-in t1 [:payload :data :payload])
-                                                                 (get-in t2 [:payload :data :payload]))
-                                                "asymmetric-left" (asymmetric-left-queries
-                                                                    (get-in t1 [:payload :data :payload])
-                                                                    (get-in t2 [:payload :data :payload]))
-                                                "asymmetric-right" (asymmetric-right-queries
-                                                                     (get-in t1 [:payload :data :payload])
-                                                                     (get-in t2 [:payload :data :payload]))
+                                                "union" (combine-queries t1 t2)
+                                                "intersection" (intersect-queries t1 t2)
+                                                "asymmetric-left" (asymmetric-left-queries t1 t2)
+                                                "asymmetric-right" (asymmetric-right-queries t1 t2)
                                                 "subtract" nil)}}))))
 
 

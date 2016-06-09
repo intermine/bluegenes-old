@@ -20,6 +20,8 @@
   (fn [db [_ mine-key response]]
     (assoc-in db [:cache :templates mine-key] response)))
 
+
+
 (re-frame/register-handler
   :handle-bootstrap-model
   (fn [db [_ mine-key response]]
@@ -161,6 +163,11 @@
     (assoc-in db [:cache :models mine-key] response)))
 
 (re-frame/register-handler
+  :handle-bootstrap-list
+  (fn [db [_ mine-key response]]
+    (assoc-in db [:cache :lists mine-key] response)))
+
+(re-frame/register-handler
   :handle-bootstrap-summary-fields
   (fn [db [_ mine-key response]]
     (assoc-in db [:cache :summary-fields mine-key] response)))
@@ -171,6 +178,7 @@
     (println "Bootstrapping Appliation")
     (doall (map (fn [[mine-key mine-details]]
                   (go (re-frame/dispatch [:handle-bootstrap-template mine-key (<! (im/templates (:service mine-details)))]))
+                  (go (re-frame/dispatch [:handle-bootstrap-list mine-key (<! (im/lists (:service mine-details)))]))
                   (go (re-frame/dispatch [:handle-bootstrap-model mine-key (<! (im/model (:service mine-details)))]))
                   (go (re-frame/dispatch [:handle-bootstrap-summary-fields mine-key (<! (im/all-summary-fields (:service mine-details)))])))
                 (get-in db [:remote-mines])))
