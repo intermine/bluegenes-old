@@ -66,7 +66,18 @@
                                                           #(= network-slug (:slug %))
                                                           (s/collect-one :_id)]
                                                          db)))]
+
+        (let [[x y] (s/select-one [:projects s/ALL s/LAST
+                                   #(= "project1" (:slug %))
+                                   (s/collect-one :_id)
+                                   :networks s/ALL s/LAST
+                                   #(= "network2" (:slug %))
+                                   (s/collect-one :_id)
+                                   butlast]
+                                  db)]
+          (println "X" x))
         (println "sees project" project)
+
         (assoc db :active-panel [active-panel project-slug network-slug]
                   :active-project project
                   :active-network network)))))

@@ -5,6 +5,7 @@
             [reagent.core :as reagent]
             [reagent.impl.util :as impl :refer [extract-props]]
             [clojure.string :as str]
+            [bluegenes.utils.imcljs :as im]
             [bluegenes.tools.templatechooser.helpers :as h]
             [bluegenes.utils.imcljs :as imcljs]))
 
@@ -24,52 +25,65 @@
             has-something (-> step-data :api :has-something)]
         [:a.list-group-item
          {:on-click (fn []
-                      (println "template chooser outputting" has-something)
-                      (has-something {:service {:root "www.flymine.org/query"}
-                                      :data {:format "query"
-                                             :type "Gene"
-                                             :payload query}
+                      (println "SEES QUERY" query)
+                      ;(println "template chooser outputting" has-something)
+                      (has-something {:service  {:root "www.flymine.org/query"}
+                                      :data     {:format  "query"
+                                                 :type    "Gene"
+                                                 :payload query}
                                       :shortcut "viewtable"}))}
          [:h4.list-group-item-heading
           (last (clojure.string/split (:title query) "-->"))]
          [:p.list-group-item-text (:description query)]]))))
 
 
-(defn templates [step-data]
-  (let [templates (re-frame/subscribe [:templates])
-        models    (re-frame/subscribe [:models])]
-    (fn []
-      (let [mine-templates       (:flymine @templates)
-            mine-model           (:flymine @models)
-            runnable-templates   (into {} (h/runnable mine-model mine-templates "Gene"))
-            replaced-constraints (into {}
-                                       (do
-                                         (println "sees payloaddddddddddddddd"
-                                                  (-> step-data :upstream-data :data :payload))
-                                         (cond
-                                           (= "query" (-> step-data :upstream-data :data :format))
-                                           (map (fn [[id query]]
-                                                  [id (h/replace-input-constraints-whole
-                                                        mine-model
-                                                        query
-                                                        "Gene"
-                                                        (-> step-data :upstream-data :data :payload :where first))])
-                                                runnable-templates)
-                                           :else
-                                           (map (fn [[id query]]
-                                                  [id (h/replace-input-constraints
-                                                        mine-model
-                                                        query
-                                                        "Gene"
-                                                        (-> step-data :upstream-data :data :payload))])
-                                                runnable-templates))))]
+(defn templates []
+  (fn [step-data]
+    ; FAST
+    (into [:div.list-group]
+          (for [t (-> step-data :cache :runnable)]
+            [template {:step-data step-data
+                       :template  t}]))
 
-        [:div.list-group
-         (for [t replaced-constraints]
-           [template {:step-data step-data
-                      :template t}])]
+    ; HOLY HELL THIS IS SLOW
+    ;[:div.list-group
+    ; (for [t (-> step-data :cache :runnable)]
+    ;   (do
+    ;     (println "test")
+    ;     [template {:step-data step-data :template  t}]))]
+    ))
 
-        ))))
+(defn ^:export run
+  "This function is called whenever the tool makes a change to its state, or its
+  upstream data changes."
+  [snapshot
+   {:keys [input state cache] :as what-changed}
+   {:keys [has-something save-state save-cache] :as api}
+   global-cache]
+  (if (nil? cache)
+    (let [runnable    (into {} (h/runnable (-> global-cache :models :flymine)
+                                           (-> global-cache :templates :flymine) "Gene"))
+          transformed (into {}
+                            (do
+                              (cond
+                                (= "query" (-> input :data :format))
+                                (map (fn [[id query]]
+                                       [id (h/replace-input-constraints-whole
+                                             (-> global-cache :models :flymine)
+                                             query
+                                             "Gene"
+                                             (-> input :data :payload :where first))])
+                                     runnable)
+                                :else
+                                (map (fn [[id query]]
+                                       [id (h/replace-input-constraints
+                                             (-> global-cache :models :flymine)
+                                             query
+                                             "Gene"
+                                             (-> input :data :payload))])
+                                     runnable))))]
+      (save-cache {:runnable transformed})))
+  (if (contains? state :data) (has-something state)))
 
 (defn upstream-data []
   (fn [data]
@@ -77,8 +91,6 @@
 
 (defn ^:export main []
   (reagent/create-class
-    {:reagent-render (fn [step-data]
-                       [:div
-                        [upstream-data (-> step-data :upstream-data :data :payload count)]
-                        [templates step-data]])}))
+    {:reagent-render (fn [{:keys [state cache api global-cache] :as step-data}]
+                       [:div [templates step-data]])}))
 

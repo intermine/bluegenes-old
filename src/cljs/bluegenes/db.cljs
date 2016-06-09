@@ -20,6 +20,9 @@
    :projects       {:project1 {:_id :project1
                                :slug "project1"
                                :title "I am a project."
+                               :query-operations {:states {:1 {:keep false}
+                                                           :2 {:keep false}
+                                                           :middle false}}
                                :saved-data {:sd1 {:_id :sd1
                                                   :label "My Favorite Genes"
                                                   :slug "myfavgenes"}}

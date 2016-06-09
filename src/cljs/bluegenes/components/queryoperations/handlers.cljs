@@ -34,10 +34,15 @@
   :toggle-qop trim-v
   (fn [db [position]]
     (println "toggling position" position)
+
+
+
     (let [location [:projects (:active-project db)
                     :query-operations :states (keyword (str position))
                     :keep]]
+
       (re-frame/dispatch [:determine-qop])
+
       (update-in db location not))))
 
 (re-frame/register-handler

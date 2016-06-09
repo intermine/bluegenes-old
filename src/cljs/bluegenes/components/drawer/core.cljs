@@ -53,7 +53,10 @@
                                     :on-key-press (partial handle-key details)
                                     :rows         5
                                     :placeholder  "Label your research..."}]
-                                  [:span [:a {:href (str "/#/timeline/project1/data/" slug)} label]])]
+                                  [:span
+                                   {:on-click #(re-frame/dispatch [:set-saved-data-panel
+                                                                   :saved-data-panel "project1" slug])}
+                                   [:a label]])]
                                (let [produced (get-in details [:nodes (last view) :output])]
                                  (println "produced" produced)
                                  ;(println "produced" (-> produced :data :payload count))

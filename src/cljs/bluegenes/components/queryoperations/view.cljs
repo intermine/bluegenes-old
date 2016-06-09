@@ -11,12 +11,25 @@
       [:div.btn-group
        [:div.btn.btn-primary.dropdown-toggle {:data-toggle "dropdown"}
          [:span "Choose " [:span.caret]]]
-       [:ul.dropdown-menu
-        (for [[id details]  @saved-research]
-          (do
-            [:li
-             {:on-click (fn [] (re-frame/dispatch [:set-qop position id]))}
-             [:a (:label details)]]))]]])))
+       [:div.dropdown-menu
+        [:div.col-sm-6
+         [:h4 "Saved Data"]
+         [:ul.list-unstyled
+          (for [[id details]  @saved-research]
+            (do
+              [:li
+               {:on-click (fn [] (re-frame/dispatch [:set-qop position id]))}
+               [:a (:label details)]]))]]
+        [:div.col-sm-6
+         [:h4 "Lists"]
+         [:ul.list-unstyled.col-sm-6
+          (for [[id details]  @saved-research]
+            (do
+              [:li
+               {:on-click (fn [] (re-frame/dispatch [:set-qop position id]))}
+               [:a (:label details)]]))]]
+
+        ]]])))
 
 (defn selection-details [position]
   (let [representing (re-frame/subscribe [(keyword (str "qop-" position))])]

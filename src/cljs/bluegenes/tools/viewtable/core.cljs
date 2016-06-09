@@ -70,6 +70,8 @@
   [snapshot
    {:keys [input state cache] :as what-changed}
    {:keys [has-something save-state save-cache]}]
+
+  (println "VIEW TABLE HAS STATE" state)
   (if input
     (save-state {:service (:service input)
                  :data    {:payload (normalize-input input)
@@ -95,7 +97,11 @@
     ;                (clj->js {:service {:root "www.flymine.org/query"}
     ;                          :query   (:payload (:data state))}))))
 
+    (println "SOMEFN" (-> state :data :payload))
 
+    (println "SERVICE" (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
+                           (.query (clj->js (-> state :data :payload)))
+                           (.then (fn [x] (println "X" x)) (fn [x] (println "FAILX" x)))))
 
     (if state (-> (.loadTable js/imtables
                               target
@@ -112,8 +118,7 @@
                                                                    :type    "Gene"}})))))
                          (fn [error] (println "TABLE ERROR" error)))
                   ))
-    )
-  )
+    ))
 
 (defn mytable []
   (reagent/create-class

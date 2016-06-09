@@ -55,8 +55,8 @@
   (hook-browser-navigation!)
   )
 ;
-;(defn nav! [token]
-;  (.setToken history token))
+(defn nav! [token]
+  (.setToken history token))
 
 ;(def history (doto (History.)
 ;               (events/listen

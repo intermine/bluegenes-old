@@ -34,7 +34,7 @@
                (map (fn [constraint]
                       (if (and (= class-to-replace (im/end-class model (:path constraint)))
                                (= true (:editable constraint)))
-                        new-value
+                        (assoc new-value :path (:path constraint))
                         constraint)) constraints))))
 
 (def runnable (comp with-one-editable-constraint with-constraint-class))

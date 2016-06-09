@@ -46,6 +46,11 @@
    (reaction (get-in @db [:mines]))))
 
 (re-frame/register-sub
+  :global-cache
+  (fn [db]
+    (reaction (get-in @db [:cache]))))
+
+(re-frame/register-sub
  :settled-steps
  (fn [db _]
    (reaction (filter #(true? (:settled %)) (get-in @db [:current-steps])))))

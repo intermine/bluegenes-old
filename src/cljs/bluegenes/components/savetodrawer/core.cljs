@@ -29,7 +29,7 @@
 
 (defn query-saver []
   (fn [payload]
-    (.log js/console "query saver payload" payload)
+    ;(.log js/console "query saver payload" payload)
     [:div.btn-group
      [:div.btn.btn-success.dropdown-toggle {:data-toggle "dropdown"}
       [:i.fa.fa-floppy-o] [:span " Save Data " [:span.caret]]]
@@ -72,7 +72,7 @@
 
 (defn list-saver []
   (fn [payload]
-    (println "list saver sees payload" (:output payload))
+    ;(println "list saver sees payload" (:output payload))
     [:div.btn.btn-success
      ;{:on-click #(println "has payload" (dissoc payload :cache))}
 

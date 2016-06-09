@@ -154,7 +154,8 @@
 
 (defn cont []
   (let [project (re-frame/subscribe [:active-project])
-        network (re-frame/subscribe [:active-network])]
+        network (re-frame/subscribe [:active-network])
+        global-cache (re-frame/subscribe [:global-cache])]
     (fn [step-data]
       ;(println "PROJECT")
       (let [location [:projects @project :networks @network :nodes (:_id step-data)]
@@ -169,8 +170,8 @@
          [savetodrawer/main step-data]
          [:div.body
           ;[:h1 (str "cont" (:tool step-data))]
-          [tool (assoc step-data :api comms)]]
-         ])
+          [tool (assoc step-data :api comms
+                                 :global-cache @global-cache)]]])
       )))
 
 (defn previous-steps
@@ -193,7 +194,9 @@
         (for [[id details] @networks]
           (doall
             (println "test" @active-network id)
-            [:li {:on-click #(dispatch [:set-active-network id])
+            [:li {:on-click #(re-frame/dispatch [:set-timeline-panel :timeline-panel
+                                                 "project1" (:slug details)])
+                  ;:on-click #(dispatch [:set-active-network id])
                   :class    (if (= @active-network id) "active")}
              [:a (:label details)]]))
         [:li [:div.btn.btn-primary

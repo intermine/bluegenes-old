@@ -112,7 +112,7 @@
     (reagent/create-class
       {:reagent-render
        (fn [{:keys [state cache api] :as step-data}]
-         (println "CHOOSE LIST IS RENDERING" step-data)
+         ;(println "CHOOSE LIST IS RENDERING" step-data)
          ;(println "GOT STEP DATA" api)
          [:div
           [pagination-control]

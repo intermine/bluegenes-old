@@ -444,11 +444,13 @@
     (let [node (get-in db location)
           run-fn (-> bluegenes.tools (aget (:tool node)) (aget "core") (aget "run"))]
       (run-fn
-        node
-        (if (nil? diffmap) node diffmap)
-        {:has-something (partial api/has-something location)
+        node                                                ;Snapshot
+        (if (nil? diffmap) node diffmap)                    ;Difference in data
+        {:has-something (partial api/has-something location) ;API
          :save-state    (partial api/save-state location)
-         :save-cache    (partial api/save-cache location)}))
+         :save-cache    (partial api/save-cache location)}
+        (get-in db [:cache])                                ;Global Cache
+        ))
     db))
 
 (re-frame/register-handler
