@@ -20,6 +20,9 @@
 
 (defn rid [] (str (make-random-uuid)))
 
+
+(def alphabet (into [] "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+
 (re-frame/register-handler
   :set-qop trim-v
   (fn [db [position id type service]]
@@ -82,8 +85,61 @@
     :where [(assoc (get-in query-a [:where 0]) :code "A")
             (assoc (get-in query-b [:where 0]) :code "B")]))
 
+
+
+
+;(defn readdress [queries op]
+;  (loop [[current-query & remaining-queries] queries
+;         alphabet    alphabet
+;         final-query {:from "Gene" :select "*" :where []}]
+;    (let [[allocated-letters remaining-letters] (split-at (count (:where current-query)) alphabet)
+;          adjusted-query (-> (update current-query :where #(mapv assoc-letter % alphabet))
+;                             ; Rebuild the constraint logic
+;                             (update :constraintLogic #(clojure.string/join " " (interpose "AND" allocated-letters))))
+;          _ (println "adjusted" adjusted-query)
+;          updated-final-query (update final-query :constraintLogic (fn [val]
+;                                                                     (println "val" val)
+;                                                                     (let [new (str "(" (:constraintLogic adjusted-query) ")")]
+;                                                                       (if (nil? val) new (str val " AND " new)))))]
+;      (if (empty? remaining-queries)
+;        updated-final-query
+;        (recur remaining-queries remaining-letters updated-final-query)))))
+
+
+
+
+(defn assoc-letter [constraint letter] (assoc constraint :code letter))
+
+(defn readdress [queries op]
+  (loop [[current-query & remaining-queries] queries
+         alphabet    alphabet
+         adjusted-queries '()]
+    (let [[allocated-letters remaining-letters] (split-at (count (:where current-query)) alphabet)
+          adjusted-query (-> (update current-query :where #(mapv assoc-letter % alphabet))
+                             (update :constraintLogic #(clojure.string/join " " (interpose "AND" allocated-letters))))
+          tally (conj adjusted-queries adjusted-query)]
+      (if (empty? remaining-queries)
+        tally
+        (recur remaining-queries remaining-letters tally)))))
+
+(defn merge-queries [queries op]
+  (let [queries (readdress queries op)]
+    (println "queries" queries)
+    {:select          "*"
+     :from            "Gene"
+     :constraintLogic (clojure.string/join " " (interpose op (map #(str "(" (:constraintLogic %) ")") queries)))
+     :where           (into [] (mapcat (fn [query] (:where query)) queries))}))
+
+
+(defn infix->prefix [[a op b & remaining]]
+  (map (fn [x] (if (list? x) (infix->prefix x) x)) (into [op a b] remaining)))
+
+
 (defn asymmetric-left-queries [query-a query-b]
-  (println "asymmetric-left-queries" query-a query-b)
+  ;(println "asymmetric-left-queries" query-a query-b)
+
+  (println "readdressed" (merge-queries [query-a query-b] "AND"))
+
   (hash-map
     :from "Gene"
     :select "*"
@@ -99,6 +155,8 @@
     :constraintLogic "A and B"
     :where [(assoc (get-in query-a [:where 0]) :code "A" :op "NOT IN")
             (assoc (get-in query-b [:where 0]) :code "B")]))
+
+
 
 (re-frame/register-handler
   :determine-qop trim-v
@@ -125,7 +183,15 @@
 
 
 (defn convert-list-to-query [db item]
-  (first (filter #(= (:id item) (:name %)) (get-in db [:cache :lists (:service item)]))))
+  (println "item" item)
+  (println "converted" (get-in db [:remote-mines (:service item) :service]))
+  (let [found-list (first (filter #(= (:id item) (:name %)) (get-in db [:cache :lists (:service item)])))
+        service    (get-in db [:remote-mines (:service item) :service])]
+    {:select "*"
+     :from   (:type found-list)
+     :where  [{:path  (:type found-list)
+               :op    "IN"
+               :value (:name found-list)}]}))
 
 (re-frame/register-handler
   :run-qop trim-v
@@ -140,12 +206,15 @@
                         (convert-list-to-query db t1id)
                         (get-in db [:projects (:active-project db)
                                     :saved-data (:id t1id) :payload :data :payload]))
-          t2          (get-in db [:projects (:active-project db)
-                                  :saved-data (:id t2id) :payload :data :payload])
+          t2          (if (= :list (:type t2id))
+                        (convert-list-to-query db t2id)
+                        (get-in db [:projects (:active-project db)
+                                    :saved-data (:id t2id) :payload :data :payload]))
           op          (get-in db [:projects (:active-project db)
                                   :query-operations :operation])]
 
-      (println "t1" t1)
+
+
 
       (update-in db update-path assoc
                  :label "TBD"
