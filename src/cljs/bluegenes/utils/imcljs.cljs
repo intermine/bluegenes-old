@@ -85,7 +85,6 @@
 (defn lists
   "Get the results of using a list enrichment widget to calculate statistics for a set of objects."
   [service]
-  (println "LOOKING AT ROOT" service)
   (go (let [response (<! (http/get (str "http://" (:root service) "/service/lists")
                                    {:with-credentials? false
                                     :keywordize-keys? true}))]

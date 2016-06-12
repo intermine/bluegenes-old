@@ -39,7 +39,17 @@
                                                      :view  [:node1]
                                                      :nodes {:node1 {:_id          :node1
                                                                      :tool         "smartidresolver"
-                                                                     :subscribe-to nil}}}}}}
+                                                                     :subscribe-to nil}}}
+                                          :network3 {:_id   :network3
+                                                     :slug  "network3"
+                                                     :label "Enrichment"
+                                                     :view  [:node1 :node2]
+                                                     :nodes {:node1 {:_id          :node1
+                                                                     :tool         "chooselist"
+                                                                     :subscribe-to nil}
+                                                             :node2 {:_id          :node2
+                                                                     :tool         "enrichment"
+                                                                     :subscribe-to :node1}}}}}}
 
    :remote-mines   {:humanmine {:_id      :humanmine
                                 :label    "HumanMine"

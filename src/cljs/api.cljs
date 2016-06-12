@@ -14,7 +14,7 @@
   (re-frame/dispatch [:update-node location function]))
 
 (defn save-cache [location data]
-  ;(println "API: save-cached called (ignoring data)")
+  ;(println "API: save-cached called (ignoring data)" location data)
   (re-frame/dispatch [:update-node location #(assoc % :cache data)]))
 
 (def api {:has-something (partial has-something :someid)})

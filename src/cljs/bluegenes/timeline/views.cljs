@@ -193,7 +193,6 @@
        [:ul.nav.nav-tabs
         (for [[id details] @networks]
           (doall
-            (println "test" @active-network id)
             [:li {:on-click #(re-frame/dispatch [:set-timeline-panel :timeline-panel
                                                  "project1" (:slug details)])
                   ;:on-click #(dispatch [:set-active-network id])

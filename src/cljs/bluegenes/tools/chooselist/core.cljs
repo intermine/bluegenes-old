@@ -53,7 +53,7 @@
      (fn [list-name list-value api state]
        ;(println "list row called with list value" list-value)
        [:tr.result {:on-click (fn []
-                                (.log js/console "CLICK" list-value)
+                                ;(.log js/console "CLICK" list-value)
                                 ((:save-state api)
                                   {:service {:root "www.flymine.org/query"}
                                    :data    {:payload {:select "*"
@@ -98,12 +98,9 @@
   [snapshot
    {:keys [input state cache] :as what-changed}
    {:keys [has-something save-state save-cache] :as api}]
-  ;(if (nil? (:cache snapshot))
-  ;  (go (let [lists (<! (im/lists {:service {:root "www.flymine.org/query"}}))]
-  ;        (save-cache {:lists lists}))))
 
   (if (contains? state :data)
-    (has-something state)))
+    (has-something (:state snapshot))))
 
 (defn ^:export main []
   "Output a table representing all lists in a mine.

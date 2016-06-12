@@ -428,7 +428,7 @@
                      #(= id (:subscribe-to %))
                      :_id] db)))
 
-(defn get-changes
+(defn get-changes-old
   "Returns a new map of where the value of the key in the
   new map is different from the value of the key in the old map."
   [old-m new-m]
@@ -436,6 +436,14 @@
             (if (not= (k old-m) (k new-m))
               (assoc total k v)
               total)) {} new-m))
+
+(defn get-changes [m1 m2]
+  (reduce (fn [total [k v]]
+            (if (= (k m1) (k m2))
+              total
+              (assoc total k (if (map? v)
+                               (get-changes (k m1) (k m2))
+                               v)))) {} m2))
 
 (re-frame/register-handler
   :run-step trim-v
@@ -481,18 +489,18 @@
           ; If the difference map contains an :output key then we must
           ; feed it as an input to each subscriber and re-run them.
           (if (contains? diffed :output)
+
             (do
               ; Deconstruct the output to individual parts for exporting
               ; (saving to the drawer)
-
-              (re-frame/dispatch [:calculate-export location (:output diffed)])
+              (re-frame/dispatch [:calculate-export location (:output updated)])
 
               ; Give all subscribers their new input and run them.
               (mapv
                 (fn [subscriber]
                   (re-frame/dispatch ^:flush-dom [:update-node
                                                   (conj (vec (butlast location)) subscriber)
-                                                  #(assoc % :input (:output diffed))]))
+                                                  #(assoc % :input (:output updated))]))
                 (subscribers db location))))))
 
       (assoc-in db location updated))))
@@ -500,14 +508,14 @@
 (re-frame/register-handler
   :add-step
   trim-v
-  (fn [db [tool-name]]
+  (fn [db [tool-name state]]
     (let [project (get-in db [:active-project])
           network (get-in db [:active-network])
           last-emitted (last (get-in db [:projects project :networks network :view]))
           uuid (keyword (rid))
           previous-output (get-in db [:projects project :networks network :nodes last-emitted :output])
           node {:tool         tool-name
-                :state        nil
+                :state        state
                 :_id          uuid
                 :input        previous-output
                 :subscribe-to last-emitted}]

@@ -70,6 +70,13 @@
      {:on-click #(re-frame/dispatch [:add-step "templatechooser" {}])}
      "Run Template"]))
 
+(defn enrichtool []
+  (fn []
+    [:button.btn
+     {:on-click #(re-frame/dispatch [:add-step "enrichment" {:widget "pathway_enrichment"
+                                                             :title "Pathway Enrichment"}])}
+     "Run Enrichment"]))
+
 
 (defn listtool []
   (fn []
@@ -107,7 +114,8 @@
        [:div.body
         [listtool]
         [templatetool]
-        [tabletool]]
+        [tabletool]
+        [enrichtool]]
 
        ;[:div.next-steps-title "Next Steps23"]
        [:div.tool-card-container

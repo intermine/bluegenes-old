@@ -67,58 +67,37 @@
 (defn ^:export run
   "This function is called whenever the tool makes a change to its state, or its
   upstream data changes."
-  [snapshot
-   {:keys [input state cache] :as what-changed}
-   {:keys [has-something save-state save-cache]}]
+  [snapshot what-changed {:keys [has-something save-state save-cache]}]
 
-  (println "VIEW TABLE HAS STATE" state)
-  (if input
-    (save-state {:service (:service input)
-                 :data    {:payload (normalize-input input)
-                           :format  "query"
-                           :type    "Gene"}})
-    (if state
-      (has-something state))))
+  (if (contains? what-changed :input)
+    (do
+      (save-state {:service (:service (:input snapshot))
+                   :data    {:payload (normalize-input (:input snapshot))
+                             :format  "query"
+                             :type    "Gene"}})))
+
+  (if (contains? what-changed :state)
+    (has-something (:state snapshot))))
 
 (defn somefn [component]
   (let [{:keys [state api]} (reagent/props component)
-        node (reagent/dom-node component)
+        node   (reagent/dom-node component)
         target (.item (.getElementsByClassName node "imtable") 0)]
 
-
-    ;(println "DOM NODE" target)
-
-    ;(if state
-    ;  (do
-    ;    ;(println "HAS STATE" state)
-    ;    (.loadTable js/imtables
-    ;                target
-    ;                nil
-    ;                (clj->js {:service {:root "www.flymine.org/query"}
-    ;                          :query   (:payload (:data state))}))))
-
-    (println "SOMEFN" (-> state :data :payload))
-
-    (println "SERVICE" (-> (js/imjs.Service. #js {:root "www.flymine.org/query"})
-                           (.query (clj->js (-> state :data :payload)))
-                           (.then (fn [x] (println "X" x)) (fn [x] (println "FAILX" x)))))
-
-    (if state (-> (.loadTable js/imtables
-                              target
-                              (clj->js {:start 0 :size 10})
-                              (clj->js {:service (:service state)
-                                        :query (:payload (:data state))}))
-                  (.then (fn [table]
-                           (-> table .-history (.on "changed:current"
-                                                    (fn [x]
-                                                      ((:save-state api)
-                                                        {:service (:service state)
-                                                         :data    {:payload (js->clj (-> x .-attributes .-query (.toJSON)) :keywordize-keys true)
-                                                                   :format  "query"
-                                                                   :type    "Gene"}})))))
-                         (fn [error] (println "TABLE ERROR" error)))
-                  ))
-    ))
+    (if-not (empty? state) (-> (.loadTable js/imtables
+                                           target
+                                           (clj->js {:start 0 :size 10})
+                                           (clj->js {:service (:service state)
+                                                     :query   (:payload (:data state))}))
+                               (.then (fn [table]
+                                        (-> table .-history (.on "changed:current"
+                                                                 (fn [x]
+                                                                   ((:save-state api)
+                                                                     {:service (:service state)
+                                                                      :data    {:payload (js->clj (-> x .-attributes .-query (.toJSON)) :keywordize-keys true)
+                                                                                :format  "query"
+                                                                                :type    "Gene"}})))))
+                                      (fn [error] (println "TABLE ERROR" error)))))))
 
 (defn mytable []
   (reagent/create-class
@@ -128,6 +107,4 @@
 
 (defn ^:export main []
   (fn [{:keys [state api] :as step-data}]
-    ;(println "VIEW TABLE RUNNING WITH" step-data)
-    [mytable (select-keys step-data [:api :state])]
-    ))
+    [mytable (select-keys step-data [:api :state])]))
