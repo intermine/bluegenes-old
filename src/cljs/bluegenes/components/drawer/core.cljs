@@ -57,14 +57,9 @@
                                    {:on-click #(re-frame/dispatch [:set-saved-data-panel
                                                                    :saved-data-panel "project1" slug])}
                                    [:a label]])]
-                               (let [produced (get-in details [:nodes (last view) :output])]
-                                 (println "produced" produced)
-                                 ;(println "produced" (-> produced :data :payload count))
-                                 [:span.count
-                                  [:span.big (str (-> payload :count))]
-                                  [:span.right (str (-> payload :data :type) "s")]]
-
-                                 )
+                               [:span.count
+                                [:span.big (str (-> payload :count))]
+                                [:span.right (str (-> payload :data :type) "s")]]
                                ])})))
 
 (defn main []

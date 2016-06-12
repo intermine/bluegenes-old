@@ -11,7 +11,7 @@
      [:div
       [:div.btn-group
        [:div.btn.btn-primary.dropdown-toggle {:data-toggle "dropdown"}
-         [:span "Choose " [:span.caret]]]
+         [:span (str "Choose " (:label @saved-research)) [:span.caret]]]
        [:div.dropdown-menu.scrollable-menu
         [:h4 "Saved Data"]
         [:ul.list-unstyled
@@ -47,7 +47,7 @@
 
 (defn selection-details [position]
   (let [representing (re-frame/subscribe [(keyword (str "qop-" position))])]
-    [:p (str (:label @representing))]))
+    [:p (str @representing)]))
 
 (defn operations []
   (let [op (re-frame/subscribe [:qop-op])]

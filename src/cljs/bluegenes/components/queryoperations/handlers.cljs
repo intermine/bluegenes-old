@@ -47,8 +47,7 @@
                  :id id
                  :deconstructed (im/deconstruct-query-by-class (-> db :cache :models :flymine) query)
                  :type type
-                 :service service))
-    ))
+                 :service service))))
 
 (re-frame/register-handler
   :update-qop-query trim-v

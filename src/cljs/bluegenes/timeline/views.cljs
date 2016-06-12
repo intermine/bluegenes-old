@@ -147,17 +147,11 @@
                                )
                              )]])})))
 
-;(-> bluegenes.tools
-;    (aget (:tool step-data))
-;    (aget "core")
-;    (aget "main"))
-
 (defn cont []
-  (let [project (re-frame/subscribe [:active-project])
-        network (re-frame/subscribe [:active-network])
+  (let [project      (re-frame/subscribe [:active-project])
+        network      (re-frame/subscribe [:active-network])
         global-cache (re-frame/subscribe [:global-cache])]
     (fn [step-data]
-      ;(println "PROJECT")
       (let [location [:projects @project :networks @network :nodes (:_id step-data)]
             comms    {:has-something (partial api/has-something location)
                       :save-state    (partial api/save-state location)
@@ -169,10 +163,8 @@
         [:div.step-container
          [savetodrawer/main step-data]
          [:div.body
-          ;[:h1 (str "cont" (:tool step-data))]
           [tool (assoc step-data :api comms
-                                 :global-cache @global-cache)]]])
-      )))
+                                 :global-cache @global-cache)]]]))))
 
 (defn previous-steps
   "Iterate through the history's structure and create step containers for
@@ -195,7 +187,6 @@
           (doall
             [:li {:on-click #(re-frame/dispatch [:set-timeline-panel :timeline-panel
                                                  "project1" (:slug details)])
-                  ;:on-click #(dispatch [:set-active-network id])
                   :class    (if (= @active-network id) "active")}
              [:a (:label details)]]))
         [:li [:div.btn.btn-primary
@@ -209,23 +200,18 @@
      [:h2 (:name @history)]
      [:h4 (:description @history)]]))
 
-
-
-
 (defn saved-data-view []
   (let [active-project (re-frame/subscribe [:active-project])
         active-data    (re-frame/subscribe [:active-data])]
     [:div.timeline-container
-     ;  [stepdash/main]
-     ;  [nextsteps/main]
      [drawer/main]
      [:div.stretchme
       [tabs]
-      [:div.prevsteps [:div.step-container
-                       [viewtable/main {:state {:service (:service (:payload @active-data))
-                                                :data    {:payload (viewtable/normalize-input (:payload @active-data))}}}]]]]
-     ])
-  )
+      [:div.prevsteps
+       [whatnext/main]
+       [:div.step-container
+        [viewtable/main {:state {:service (:service (:payload @active-data))
+                                 :data    {:payload (viewtable/normalize-input (:payload @active-data))}}}]]]]]))
 
 (defn operations []
   [:div.timeline-container
@@ -238,10 +224,7 @@
 
 (defn main-view []
   [:div.timeline-container
-   ;  [stepdash/main]
-   ;  [nextsteps/main]
    [drawer/main]
    [:div.stretchme
     [tabs]
-    [previous-steps]]
-   ])
+    [previous-steps]]])

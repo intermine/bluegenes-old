@@ -79,8 +79,8 @@
      [:td (.. (:p-value row) (toPrecision 6))]
      [:td
       {:on-click (fn []
-                   (has-something {:data
-                                             {:format  "query"
+                   (println "EMITTING")
+                   (has-something {:data     {:format  "query"
                                               :type    path-constraint
                                               :payload (c/build-matches-query
                                                          path-query
@@ -93,16 +93,25 @@
 (defn table
   "Table to display enrichment results"
   []
-  (fn [enrichment-results]
+  (fn [step-data]
     (do
       [:div.table-wrapper
        [:table.table.table-striped.comp-table
         [table-header]
         [:tbody
-         (if (> (count enrichment-results) 0)
+         (if (> (count (-> step-data :cache :enrichment-results)) 0)
            (do
-             (for [row (take 10 enrichment-results)]
+             (for [row (take 10 (-> step-data :cache :enrichment-results))]
                [:tr
+                {:on-click (fn []
+                             ((:has-something (:api step-data)) {:data     {:format  "query"
+                                                             :type    (-> step-data :cache :path-constraint)
+                                                             :payload (c/build-matches-query
+                                                                        (-> step-data :cache :path-query)
+                                                                        (-> step-data :cache :path-constraint)
+                                                                        (:identifier row))}
+                                                  :service  (-> step-data :input :service)
+                                                  :shortcut "viewtable"}))}
                 [:td (:description row)]
                 [:td (:p-value row)]
                 [:td (:matches row)]])))]]])))
@@ -116,27 +125,6 @@
                      :population    nil
                      :correction    "Bonferroni"})
 
-(defn handle-update
-  "Fetch enrichment results from Intermine and save the results."
-  [component]
-  (let [{:keys [api upstream-data state]} (reagent/props component)]
-    ; Start with default values for enrichment, then merge in the state
-    (let [replace-state         (:replace-state api)
-          enrichment-parameters (merge default-values
-                                       state
-                                       (cond
-                                         (= "list" (:format (:data upstream-data)))
-                                         {:list (:payload (:data upstream-data))}
-                                         (= "ids" (:format (:data upstream-data)))
-                                         {:ids (:payload (:data upstream-data))}))]
-      (go (let [res (<! (im/enrichment (select-keys upstream-data [:service]) enrichment-parameters))]
-            (replace-state (update-in enrichment-parameters [:cache]
-                                      assoc
-                                      :enrichment-results (-> res :results)
-                                      :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
-                                      :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
-                                      :path-constraint (:pathConstraint res))))))))
-
 (defn run
   "This function is called whenever the tool makes a change to its state, or its
   upstream data changes."
@@ -145,48 +133,30 @@
    {:keys [has-something save-state save-cache] :as api}
    global-cache]
 
-  (let [replace-state         (:save-state api)
-        deconstructed         (im/deconstruct-query-by-class (-> global-cache :models :flymine)
-                                                             (-> input :data :payload))
-        ;enrichment-parameters (merge default-values state (cond
-        ;                                                    ;(= "list" (:format (:data input)))
-        ;                                                    ;{:list (:payload (:data input))}
-        ;                                                    ;(= "query" (:format (:data input)))
-        ;                                                    (= "query" "one")
-        ;                                                    {:ids (-> input :data :payload)}))
-        ]
+  (let [deconstructed (im/deconstruct-query-by-class (-> global-cache :models :flymine)
+                                                     (-> snapshot :input :data :payload))]
 
-    ;(case (count deconstructed)
-    ;  1 (println "HAS JUST ONE" (-> deconstructed seq first second))
-    ;  2 (println "HAS TWO" (keys deconstructed)))
-
-    ;(println "cachen" cache)
-
+    ; If we don't have cached ids, or the input has changed, get new ids
     (if (or (not (contains? cache :ids)) (contains? what-changed :input))
-      (let [query (-> deconstructed seq first second first :query)]
-        (go (let [results (flatten (<! (im/query-rows {:service (:service input)} query)))]
-              (save-cache {:ids results})))))
+      (do
+        (println "what-changed" what-changed)
+        (let [query (-> deconstructed seq first second first :query)]
+          (go (let [results (flatten (<! (im/query-rows {:service (:service (:input snapshot))} query)))]
+                (save-cache (merge (:cache snapshot) {:ids results})))))))
 
+    ; If our state has changed then merge it on top of the default values
+    (if (contains? what-changed :state)
+      (save-state (merge default-values (:state snapshot))))
+
+    ; If our cache contains IDs we need to re-run:
     (if (contains? cache :ids)
       (let [parameters (merge default-values (:state snapshot) (select-keys cache [:ids]))]
-        (println "doing parametesr" (-> snapshot :input :service))
-        (go (let [results (<! (im/enrichment {:service (-> snapshot :input :service)} parameters))]
-              (println "TRUE RESULTS" results)))
-        ))
-
-
-
-    ;(println "deconstructed" (count (keys deconstructed)))
-    ;(println "enrichment params" enrichment-parameters)
-    ;(go (let [res (<! (im/enrichment (select-keys upstream-data [:service]) enrichment-parameters))]
-    ;      (replace-state (update-in enrichment-parameters [:cache]
-    ;                                assoc
-    ;                                :enrichment-results (-> res :results)
-    ;                                :path-query (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
-    ;                                :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
-    ;                                :path-constraint (:pathConstraint res)))))
-    )
-  )
+        (go (let [res (<! (im/enrichment {:service (-> snapshot :input :service)} parameters))]
+              (save-cache {:ids                    (:ids cache)
+                           :enrichment-results     (-> res :results)
+                           :path-query             (js->clj (.parse js/JSON (:pathQuery res)) :keywordize-keys true)
+                           :path-query-for-matches (js->clj (.parse js/JSON (:pathQueryForMatches res)) :keywordize-keys true)
+                           :path-constraint        (:pathConstraint res)})))))))
 
 (defn ^:export main []
   "Output a table representing all lists in a mine.
@@ -196,10 +166,7 @@
      (fn [step-data]
        [:div.enrichment
         [:h3 (:title (:state step-data))]
-        [:div (str "results: " (count (get-in step-data [:state :cache :enrichment-results])))]
+        [:div (str "results: " (count (get-in step-data [:cache :enrichment-results])))]
         [enrichment-controls {:state         (:state step-data)
                               :replace-state (-> step-data :api :replace-state)}]
-        [table (-> step-data :state :cache :enrichment-results)]])
-     ;:component-did-mount handle-update
-     ;:component-did-update handle-update
-     }))
+        [table step-data]])}))
