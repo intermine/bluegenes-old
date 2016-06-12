@@ -1,7 +1,7 @@
 (ns bluegenes.components.queryoperations.handlers
   (:require-macros [reagent.ratom :refer [reaction]]
                    [cljs.core.async.macros :refer [go go-loop]])
-  (:require [re-frame.core :as re-frame :refer [debug trim-v enrich]]
+  (:require [re-frame.core :as re-frame :refer [debug trim-v enrich register-handler]]
             [bluegenes.db :as db]
             [secretary.core :as secretary]
             [schema.core :as s]
@@ -11,7 +11,8 @@
             [bluegenes.api :as api]
             [com.rpl.specter :as specter]
             [cuerdas.core :as cue]
-            [cljs.core.async :refer [put! chan <! >! timeout close!]]
+            [clojure.set :as set :refer [union intersection difference]]
+            [cljs.core.async :as async :refer [put! chan <! >! timeout close!]]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report
                                 logf tracef debugf infof warnf errorf fatalf reportf
@@ -23,17 +24,41 @@
 
 (def alphabet (into [] "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
 
+(defn convert-list-to-query [db item]
+  (println "item" item)
+  (println "converted" (get-in db [:remote-mines (:service item) :service]))
+  (let [found-list (first (filter #(= (:id item) (:name %)) (get-in db [:cache :lists (:service item)])))
+        service    (get-in db [:remote-mines (:service item) :service])]
+    {:select "*"
+     :from   (:type found-list)
+     :where  [{:path  (:type found-list)
+               :op    "IN"
+               :value (:name found-list)}]}))
+
 (re-frame/register-handler
   :set-qop trim-v
   (fn [db [position id type service]]
-    (println "TYPE" service)
-    (update-in db
-               [:projects (:active-project db)
-                :query-operations :targets (keyword (str position))]
-               assoc
-               :id id
-               :type type
-               :service service)))
+    (let [query (if (= :list type)
+                  (convert-list-to-query db {:id id :service service})
+                  (get-in db [:projects (:active-project db)
+                              :saved-data id :payload :data :payload]))]
+      (update-in db [:projects (:active-project db) :query-operations :targets (keyword (str position))]
+                 assoc
+                 :id id
+                 :deconstructed (im/deconstruct-query-by-class (-> db :cache :models :flymine) query)
+                 :type type
+                 :service service))
+    ))
+
+(re-frame/register-handler
+  :update-qop-query trim-v
+  (fn [db [position query]]
+    (assoc-in db [:projects (:active-project db) :query-operations :targets (keyword (str position)) :query]
+               query)
+    ))
+
+
+
 
 (re-frame/register-handler
   :toggle-qop trim-v
@@ -112,12 +137,12 @@
 
 (defn readdress [queries op]
   (loop [[current-query & remaining-queries] queries
-         alphabet    alphabet
+         alphabet         alphabet
          adjusted-queries '()]
     (let [[allocated-letters remaining-letters] (split-at (count (:where current-query)) alphabet)
           adjusted-query (-> (update current-query :where #(mapv assoc-letter % alphabet))
                              (update :constraintLogic #(clojure.string/join " " (interpose "AND" allocated-letters))))
-          tally (conj adjusted-queries adjusted-query)]
+          tally          (conj adjusted-queries adjusted-query)]
       (if (empty? remaining-queries)
         tally
         (recur remaining-queries remaining-letters tally)))))
@@ -182,39 +207,13 @@
                        (= true (-> states :middle))) "intersection")))))
 
 
-(defn convert-list-to-query [db item]
-  (println "item" item)
-  (println "converted" (get-in db [:remote-mines (:service item) :service]))
-  (let [found-list (first (filter #(= (:id item) (:name %)) (get-in db [:cache :lists (:service item)])))
-        service    (get-in db [:remote-mines (:service item) :service])]
-    {:select "*"
-     :from   (:type found-list)
-     :where  [{:path  (:type found-list)
-               :op    "IN"
-               :value (:name found-list)}]}))
 
-(re-frame/register-handler
-  :run-qop trim-v
-  (fn [db]
+(register-handler
+  :accept-qop trim-v
+  (fn [db [s1 s2]]
     (let [uuid        (keyword (rid))
-          update-path [:projects (:active-project db) :saved-data uuid]
-          t1id        (get-in db [:projects (:active-project db)
-                                  :query-operations :targets :1])
-          t2id        (get-in db [:projects (:active-project db)
-                                  :query-operations :targets :2])
-          t1          (if (= :list (:type t1id))
-                        (convert-list-to-query db t1id)
-                        (get-in db [:projects (:active-project db)
-                                    :saved-data (:id t1id) :payload :data :payload]))
-          t2          (if (= :list (:type t2id))
-                        (convert-list-to-query db t2id)
-                        (get-in db [:projects (:active-project db)
-                                    :saved-data (:id t2id) :payload :data :payload]))
-          op          (get-in db [:projects (:active-project db)
-                                  :query-operations :operation])]
-
-
-
+          op (get-in db [:projects (:active-project db) :query-operations :operation])
+          update-path [:projects (:active-project db) :saved-data uuid]]
 
       (update-in db update-path assoc
                  :label "TBD"
@@ -224,12 +223,34 @@
                  :payload {:service {:root "www.flymine.org/query"}
                            :data    {:format  "query"
                                      :type    "Gene"
-                                     :payload (case op
-                                                "union" (combine-queries t1 t2)
-                                                "intersection" (intersect-queries t1 t2)
-                                                "asymmetric-left" (asymmetric-left-queries t1 t2)
-                                                "asymmetric-right" (asymmetric-right-queries t1 t2)
-                                                "subtract" nil)}}))))
+                                     :payload {:from "Gene"
+                                               :select "*"
+                                               :where [{:path "Gene.id"
+                                                        :op "ONE OF"
+                                                        :values (case op
+                                                                 "union" (union s1 s2)
+                                                                 "intersection" (intersection s1 s2)
+                                                                 "asymmetric-left" (difference s1 s2)
+                                                                 "asymmetric-right" (difference s2 s1)
+                                                                 "subtract" (union (difference s1 s2) (difference s2 s1)))}]}}}))))
+
+(re-frame/register-handler
+  :run-qop trim-v
+  (fn [db]
+    (let [uuid        (keyword (rid))
+          update-path [:projects (:active-project db) :saved-data uuid]
+          t1id        (get-in db [:projects (:active-project db)
+                                  :query-operations :targets :1 :query])
+          t2id        (get-in db [:projects (:active-project db)
+                                  :query-operations :targets :2 :query])]
+
+      (let [channels (map (partial im/query-rows {:service {:root "www.flymine.org/query"}}) [t1id t2id])]
+        (go (let [result1 (set (flatten (<! (first channels))))
+                  result2 (set (flatten (<! (second channels))))]
+              (re-frame/dispatch [:accept-qop result1 result2]))))
+
+
+      db)))
 
 
 (re-frame/register-handler

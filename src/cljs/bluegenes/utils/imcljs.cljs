@@ -58,12 +58,13 @@
   [service query-map]
   (println "Rows query sees maps" query-map)
   (let [c (chan)]
-    (println "Rows: in the let" (clj->js service))
+    ;(println "Rows: in the let" (clj->js service))
     (-> (js/imjs.Service. (clj->js (:service service)))
         (.rows (clj->js query-map))
         (.then (fn [rows]
-                 (go (>! c (js->clj rows :keywordize-keys true))))
-               (fn [error])))
+                 (go (>! c (js->clj rows :keywordize-keys true)) (close! c)))
+               (fn [error]
+                 (go (>! c error)))))
     c))
 
 (defn query-count
@@ -370,3 +371,23 @@
                               :end-class end-class
                               :display-name display-name
                               :query (assoc query :select (str next ".id"))}))) {} classes)))
+
+
+(defn deconstruct-query-by-class
+  "Deconstructs a query into a map. Keys are the unique paths
+  and values include the query to return the values in the path,
+  the display name, and the end class.
+  {:Gene.pathways {:end-class Pathway :display-name Pathway :query ...}}"
+  [model query]
+  (let [sterilized-query (sterilize-query query)]
+    (reduce (fn [total next]
+              (let [end-class    (end-class model next)
+                    display-name (display-name model end-class)
+                    trimmed-path (trim-path-to-class model next)]
+                (update total end-class conj {:path         trimmed-path
+                                              :end-class    end-class
+                                              :display-name display-name
+                                              :query        (-> query
+                                                                (assoc :select (str trimmed-path ".id"))
+                                                                (dissoc :orderBy))})))
+            {} (into [] (comp (map (partial trim-path-to-class model)) (distinct)) (:select sterilized-query)))))

@@ -5,18 +5,12 @@
 (re-frame/register-sub
   :qop-1
   (fn [db [_]]
-    (let [qops (reaction (get-in @db [:projects (:active-project @db) :query-operations]))]
-      (reaction (assoc (get-in @db [:projects (:active-project @db)
-                                    :saved-data (:id (:1 (:targets @qops)))])
-                  :keep (:keep (:1 (:states @qops))))))))
+    (reaction (get-in @db [:projects (:active-project @db) :query-operations :targets :1]))))
 
 (re-frame/register-sub
   :qop-2
   (fn [db [_]]
-    (let [qops (reaction (get-in @db [:projects (:active-project @db) :query-operations]))]
-      (reaction (assoc (get-in @db [:projects (:active-project @db)
-                                    :saved-data (:id (:2 (:targets @qops)))])
-                  :keep (:keep (:2 (:states @qops))))))))
+    (reaction (get-in @db [:projects (:active-project @db) :query-operations :targets :2]))))
 
 (re-frame/register-sub
   :qop-op

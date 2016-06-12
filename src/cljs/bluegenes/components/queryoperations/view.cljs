@@ -26,10 +26,24 @@
            (do
              [:li
               {:on-click (fn [] (re-frame/dispatch [:set-qop position (:name details) :list :flymine]))}
-              [:a (:title details)]]))]
+              [:a (:title details)]]))]]]])))
 
-
-        ]]])))
+(defn dropdown-research-path [position]
+  (let [selected (re-frame/subscribe [(keyword (str "qop-" position))])]
+    (fn []
+      [:div
+       [:div.btn-group
+        [:div.btn.btn-primary.dropdown-toggle {:data-toggle "dropdown"}
+         [:span "Choose " [:span.caret]]]
+        [:div.dropdown-menu.scrollable-menu
+         [:h4 "Saved Data"]
+         [:ul.list-unstyled
+          (for [[class queries] (:deconstructed @selected)]
+            [:li [:ul (for [q queries]
+                        (do
+                          [:li
+                           {:on-click (fn [] (re-frame/dispatch [:update-qop-query position (:query q)]))}
+                           [:a (:path q)]]))]])]]]])))
 
 (defn selection-details [position]
   (let [representing (re-frame/subscribe [(keyword (str "qop-" position))])]
@@ -52,11 +66,13 @@
      [:div.query-operations-container
       [:div.child
        [dropdown-research 1]
+       [dropdown-research-path 1]
        [selection-details 1]]
       [:div.child
        [venn/main]]
       [:div.child
        [dropdown-research 2]
+       [dropdown-research-path 2]
        [selection-details 2]]]
      [:div.centered
       [operations] [doit]]]))
