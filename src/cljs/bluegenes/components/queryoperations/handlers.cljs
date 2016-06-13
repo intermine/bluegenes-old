@@ -44,6 +44,7 @@
                               :saved-data id :payload :data :payload]))]
       (update-in db [:projects (:active-project db) :query-operations :targets (keyword (str position))]
                  assoc
+                 :label (if (= :list type) id (get-in db [:projects (:active-project db) :saved-data id :label]))
                  :id id
                  :deconstructed (im/deconstruct-query-by-class (-> db :cache :models :flymine) query)
                  :type type
