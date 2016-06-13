@@ -69,6 +69,8 @@
                                                           (s/collect-one :_id)]
                                                          db)))]
 
+        (println ":set-timeline-panel" project network)
+
         (re-frame/dispatch [:run-step [:projects project :networks network :nodes :node1]])
 
         (assoc db :active-panel [active-panel project-slug network-slug]
@@ -80,7 +82,7 @@
   (fn [db [active-panel project-slug network-slug]]
     ;Look up the UUID of the history based on the slug (friendly) name
     ;TODO - if the slug doesn't exist then check for the UUID directly
-    (println "***** SET SAVED DATA PANEL" project-slug network-slug)
+    (println "***** SET SAVED DATA PANEL" project-slug network-slug active-panel)
     (let [uuid (first (keep #(when (= (:slug (val %)) project-slug) (key %)) (:projects db)))]
 
       (let [[project did] (vec (butlast (s/select-one [:projects s/ALL s/LAST

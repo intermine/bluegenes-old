@@ -64,9 +64,9 @@
   trim-v
   (fn [db [tool-name]]
     (let [last-emitted (get-in db [:histories (:active-history db) :available-data])
-          source (:source last-emitted)
-          data (:data last-emitted)
-          uuid (keyword (rid))]
+          source       (:source last-emitted)
+          data         (:data last-emitted)
+          uuid         (keyword (rid))]
       (clear-available-data (link-new-step-to-source (create-step db uuid {
                                                                            :tool        tool-name
                                                                            :uuid        uuid
@@ -142,7 +142,7 @@
   (println "parsing produced")
   (cond
     (= "query" (-> data :data :format))
-    (let [model (-> db :cache :models :flymine)
+    (let [model               (-> db :cache :models :flymine)
           deconstructed-query (im/deconstruct-query (-> db :cache :models :flymine)
                                                     (-> data :data :payload))]
       (println "deconstructed query" deconstructed-query)
@@ -206,7 +206,7 @@
     (.log js/console "add-step" tool-name state)
     ;(println "active history" (:active-history db))
     (let [last-emitted (last (get-in db [:networks (:active-history db) :view]))
-          uuid (keyword (rid))]
+          uuid         (keyword (rid))]
       (re-frame/dispatch [:run-step
                           [:networks (:active-history db) :nodes uuid] [:state :input]])
       (->
@@ -256,7 +256,7 @@
   this step from the root of the workflow. This is useful for forking steps,
   copying workflows, and trimming siblings and childrens."
   [steps end]
-  (loop [m {}
+  (loop [m       {}
          step-id end]
     (let [current-step (-> steps step-id)]
       (if (contains? current-step :subscribe)
@@ -314,11 +314,11 @@
   :save-research-old
   trim-v
   (fn [db [id]]
-    (let [steps (get-in db [:histories (:active-history db) :steps])
-          uuid (keyword (rid))
-          update-path [:histories (:active-history db) :saved-research uuid]
-          pruned-steps (steps-back-to-beginning steps id)
-          key-map (generate-key-map pruned-steps)
+    (let [steps         (get-in db [:histories (:active-history db) :steps])
+          uuid          (keyword (rid))
+          update-path   [:histories (:active-history db) :saved-research uuid]
+          pruned-steps  (steps-back-to-beginning steps id)
+          key-map       (generate-key-map pruned-steps)
           new-structure (apply-new-ids-to-structure
                           (get-in db [:histories (:active-history db) :structure])
                           id
@@ -346,10 +346,10 @@
   trim-v
   (fn [db [id data-to-save]]
     (println "saving researh" id data-to-save)
-    (let [steps (get-in db [:projects (:active-project db)
-                            :networks (:active-network db) :nodes])
-          uuid (keyword (rid))
-          update-path [:projects (:active-project db) :saved-data uuid]
+    (let [steps         (get-in db [:projects (:active-project db)
+                                    :networks (:active-network db) :nodes])
+          uuid          (keyword (rid))
+          update-path   [:projects (:active-project db) :saved-data uuid]
           new-structure (trimmed-structure
                           (get-in db [:projects (:active-project db)
                                       :networks (:active-network db) :view])
@@ -448,8 +448,7 @@
 (re-frame/register-handler
   :run-step trim-v
   (fn [db [location diffmap]]
-    ;(println "run step given location" location)
-    (let [node (get-in db location)
+    (let [node   (get-in db location)
           run-fn (-> bluegenes.tools (aget (:tool node)) (aget "core") (aget "run"))]
       (run-fn
         node                                                ;Snapshot
@@ -477,8 +476,8 @@
   (fn [db [location update-fn]]
     ;(println "update node given location" location)
     (let [snapshot (get-in db location)
-          updated (update-fn snapshot)
-          diffed (get-changes snapshot updated)]
+          updated  (update-fn snapshot)
+          diffed   (get-changes snapshot updated)]
 
       ; If something has changed then re-run the tool with
       ; the new data (only the difference)
@@ -509,18 +508,36 @@
   :add-step
   trim-v
   (fn [db [tool-name state]]
-    (let [project (get-in db [:active-project])
-          network (get-in db [:active-network])
-          last-emitted (last (get-in db [:projects project :networks network :view]))
-          uuid (keyword (rid))
+    (let [project         (get-in db [:active-project])
+          network         (get-in db [:active-network])
+          panel           (first (get-in db [:active-panel]))
+          last-emitted    (last (get-in db [:projects project :networks network :view]))
+          uuid            (keyword (rid))
           previous-output (get-in db [:projects project :networks network :nodes last-emitted :output])
-          node {:tool         tool-name
-                :state        state
-                :_id          uuid
-                :input        previous-output
-                :subscribe-to last-emitted}]
-      (re-frame/dispatch ^:flush-dom [:run-step [:projects project :networks network :nodes uuid] node])
-      (->
-        db
-        (assoc-in [:projects project :networks network :nodes uuid] node)
-        (update-in [:projects project :networks network :view] conj uuid)))))
+          node            {:tool         tool-name
+                           :state        state
+                           :_id          uuid
+                           :input        previous-output
+                           :subscribe-to last-emitted}]
+
+      (case panel
+        :saved-data-panel
+        (let [id (keyword (rid))]
+          (let [current-data (get-in db [:projects (:active-project db) :saved-data (:active-data db)])]
+            (re-frame/dispatch ^:flush-dom [:run-step [:projects project :networks id :nodes uuid] :node1])
+            (-> db (assoc-in [:projects project :networks id]
+                             {:_id   id
+                              :slug  "new-search"
+                              :label "New Search"
+                              :view  [:node1 uuid]
+                              :nodes {:node1 (assoc current-data :_id :node1
+                                                                 :state (:payload current-data)
+                                                                 :tool "viewtable")
+                                      uuid (assoc node :subscribe-to :node1)}}))))
+        :timeline-panel (do
+                          (re-frame/dispatch ^:flush-dom [:run-step [:projects project :networks network :nodes uuid] node])
+                          (->
+                           db
+                           (assoc-in [:projects project :networks network :nodes uuid] node)
+                           (update-in [:projects project :networks network :view] conj uuid))))
+      )))
