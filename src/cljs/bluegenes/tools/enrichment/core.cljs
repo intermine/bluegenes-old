@@ -139,7 +139,7 @@
     ; If we don't have cached ids, or the input has changed, get new ids
     (if (or (not (contains? cache :ids)) (contains? what-changed :input))
       (do
-        (println "what-changed" what-changed)
+        ;(println "what-changed" what-changed)
         (let [query (-> deconstructed seq first second first :query)]
           (go (let [results (flatten (<! (im/query-rows {:service (:service (:input snapshot))} query)))]
                 (save-cache (merge (:cache snapshot) {:ids results})))))))

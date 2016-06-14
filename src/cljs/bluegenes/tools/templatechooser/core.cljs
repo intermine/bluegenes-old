@@ -22,16 +22,9 @@
   (fn [{:keys [step-data template]}]
     (fn []
       (let [[id query] template
-            has-something (-> step-data :api :has-something)]
+            save-state (-> step-data :api :save-state)]
         [:a.list-group-item
-         {:on-click (fn []
-                      (println "SEES QUERY" query)
-                      ;(println "template chooser outputting" has-something)
-                      (has-something {:service  {:root "www.flymine.org/query"}
-                                      :data     {:format  "query"
-                                                 :type    "Gene"
-                                                 :payload query}
-                                      :shortcut "viewtable"}))}
+         {:on-click (fn [] (save-state id))}
          [:h4.list-group-item-heading
           (last (clojure.string/split (:title query) "-->"))]
          [:p.list-group-item-text (:description query)]]))))
@@ -60,30 +53,43 @@
    {:keys [input state cache] :as what-changed}
    {:keys [has-something save-state save-cache] :as api}
    global-cache]
-  (if (nil? cache)
-    (let [runnable    (into {} (h/runnable (-> global-cache :models :flymine)
-                                           (-> global-cache :templates :flymine) "Gene"))
-          transformed (into {}
-                            (do
-                              (cond
-                                (= "query" (-> input :data :format))
-                                (map (fn [[id query]]
-                                       [id (h/replace-input-constraints-whole
-                                             (-> global-cache :models :flymine)
-                                             query
-                                             "Gene"
-                                             (-> input :data :payload :where first))])
-                                     runnable)
-                                :else
-                                (map (fn [[id query]]
-                                       [id (h/replace-input-constraints
-                                             (-> global-cache :models :flymine)
-                                             query
-                                             "Gene"
-                                             (-> input :data :payload))])
-                                     runnable))))]
-      (save-cache {:runnable transformed})))
-  (if (contains? state :data) (has-something state)))
+
+  ;(println "what changed" what-changed)
+  (println "run is running" what-changed)
+  (if (or (nil? cache) (not (nil? input)))
+    (do
+      (println "template running ")
+      (let [runnable    (into {} (h/runnable (-> global-cache :models :flymine)
+                                             (-> global-cache :templates :flymine) "Gene"))
+            transformed (into {}
+                              (do
+                                (cond
+                                  (= "query" (-> snapshot :input :data :format))
+                                  (map (fn [[id query]]
+                                         [id (h/replace-input-constraints-whole
+                                               (-> global-cache :models :flymine)
+                                               query
+                                               "Gene"
+                                               (-> snapshot :input :data :payload :where first))])
+                                       runnable)
+                                  :else
+                                  (map (fn [[id query]]
+                                         [id (h/replace-input-constraints
+                                               (-> global-cache :models :flymine)
+                                               query
+                                               "Gene"
+                                               (-> snapshot :input :data :payload))])
+                                       runnable))))]
+        (save-cache {:runnable transformed}))))
+
+  (if (or (contains? what-changed :state) (contains? what-changed :cache))
+    (do
+      (println "payload" (get-in snapshot [:cache :runnable (:state snapshot)]))
+      (has-something {:service  {:root "www.flymine.org/query"}
+                     :data     {:format  "query"
+                                :type    "Gene"
+                                :payload (get-in snapshot [:cache :runnable (:state snapshot)])}
+                     :shortcut "viewtable"}))))
 
 (defn upstream-data []
   (fn [data]

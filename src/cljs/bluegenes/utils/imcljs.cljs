@@ -56,7 +56,7 @@
 (defn query-rows
   "Returns IMJS row-style result"
   [service query-map]
-  (println "Rows query sees maps" query-map)
+  ;(println "Rows query sees maps" query-map)
   (let [c (chan)]
     ;(println "Rows: in the let" (clj->js service))
     (-> (js/imjs.Service. (clj->js (:service service)))
@@ -380,7 +380,7 @@
   [model query]
   (let [sterilized-query (sterilize-query query)]
     (reduce (fn [total next]
-              (let [end-class    (end-class model next)
+              (let [end-class    (keyword (end-class model next))
                     display-name (display-name model end-class)
                     trimmed-path (trim-path-to-class model next)]
                 (update total end-class conj {:path         trimmed-path

@@ -166,6 +166,43 @@
           [tool (assoc step-data :api comms
                                  :global-cache @global-cache)]]]))))
 
+(defn input-filter []
+  (fn [data]
+    [:ul.nav.nav-pills
+     (for [i (:Gene (:decon data))]
+       [:li
+        {:on-click (fn []
+                     (println "i" i)
+                     (re-frame/dispatch [:set-input-filter (:_id data) (:path i)]))}
+        [:a (str (:path i))]])
+
+     ;[:svg {:width  100
+     ;       :height 100}
+     ; [:line {:x1    50 :y1 0
+     ;         :x2    50 :y2 100
+     ;         :style {:stroke       "#2196F3"
+     ;                 :stroke-width 3}}]
+     ; [:g {:transform "translate(50,50)"}
+     ;  [:circle {:r     30
+     ;            :style {:stroke       "#2196F3"
+     ;                    :fill         "white"
+     ;                    :stroke-width 2.5}}]
+     ;  [:text {:text-anchor "middle"
+     ;          :style       {:alignment-baseline "middle"}}
+     ;   [:tspan 459]
+     ;   [:tspan (-> data :input :data :type)]]]]
+
+
+     ;(for [[class queries] (:decon data)]
+     ;  [:span
+     ;   ;[:span (str class)]
+     ;   (into [:span]
+     ;         (map (fn [query]
+     ;                [:span {:on-click (fn []
+     ;                                    (println "x" query))} (str (:path query))]) queries))])
+
+     ]))
+
 (defn previous-steps
   "Iterate through the history's structure and create step containers for
   single tools (keyword) or steps dashboards for grouped tools (vector)."
@@ -175,8 +212,13 @@
     (fn []
       (into [:div.prevsteps
              [whatnext/main]]
-            (for [id (reverse @step-path)]
-              [cont (get @steps id)])))))
+            (-> (map (fn [id]
+                       [:div.abc
+                        [cont (get @steps id)]
+                        [input-filter (get @steps id)]]) (reverse @step-path)))
+
+
+            ))))
 (defn tabs []
   (let [networks       (subscribe [:networks])
         active-network (subscribe [:active-network])]
@@ -225,6 +267,7 @@
 (defn main-view []
   [:div.timeline-container
    [drawer/main]
+   [tabs]
    [:div.stretchme
-    [tabs]
+
     [previous-steps]]])

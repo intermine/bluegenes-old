@@ -437,12 +437,14 @@
               (assoc total k v)
               total)) {} new-m))
 
-(defn get-changes [m1 m2]
+(defn get-changes
+  "Walks map m2 depth first keeping only key value pairs that are difer between map m1 and m2."
+  [m1 m2]
   (reduce (fn [total [k v]]
-            (if (= (k m1) (k m2))
+            (if (= (get m1 k) (get m2 k))
               total
               (assoc total k (if (map? v)
-                               (get-changes (k m1) (k m2))
+                               (get-changes (get m1 k) (get m2 k))
                                v)))) {} m2))
 
 (re-frame/register-handler
@@ -450,6 +452,8 @@
   (fn [db [location diffmap]]
     (let [node   (get-in db location)
           run-fn (-> bluegenes.tools (aget (:tool node)) (aget "core") (aget "run"))]
+      (if (= :tool "enrichment")
+        (println "enrich me, baby"))
       (run-fn
         node                                                ;Snapshot
         (if (nil? diffmap) node diffmap)                    ;Difference in data
@@ -463,13 +467,15 @@
 (re-frame/register-handler
   :calculate-export trim-v
   (fn [db [location output]]
+    ;(if (= "query" (:format (:data output)))
+    ;  (let [m (get-in db [:cache :models :flymine])]
+    ;    (.log js/console "HAS DECONSTRUCTED" (im/deconstruct-query-by-class m (:payload (:data output))))))
     (cond (= "query_ignorefornow" (:format (:data output)))
           (let [m (get-in db [:cache :models :flymine])]
             (.log js/console "HAS DECONSTRUCTED" (im/deconstruct-query m (:payload (:data output))))
             (assoc-in db (conj location :export) (im/deconstruct-query m (:payload (:data output)))))
           :else
-          (assoc-in db (conj location :export) output)
-          )))
+          (assoc-in db (conj location :export) output))))
 
 (re-frame/register-handler
   :update-node trim-v
@@ -497,9 +503,15 @@
               ; Give all subscribers their new input and run them.
               (mapv
                 (fn [subscriber]
-                  (re-frame/dispatch ^:flush-dom [:update-node
-                                                  (conj (vec (butlast location)) subscriber)
-                                                  #(assoc % :input (:output updated))]))
+                  (let [decon (doall (im/deconstruct-query-by-class
+                                       (get-in db [:cache :models :flymine])
+                                       (:payload (:data (:output updated)))))]
+
+
+                    (println "decone" decon)
+
+                    (re-frame/dispatch [:update-node (conj (vec (butlast location)) subscriber)
+                                        #(assoc % :input (:output updated) :decon decon)])))
                 (subscribers db location))))))
 
       (assoc-in db location updated))))
@@ -533,11 +545,19 @@
                               :nodes {:node1 (assoc current-data :_id :node1
                                                                  :state (:payload current-data)
                                                                  :tool "viewtable")
-                                      uuid (assoc node :subscribe-to :node1)}}))))
+                                      uuid   (assoc node :subscribe-to :node1)}}))))
         :timeline-panel (do
                           (re-frame/dispatch ^:flush-dom [:run-step [:projects project :networks network :nodes uuid] node])
                           (->
-                           db
-                           (assoc-in [:projects project :networks network :nodes uuid] node)
-                           (update-in [:projects project :networks network :view] conj uuid))))
+                            db
+                            (assoc-in [:projects project :networks network :nodes uuid] node)
+                            (update-in [:projects project :networks network :view] conj uuid))))
       )))
+
+
+(re-frame/register-handler
+  :set-input-filter trim-v
+  (fn [db [id path]]
+    (assoc-in db [:projects (:active-project db)
+                  :networks (:active-network db)
+                  :nodes id :filter] path)))
