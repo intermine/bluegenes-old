@@ -23,12 +23,12 @@
                                :query-operations {:states {:1 {:keep false}
                                                            :2 {:keep false}
                                                            :middle false}}
-                               :saved-data {:sd1 {:_id :sd1
-                                                  :label "My Favorite Genes"
-                                                  :slug "myfavgenes"}}
+                               ;:saved-data {:sd1 {:_id :sd1
+                               ;                   :label "My Favorite Genes"
+                               ;                   :slug "myfavgenes"}}
                                :networks {:network1 {:_id   :network1
                                                      :slug  "network1"
-                                                     :label "First Network"
+                                                     :label "Initial Search"
                                                      :view  [:node1]
                                                      :nodes {:node1 {:_id          :node1
                                                                      :tool         "chooselist"

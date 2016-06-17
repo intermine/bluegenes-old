@@ -171,8 +171,8 @@
     [:ul.nav.nav-pills
      (for [i (:Gene (:decon data))]
        [:li
-        {:on-click (fn []
-                     (println "i" i)
+        {:class (if (= (:path i) (:filter data)) "active")
+         :on-click (fn []
                      (re-frame/dispatch [:set-input-filter (:_id data) (:path i)]))}
         [:a (str (:path i))]])
 
@@ -267,7 +267,7 @@
 (defn main-view []
   [:div.timeline-container
    [drawer/main]
-   [tabs]
-   [:div.stretchme
 
+   [:div.stretchme
+    [tabs]
     [previous-steps]]])

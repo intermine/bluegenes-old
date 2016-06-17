@@ -4,6 +4,7 @@
   (:require [re-frame.core :as re-frame :refer [debug trim-v enrich]]
             [bluegenes.db :as db]
             [secretary.core :as secretary]
+            [secretary.core :as secretary]
             [schema.core :as s]
             [bluegenes.schemas :as schemas]
             [bluegenes.utils :as utils]
@@ -452,16 +453,20 @@
   (fn [db [location diffmap]]
     (let [node   (get-in db location)
           run-fn (-> bluegenes.tools (aget (:tool node)) (aget "core") (aget "run"))]
-      (if (= :tool "enrichment")
-        (println "enrich me, baby"))
-      (run-fn
-        node                                                ;Snapshot
-        (if (nil? diffmap) node diffmap)                    ;Difference in data
-        {:has-something (partial api/has-something location) ;API
-         :save-state    (partial api/save-state location)
-         :save-cache    (partial api/save-cache location)}
-        (get-in db [:cache])                                ;Global Cache
-        ))
+
+      ; Run input through the filter
+
+
+      (let [node (cond-> node
+                         (:filter node) (assoc-in [:input :data :payload :select] [(:filter node)]))]
+        (run-fn
+          node                                              ;Snapshot
+          (if (nil? diffmap) node diffmap)                  ;Difference in data
+          {:has-something (partial api/has-something location) ;API
+           :save-state    (partial api/save-state location)
+           :save-cache    (partial api/save-cache location)}
+          (get-in db [:cache])                              ;Global Cache
+          )))
     db))
 
 (re-frame/register-handler
@@ -530,6 +535,9 @@
                            :state        state
                            :_id          uuid
                            :input        previous-output
+                           :decon        (im/deconstruct-query-by-class
+                                           (get-in db [:cache :models :flymine])
+                                           (-> previous-output :data :payload))
                            :subscribe-to last-emitted}]
 
       (case panel
@@ -537,9 +545,11 @@
         (let [id (keyword (rid))]
           (let [current-data (get-in db [:projects (:active-project db) :saved-data (:active-data db)])]
             (re-frame/dispatch ^:flush-dom [:run-step [:projects project :networks id :nodes uuid] :node1])
+            (println "dispatching")
+            (secretary/dispatch! (str "/timeline/project1/" (str id)))
             (-> db (assoc-in [:projects project :networks id]
                              {:_id   id
-                              :slug  "new-search"
+                              :slug  (str id)
                               :label "New Search"
                               :view  [:node1 uuid]
                               :nodes {:node1 (assoc current-data :_id :node1
@@ -551,13 +561,16 @@
                           (->
                             db
                             (assoc-in [:projects project :networks network :nodes uuid] node)
-                            (update-in [:projects project :networks network :view] conj uuid))))
-      )))
+                            (update-in [:projects project :networks network :view] conj uuid)))))))
 
 
 (re-frame/register-handler
   :set-input-filter trim-v
   (fn [db [id path]]
-    (assoc-in db [:projects (:active-project db)
-                  :networks (:active-network db)
-                  :nodes id :filter] path)))
+    (let [location [:projects (:active-project db) :networks (:active-network db) :nodes id]
+          snapshot (get-in db location)
+          updated  (assoc snapshot :filter path)
+          diffmap  (get-changes snapshot updated)]
+
+      (re-frame/dispatch ^:flush-dom [:run-step location {:input (:input snapshot)}])
+      (assoc-in db location updated))))

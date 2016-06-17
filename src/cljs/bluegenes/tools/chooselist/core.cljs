@@ -57,10 +57,10 @@
                                 ((:save-state api)
                                   {:service {:root "www.flymine.org/query"}
                                    :data    {:payload {:select "*"
-                                                       :from "Gene"
-                                                       :where [{:path "Gene"
-                                                                :op "IN"
-                                                                :value (:name list-value)}]}
+                                                       :from   "Gene"
+                                                       :where  [{:path  "Gene"
+                                                                 :op    "IN"
+                                                                 :value (:name list-value)}]}
                                              :format  "query"
                                              :type    (:type list-value)}}))
                     :class    (if (is-selected list-value state) "selected")}
@@ -108,31 +108,29 @@
   (let [local-state (reagent/atom nil)]
     (reagent/create-class
       {:reagent-render
-       (fn [{:keys [state cache api global-cache] :as step-data}]
-         ;(println "has cache" global-cache)
-         ;(println "CHOOSE LIST IS RENDERING" step-data)
-         ;(println "GOT STEP DATA" api)
-         [:div
-          [pagination-control]
-          [:table {:class "list-chooser"}
-           [:thead
-            [:tr
-             [:th "Type"]
-             [:th "#"]
-             [:th "Name"]]]
-           (into [:tbody] (for [result (:flymine (:lists global-cache))]
-                            ;[:tr
-                            ; [:td (:type result)]
-                            ; [:td (:size result)]
-                            ; [:td (:name result)]]
-                            [list-row nil result api state]
-                            ;^{:key (.-name result)}
+                             (fn [{:keys [state cache api global-cache] :as step-data}]
+                               ;(println "has cache" global-cache)
+                               ;(println "CHOOSE LIST IS RENDERING" step-data)
+                               ;(println "GOT STEP DATA" api)
+                               [:div
+                                [pagination-control]
+                                [:table {:class "list-chooser"}
+                                 [:thead
+                                  [:tr
+                                   [:th "Type"]
+                                   [:th "#"]
+                                   [:th "Name"]]]
+                                 (into [:tbody] (for [result (:flymine (:lists global-cache))]
+                                                  ;[:tr
+                                                  ; [:td (:type result)]
+                                                  ; [:td (:size result)]
+                                                  ; [:td (:name result)]]
+                                                  [list-row nil result api state]
+                                                  ;^{:key (.-name result)}
 
-                            ))]
-          ])
-       :component-did-mount
-       (fn [this]
-         (get-lists local-state))
-       :component-did-update
-       (fn [this old-props]
-         (did-update-handler local-state (reagent/props this)))})))
+                                                  ))]
+                                ])
+       :component-did-mount  (fn [this]
+                               (get-lists local-state))
+       :component-did-update (fn [this old-props]
+                               (did-update-handler local-state (reagent/props this)))})))

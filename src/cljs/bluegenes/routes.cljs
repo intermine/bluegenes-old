@@ -26,6 +26,7 @@
             (re-frame/dispatch [:set-active-panel :home-panel]))
 
   (defroute "/about" []
+            (println "GOT TO ABOUT")
             (re-frame/dispatch [:set-active-panel :about-panel]))
 
   (defroute "/timeline/:id" [id]
@@ -52,11 +53,10 @@
             (re-frame/dispatch [:set-active-panel :debug-panel]))
 
   ;; --------------------
-  (hook-browser-navigation!)
-  )
+  (hook-browser-navigation!))
 ;
-(defn nav! [token]
-  (.setToken history token))
+;(defn nav! [token]
+;  (.setToken history token))
 
 ;(def history (doto (History.)
 ;               (events/listen

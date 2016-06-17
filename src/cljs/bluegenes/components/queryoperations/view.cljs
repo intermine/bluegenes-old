@@ -4,7 +4,7 @@
             [bluegenes.components.queryoperations.subs]
             [bluegenes.components.venn.view :as venn]))
 
-(defn dropdown-research [position]
+(defn dropdown-research []
   (let [saved-research (subscribe [:saved-research])
         lists (subscribe [:lists])]
     (fn [position]
@@ -36,7 +36,7 @@
         [:div.btn.btn-primary.dropdown-toggle {:data-toggle "dropdown"}
          [:span "Choose View" [:span.caret]]]
         [:div.dropdown-menu.scrollable-menu
-         [:h4 "Saved Data"]
+         [:h4 "Choose Path"]
          [:ul.list-unstyled
           (for [[class queries] (:deconstructed @selected)]
             [:li [:ul (for [q queries]
