@@ -13,7 +13,8 @@
             [bluegenes.tools.viewtable.core :as viewtable]
             [reagent.impl.util :as impl :refer [extract-props]]
             [bluegenes.api :as api]
-            [bluegenes.components.savetodrawer.core :as savetodrawer]))
+            [bluegenes.components.savetodrawer.core :as savetodrawer]
+            [bluegenes.components.lighttable.core :as lighttable]))
 
 (enable-console-print!)
 
@@ -171,7 +172,7 @@
     [:ul.nav.nav-pills
      (for [i (:Gene (:decon data))]
        [:li
-        {:class (if (= (:path i) (:filter data)) "active")
+        {:class    (if (= (:path i) (:filter data)) "active")
          :on-click (fn []
                      (re-frame/dispatch [:set-input-filter (:_id data) (:path i)]))}
         [:a (str (:path i))]])
@@ -214,9 +215,10 @@
              [whatnext/main]]
             (-> (map (fn [id]
                        [:div.abc
-                        [cont (get @steps id)]
+                        [:div.row
+                         [:div.col-md-6 [cont (get @steps id)]]
+                         [:div.col-md-6 [lighttable/main (:output (get @steps id))]]]
                         [input-filter (get @steps id)]]) (reverse @step-path)))
-
 
             ))))
 (defn tabs []

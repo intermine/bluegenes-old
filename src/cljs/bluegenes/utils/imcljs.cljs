@@ -67,6 +67,21 @@
                  (go (>! c error)))))
     c))
 
+(defn raw-query-rows
+  "Returns IMJS row-style result"
+  [service query options]
+  (let [c (chan)]
+    (-> (js/imjs.Service. (clj->js service))
+        (.query (clj->js query))
+        (.then (fn [q]
+                 (.log js/console "q" (.toXML q))
+                 (go (let [response (<! (http/post (str "http://" (:root service) "/service/query/results")
+                                                  {:with-credentials? false
+                                                   :form-params (merge options
+                                                                       {:query (.toXML q)})}))]
+                       (>! c (-> response :body)))))))
+    c))
+
 (defn query-count
   "Returns IMJS row-style result"
   [service query-map]
