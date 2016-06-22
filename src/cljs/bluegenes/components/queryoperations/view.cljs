@@ -11,16 +11,16 @@
      [:div
       [:div.btn-group
        [:div.btn.btn-primary.dropdown-toggle {:data-toggle "dropdown"}
-         [:span (str "Choose Data" (:label @saved-research)) [:span.caret]]]
+         [:span (str "Choose Query" (:label @saved-research)) [:span.caret]]]
        [:div.dropdown-menu.scrollable-menu
-        [:h4 "Saved Data"]
+        [:h4 "My Saved Queries"]
         [:ul.list-unstyled
          (for [[id details]  @saved-research]
            (do
              [:li
               {:on-click (fn [] (re-frame/dispatch [:set-qop position id :saved-data]))}
               [:a (:label details)]]))]
-        [:h4 "Lists"]
+        [:h4 "Public Queries"]
         [:ul.list-unstyled
          (for [details (:flymine @lists)]
            (do
@@ -34,9 +34,9 @@
       [:div
        [:div.btn-group
         [:div.btn.btn-primary.dropdown-toggle {:data-toggle "dropdown"}
-         [:span "Choose View" [:span.caret]]]
+         [:span "Choose Items" [:span.caret]]]
         [:div.dropdown-menu.scrollable-menu
-         [:h4 "Choose Path"]
+         ;[:h4 "Choose Path"]
          [:ul.list-unstyled
           (for [[class queries] (:deconstructed @selected)]
             [:li [:ul (for [q queries]
