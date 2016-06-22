@@ -42,68 +42,39 @@
     (= "query" (-> input-data :data :format))
     (get-in input-data [:data :payload])))
 
-;(defn somefn [component]
-;  (let [{:keys [service data] :as dd} (reagent/props component)
-;        node   (reagent/dom-node component)
-;        target (.item (.getElementsByClassName node "imtable") 0)]
-;
-;
-;    (println "service daa" service data)
-;    (println "normalized" (normalize-input dd))
-;
-;    (println "CAN RUN" (every? false? (map nil? [service data])))
-;    (println "running with" (clj->js {:service service
-;                                      :query   (normalize-input (:payload data))}))
-;
-;    (if (normalize-input dd)
-;      (-> (.loadTable js/imtables
-;                      target
-;                      (clj->js {:start 0 :size 10})
-;                      (clj->js {:service service
-;                                :query   (normalize-input dd)}))))))
-
-
 (defn table-cell []
   (fn [d]
     [:td d]))
 
 (defn table-row []
   (fn [row-data]
-    (println "TABLE ROW")
-    (into [:tr] (map table-cell row-data))))
+    (into [:tr] (map (fn [x] [table-cell x]) row-data))))
 
-(defn table [results]
-  [:table.table
-   [:tbody (doall (map table-row @results))]])
+(defn table
+  [xatom]
+  (fn []
+    [:table.table.table-striped
+     [:thead
+      (into [:tr] (map (fn [x] [:th x]) (:columnHeaders @xatom)))]
+     [:tbody (map (fn [x] [table-row x]) (:results @xatom))]]))
 
-(defn somefn [y]
-  (println "somefn")
-  (go (let [r (<! (im/raw-query-rows {:root "www.flymine.org/query"}
-                                     {:from   "Gene"
-                                      :select ["primaryIdentifier",
-                                               "symbol",
-                                               "homologues.homologue.primaryIdentifier",
-                                               "homologues.homologue.symbol",
-                                               "homologues.homologue.organism.shortName",
-                                               "homologues.dataSets.name",
-                                               "homologues.type"]
-                                      :where  [{:path  "Gene"
-                                                :op    "LOOKUP"
-                                                :value "cdc2"}]}
-                                     {:size 10
-                                      :format "json"}))]
-        (println "got back r" r)
-        (reset! y r))))
+(defn swap-query-results
+  [component a]
+  (let [props(reagent/props component)]
+    (go (let [r (<! (im/raw-query-rows {:root "www.flymine.org/query"}
+                                       (normalize-input props)
+                                       {:size 10
+                                        :format "json"}))]
+          (reset! a r)))))
 
-(defn mounty []
-  (let [x (reagent/atom nil)]
+(defn mounty[]
+  (let [xatom (reagent/atom nil)]
     (reagent/create-class
-      {:component-did-mount  (partial somefn x)
-       :component-did-update (partial somefn x)
-       :reagent-render       (fn [] [table x])})))
+      {:component-did-mount  #(swap-query-results % xatom)
+       :component-did-update #(swap-query-results % xatom)
+       :reagent-render       (fn [] [table xatom])})))
 
 (defn ^:export main []
-  (fn [{:keys [service payload] :as step-data}]
+  (fn [step-data]
     [:div
-     [:h4 "Table Component" (str step-data)]
      [mounty step-data]]))

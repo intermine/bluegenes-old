@@ -77,8 +77,7 @@
                  (.log js/console "q" (.toXML q))
                  (go (let [response (<! (http/post (str "http://" (:root service) "/service/query/results")
                                                   {:with-credentials? false
-                                                   :form-params (merge options
-                                                                       {:query (.toXML q)})}))]
+                                                   :form-params (merge options {:query (.toXML q)})}))]
                        (>! c (-> response :body)))))))
     c))
 
