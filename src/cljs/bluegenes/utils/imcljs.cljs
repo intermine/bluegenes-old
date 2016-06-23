@@ -1,8 +1,8 @@
 (ns bluegenes.utils.imcljs
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs-http.client :as http]
             [bluegenes.utils.machinefields :as machine]
-            [cljs.core.async :refer [put! chan <! >! timeout close!]]
+            [cljs.core.async :as a :refer [put! chan <! >! timeout close!]]
             [intermine.imjs :as imjs]))
 
 (defn resolve-ids
@@ -15,7 +15,7 @@
    input]
   (go (let [response (<! (http/post (str "http://" root "/service/ids")
                                     {:with-credentials? false
-                                     :json-params (clj->js input)}))]
+                                     :json-params       (clj->js input)}))]
         (if-let [uid (-> response :body :uid)]
           (loop []
             (let [status-response (<! (http/get (str "http://" root "/service/ids/" uid "/status")
@@ -36,20 +36,20 @@
   [{{:keys [root token]} :service} {:keys [ids list widget maxp correction population]}]
   (go (let [response (<! (http/post (str "http://" root "/service/list/enrichment")
                                     {:with-credentials? false
-                                     :keywordize-keys? true
-                                     :form-params (merge
-                                                    {:widget widget
-                                                     :maxp maxp
-                                                     :format "json"
-                                                     :correction correction}
+                                     :keywordize-keys?  true
+                                     :form-params       (merge
+                                                          {:widget     widget
+                                                           :maxp       maxp
+                                                           :format     "json"
+                                                           :correction correction}
 
-                                                    (cond
-                                                      ids
-                                                      {:ids (clojure.string/join "," ids)}
-                                                      list
-                                                      {:list list})
+                                                          (cond
+                                                            ids
+                                                            {:ids (clojure.string/join "," ids)}
+                                                            list
+                                                            {:list list})
 
-                                                    (if-not (nil? population) {:population population}))}))]
+                                                          (if-not (nil? population) {:population population}))}))]
         (-> response :body))))
 
 
@@ -70,16 +70,18 @@
 (defn raw-query-rows
   "Returns IMJS row-style result"
   [service query options]
+  (println "running query" query)
   (let [c (chan)]
     (-> (js/imjs.Service. (clj->js service))
         (.query (clj->js query))
         (.then (fn [q]
-                 (.log js/console "q" (.toXML q))
                  (go (let [response (<! (http/post (str "http://" (:root service) "/service/query/results")
-                                                  {:with-credentials? false
-                                                   :form-params (merge options {:query (.toXML q)})}))]
-                       (>! c (-> response :body)))))))
+                                                   {:with-credentials? false
+                                                    :form-params       (merge options {:query (.toXML q)})}))]
+                       (>! c (-> response :body))
+                       (close! c))))))
     c))
+
 
 (defn query-count
   "Returns IMJS row-style result"
@@ -101,7 +103,7 @@
   [service]
   (go (let [response (<! (http/get (str "http://" (:root service) "/service/lists")
                                    {:with-credentials? false
-                                    :keywordize-keys? true}))]
+                                    :keywordize-keys?  true}))]
         (-> response :body :lists))))
 
 (defn query-records
@@ -128,17 +130,17 @@
 
 (defn summary-query [type id path-info]
   "returns pre-built query object for summary fields"
-  {:from type
+  {:from   type
    :select (all-attributes path-info)
-   :where [{
-            :path (str type ".id")
-            :op "="
-            :value id}]})
+   :where  [{
+             :path  (str type ".id")
+             :op    "="
+             :value id}]})
 
 (defn is-good-result? [k v]
   "Check that values are non null or machine-only names - no point getting dispaly names for them. "
-  (and (not (contains? machine/fields k))                   ;;don't output user-useless results
-       (some? (:val v)))                                    ;;don't output null results
+  (and (not (contains? machine/fields k)) ;;don't output user-useless results
+       (some? (:val v))) ;;don't output null results
   )
 
 
@@ -181,12 +183,12 @@
   "Returns the primary identifier associated with a given object id. Useful for cross-mine queries, as object ids aren't consistent between different mine instances."
   [type id service]
   (let [c (chan) q {
-                    :from type
+                    :from   type
                     :select "primaryIdentifier"
-                    :where [{
-                             :path (str type ".id")
-                             :op "="
-                             :value id}]}]
+                    :where  [{
+                              :path  (str type ".id")
+                              :op    "="
+                              :value id}]}]
     (go (let [response (<! (query-records service q))]
           (>! c (:primaryIdentifier (first response)))))
     c))
@@ -194,56 +196,56 @@
 (defn homologue-query [id organism]
   {
    :constraintLogic "A and B"
-   :from "Gene"
-   :select [
-            "homologues.homologue.primaryIdentifier"
-            "homologues.homologue.symbol"
-            "homologues.homologue.organism.shortName"
-            ]
-   :orderBy [
-             {
-              :path "primaryIdentifier"
-              :direction "ASC"
-              }
-             ]
-   :where [
-           {
-            :path "primaryIdentifier"
-            :op "="
-            :value id
-            :code "A"
-            }
-           {
-            :path "homologues.homologue.organism.shortName"
-            :op "="
-            :value organism
-            :code "B"
-            }
-           ]
+   :from            "Gene"
+   :select          [
+                     "homologues.homologue.primaryIdentifier"
+                     "homologues.homologue.symbol"
+                     "homologues.homologue.organism.shortName"
+                     ]
+   :orderBy         [
+                     {
+                      :path      "primaryIdentifier"
+                      :direction "ASC"
+                      }
+                     ]
+   :where           [
+                     {
+                      :path  "primaryIdentifier"
+                      :op    "="
+                      :value id
+                      :code  "A"
+                      }
+                     {
+                      :path  "homologues.homologue.organism.shortName"
+                      :op    "="
+                      :value organism
+                      :code  "B"
+                      }
+                     ]
    })
 
 (defn local-homologue-query [ids type organism]
   {
-   :from type
-   :select [
-            "primaryIdentifier"
-            "symbol"
-            "organism.shortName"
-            ]
+   :from    type
+   :select  [
+             "primaryIdentifier"
+             "symbol"
+             "organism.shortName"
+             ]
    :orderBy [
              {
-              :path "primaryIdentifier"
+              :path      "primaryIdentifier"
               :direction "ASC"
               }
              ]
-   :where [
-           {
-            :path type
-            :op "LOOKUP"
-            :value ids
-            :extraValue organism
-            }
-           ]
+   :where   [
+             {
+              :path       type
+              :op         "LOOKUP"
+              :value      ids
+              :extraValue organism
+              }
+             ]
    })
 
 (defn map-local-homologue-response [data]
@@ -380,10 +382,10 @@
               (let [end-class    (end-class model next)
                     display-name (display-name model end-class)]
                 (assoc total next
-                             {:count "N"
-                              :end-class end-class
+                             {:count        "N"
+                              :end-class    end-class
                               :display-name display-name
-                              :query (assoc query :select (str next ".id"))}))) {} classes)))
+                              :query        (assoc query :select (str next ".id"))}))) {} classes)))
 
 
 (defn deconstruct-query-by-class
@@ -404,3 +406,29 @@
                                                                 (assoc :select (str trimmed-path ".id"))
                                                                 (dissoc :orderBy))})))
             {} (into [] (comp (map (partial trim-path-to-class model)) (distinct)) (:select sterilized-query)))))
+
+
+(defn concat-channels
+  [& chans]
+  (let [out (chan)]
+    (go-loop [[ch & more] chans]
+             (if ch
+               (let [val (<! ch)]
+                 (if (nil? val)
+                   (recur more)
+                   (do (>! out val)
+                       (recur chans))))
+               (close! out)))
+    out))
+
+
+(defn summarize-query [model service query]
+  (let [out (chan)
+        deconstructed-query (seq (deconstruct-query model query))]
+    (let [count-queries     (map (fn [[_ v]]
+                                   (dissoc (:query v) :orderBy)) deconstructed-query)
+          response-channels (into [] (map #(raw-query-rows service % {:format "count"}) count-queries))]
+      (go (let [count-results (<! (a/into [] (apply concat-channels response-channels)))]
+            (>! out (into {} (map (fn [x y] (assoc-in x [1 :count] y)) deconstructed-query count-results)))))
+      )
+    out))

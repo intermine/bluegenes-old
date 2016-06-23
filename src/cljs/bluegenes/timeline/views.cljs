@@ -216,8 +216,8 @@
             (-> (map (fn [id]
                        [:div.abc
                         [:div.row
-                         [:div.col-md-6 [cont (get @steps id)]]
-                         [:div.col-md-6 [lighttable/main (:output (get @steps id))]]]
+                         [:div.col-md-8 [cont (get @steps id)]]
+                         [:div.col-md-4 [lighttable/main (:output (get @steps id))]]]
                         [input-filter (get @steps id)]]) (reverse @step-path)))
 
             ))))

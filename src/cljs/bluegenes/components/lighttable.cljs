@@ -1,13 +1,14 @@
 (ns bluegenes.components.lighttable.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [clojure.string :as str]
             [bluegenes.utils.imcljs :as im]
             [intermine.imtables :as imtables]
+            [cljs-http.client :as http]
             [reagent.impl.util :as impl :refer [extract-props]]
             [intermine.imjs :as imjs]
-            [cljs.core.async :refer [put! chan <! >! timeout close!]]))
+            [cljs.core.async :as a :refer [put! chan <! >! timeout close!]]))
 
 (enable-console-print!)
 
@@ -59,22 +60,50 @@
      [:tbody (map (fn [x] [table-row x]) (:results @xatom))]]))
 
 (defn swap-query-results
-  [component a]
-  (let [props(reagent/props component)]
+  [component a cache]
+  (let [props (reagent/props component)]
     (go (let [r (<! (im/raw-query-rows {:root "www.flymine.org/query"}
                                        (normalize-input props)
-                                       {:size 10
+                                       {:size   10
                                         :format "json"}))]
           (reset! a r)))))
 
-(defn mounty[]
-  (let [xatom (reagent/atom nil)]
+(defn swap-query-summary
+  [component a cache]
+  (let [props (reagent/props component)]
+    (go (let [r (<! (im/summarize-query (-> cache :models :flymine)
+                                        {:root "www.flymine.org/query"}
+                                        (normalize-input props)))]
+          (reset! a r)))))
+
+(defn countbox
+  [atom]
+  (fn []
+    [:div (str @atom)]
+    ;[:div (str (map (fn [[path details]] [path (:count details)] ) @atom))]
+    ))
+
+(defn county []
+  (let [xatom        (reagent/atom nil)
+        global-cache (re-frame/subscribe [:global-cache])]
     (reagent/create-class
-      {:component-did-mount  #(swap-query-results % xatom)
-       :component-did-update #(swap-query-results % xatom)
+      {:component-did-mount  #(swap-query-summary % xatom @global-cache)
+       :component-did-update #(swap-query-summary % xatom @global-cache)
+       :reagent-render       (fn [] [countbox xatom])})))
+
+
+(defn mounty []
+  (let [xatom        (reagent/atom nil)
+        global-cache (re-frame/subscribe [:global-cache])]
+    (reagent/create-class
+      {:component-did-mount  #(swap-query-results % xatom @global-cache)
+       :component-did-update #(swap-query-results % xatom @global-cache)
        :reagent-render       (fn [] [table xatom])})))
 
 (defn ^:export main []
   (fn [step-data]
-    [:div
+    [:div.lighttable-container
+     [:h3 "Results"]
+     [county step-data]
      [mounty step-data]]))
+
