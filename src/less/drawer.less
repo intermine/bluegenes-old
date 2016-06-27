@@ -1,19 +1,17 @@
+html {background:#333;}
+
+
 .timeline-container {
   display: flex;
   flex-direction: row;
   align-items: stretch;
   height: 100%;
-
-
   @highlight: #bbe9f0;
   // @highlight: hotpink;
-
-
   .offset {
     position: relative;
     left: -25px;
   }
-
   .out {
     font-size: 2em;
     color: white;
@@ -21,14 +19,15 @@
     left: -25px;
     top: -10px;
   }
-
   div.drawer {
-
     input {
       color: white;
     }
-
-    h3 {color: @highlight; font-weight: bolder; font-size: 2em;}
+    h3 {
+      color: @highlight;
+      font-weight: bolder;
+      font-size: 2em;
+    }
     flex: 0 0 300px;
     color: white;
     padding: 10px;
@@ -36,102 +35,88 @@
     display: flex;
     flex-direction: column;
     background: #333333;
-
     div.heading {
       text-align: center;
-
       .new {
         padding-top: 10px;
       }
     }
-
-      div.item {
-
-        &:hover {
-          background: #4F4F4F;
-        }
-
-        &.active {
-          background: white;
-          color: black;
-        }
-
-        // border: 1px solid black;
-        display: flex;
-        padding: 5px;
-        align-items: center;
-
-        &:not(:last-child) {
-          // border-bottom: 1px dotted @highlight;
-        }
-
-        .ico {
-          // border: 1px solid red;
-          fill: red;
-          color: @highlight;
-        }
-
-        // i, span {
-        //   padding: 5px;
-        // }
-
-
-        .grow {
-          flex: 1 0;
-          padding: 0 10px 0 10px;
-          font-weight: bolder;
-          font-size: 1.2em;
-          // font-size: 1.2em;
-
-              li > a,a:visited {
-                  color: white;
-                  font-size: 1.2em;
-              }
-        }
-
-        a:visited {
-            color: white;
-        }
-
-
-        span.count {
-          display: flex;
-          flex-direction: column;
-          // border-left: 1px dashed hotpink;
-          padding-left: 10px;
-          align-items: flex-end;
-
-          .big {
-            font-size: 2em;
-          }
-
-          .right {
-            justify-contents: right;
-          }
-        }
-
-
-
-
+    div.item {
+      &:hover {
+        background: #4F4F4F;
       }
-
+      &.active {
+        background: white;
+        color: black;
+      }
+      // border: 1px solid black;
+      display: flex;
+      padding: 5px;
+      align-items: center;
+      &:not(:last-child) {
+        // border-bottom: 1px dotted @highlight;
+      }
+      .ico {
+        // border: 1px solid red;
+        fill: red;
+        color: @highlight;
+      }
+      // i, span {
+      //   padding: 5px;
+      // }
+      .grow {
+        flex: 1 0;
+        padding: 0 10px;
+        font-weight: bolder;
+        font-size: 1.2em;
+        // font-size: 1.2em;
+        li > a,
+        a:visited {
+          color: white;
+          font-size: 1.2em;
+        }
+      }
+      a:visited {
+        color: white;
+      }
+      span.count {
+        display: flex;
+        flex-direction: column;
+        // border-left: 1px dashed hotpink;
+        padding-left: 10px;
+        align-items: flex-end;
+        .big {
+          font-size: 2em;
+        }
+        .right {
+          justify-contents: right;
+        }
+      }
+    }
   }
-
-  div.prevsteps {
+  @stripeybg1: rgba(255,255,255,0.2);
+  @stripeybg2: rgba(255,255,255,0.9);
+  .next-step-chooser {
+    background: @stripeybg2;
+  }
+  .prevsteps {
+    background:#d9d9d9;
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-
-    div.abc {
+    .abc {
+      &:nth-child(odd) {
+        background: @stripeybg1;
+      }
+      &:nth-child(even) {
+        background: @stripeybg2;
+      }
       display: flex;
       flex-direction: column;
       // align-items: center;
     }
   }
-
 }
-
 // div.filterer {
 //   display: flex;
 //
@@ -139,29 +124,24 @@
 //     flex: 1 0 auto;
 //   }
 // }
-
-
 html,
 body {
-    height: 100%;
-}
-
-#app, .bob {
   height: 100%;
 }
-
-
-.up {
-    font-size: 4em;
-    position: relative;
-    top: -40px;
-    color: #2196F3;
-    stroke-fill: red;
-    stroke-width: 1;
+#app,
+.bob {
+  height: 100%;
 }
-
+.up {
+  font-size: 4em;
+  position: relative;
+  top: -40px;
+  color: #2196F3;
+  stroke-fill: red;
+  stroke-width: 1;
+}
 .center-contents {
-    text-align: center;
+  text-align: center;
 }
 .btn-circle {
   width: 30px;
@@ -188,12 +168,11 @@ body {
   line-height: 1.33;
   border-radius: 35px;
 }
-
 .savetodrawer {
-    background-color: #3d8b40;
+  background-color: #3d8b40;
+  color: white;
+  li > a {
     color: white;
-    li > a {
-        color: white;
-        font-size: 1.2em;
-    }
+    font-size: 1.2em;
+  }
 }

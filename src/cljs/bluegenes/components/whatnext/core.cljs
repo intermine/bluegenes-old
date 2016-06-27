@@ -110,18 +110,10 @@
 (defn main []
   (let [available-data (re-frame/subscribe [:available-data])]
     (fn []
-      [:div.step-container
-       [:div.body
+      [:div.next-step-chooser
+       [:div
         [listtool]
         [templatetool]
         [tabletool]
         [enrichtool]]
-
-       ;[:div.next-steps-title "Next Steps23"]
-       [:div.tool-card-container
-        ;(for [tool (filter-available-tools (:type (:data @available-data)) )]
-        ;  (let [[id] tool]
-        ;    ^{:key id} [tool-card tool]  ))
-        ;[data-popover]
-        ]
-       [:div.clear-fix]])))
+])))
