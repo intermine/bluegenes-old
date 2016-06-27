@@ -104,6 +104,6 @@
   (fn [step-data]
     [:div.lighttable-container
      [:h3 "Results"]
-     [county step-data]
+     ;[county step-data]
      [mounty step-data]]))
 
