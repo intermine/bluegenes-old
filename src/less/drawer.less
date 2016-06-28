@@ -20,6 +20,8 @@
   main {
     @stripe-a: #fff;
     @stripe-b: darken(@stripe-a, 15%);
+    @results: rgba(0,0,0,0.1);
+    @results-size:200px;
     flex-grow: 1;
     box-sizing: border-box;
     //    &:nth-child(even){background:#fff;}
@@ -29,6 +31,7 @@
     .next-step-chooser {
       padding: @spacer/2 @spacer;
       background: @stripe-a;
+      border-right: solid @results-size @results;
     }
     .workflow-step {
       &:after {
@@ -90,9 +93,9 @@
       }
       padding: @spacer @spacer @spacer 0;
       flex-grow: 1;
-      min-width: 200px;
-      max-width: 200px;
-      background: rgba(0,0,0,0.1);
+      min-width: @results-size;
+      max-width: @results-size;
+      background: @results;
       padding: @spacer;
       margin-bottom:-26px;
     }
