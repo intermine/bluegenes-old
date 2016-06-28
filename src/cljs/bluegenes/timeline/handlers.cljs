@@ -464,7 +464,8 @@
           (if (nil? diffmap) node diffmap)                  ;Difference in data
           {:has-something (partial api/has-something location) ;API
            :save-state    (partial api/save-state location)
-           :save-cache    (partial api/save-cache location)}
+           :save-cache    (partial api/save-cache location)
+           :update-cache (partial api/update-cache location)}
           (get-in db [:cache])                              ;Global Cache
           )))
     db))
@@ -512,9 +513,6 @@
                                        (get-in db [:cache :models :flymine])
                                        (:payload (:data (:output updated)))))]
 
-
-                    (println "decone" decon)
-
                     (re-frame/dispatch [:update-node (conj (vec (butlast location)) subscriber)
                                         #(assoc % :input (:output updated) :decon decon)])))
                 (subscribers db location))))))
@@ -545,7 +543,6 @@
         (let [id (keyword (rid))]
           (let [current-data (get-in db [:projects (:active-project db) :saved-data (:active-data db)])]
             (re-frame/dispatch ^:flush-dom [:run-step [:projects project :networks id :nodes uuid] :node1])
-            (println "dispatching")
             (secretary/dispatch! (str "/timeline/project1/" (str id)))
             (-> db (assoc-in [:projects project :networks id]
                              {:_id   id

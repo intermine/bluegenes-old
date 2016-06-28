@@ -34,46 +34,46 @@
   (into [] (distinct) (mapcat categories-from-template templates)))
 
 
+
+(def missing? (complement contains?))
+
 (defn ^:export run
   "This function is called whenever the tool makes a change to its state, or its
   upstream data changes."
-  [snapshot
-   {:keys [input state cache] :as what-changed}
-   {:keys [has-something save-state save-cache] :as api}
+  [{:keys [cache] :as snapshot}
+   {:keys [input-changes state-changes cache-changes] :as what-changed}
+   {:keys [has-something save-cache update-cache] :as api}
    global-cache]
 
-  (if (nil? (:categories (:cache snapshot)))
-    (save-cache (assoc (:cache snapshot) :categories (parse-categories (-> global-cache :templates :flymine)) )))
+  (when (missing? cache :banana)
+    (update-cache (fn [c] (assoc c :banana "cakes"))))
 
-  ;(let [new-cache (cond-> (:cache snapshot)
-  ;                        ;
-  ;                        (empty? (:categories (:cache snapshot)))
-  ;                        )]
-  ;  (save-cache new-cache))
+  (when (missing? cache :categories)
+    (update-cache (fn [c] (assoc c :categories (parse-categories (-> global-cache :templates :flymine))))))
 
-  (if (or (nil? cache) (not (nil? input)))
-    (let [runnable    (into {} (h/runnable (-> global-cache :models :flymine)
-                                           (-> global-cache :templates :flymine) "Gene"))
-          transformed (into {}
-                            (do
-                              (cond
-                                (= "query" (-> snapshot :input :data :format))
-                                (map (fn [[id query]]
-                                       [id (h/replace-input-constraints-whole
-                                             (-> global-cache :models :flymine)
-                                             query
-                                             "Gene"
-                                             (-> snapshot :input :data :payload :where first))])
-                                     runnable)
-                                :else
-                                (map (fn [[id query]]
-                                       [id (h/replace-input-constraints
-                                             (-> global-cache :models :flymine)
-                                             query
-                                             "Gene"
-                                             (-> snapshot :input :data :payload))])
-                                     runnable))))]
-      (save-cache {:runnable transformed})))
+  (when (or input-changes (missing? cache :runnable))
+    (update-cache (fn [c] (assoc c :runnable (let [runnable    (into {} (h/runnable (-> global-cache :models :flymine)
+                                                                                    (-> global-cache :templates :flymine) "Gene"))
+                                                   transformed (into {}
+                                                                     (cond
+                                                                       (= "query" (-> snapshot :input :data :format))
+                                                                       (map (fn [[id query]]
+                                                                              [id (h/replace-input-constraints-whole
+                                                                                    (-> global-cache :models :flymine)
+                                                                                    query
+                                                                                    "Gene"
+                                                                                    (-> snapshot :input :data :payload :where first))])
+                                                                            runnable)
+                                                                       :else
+                                                                       (map (fn [[id query]]
+                                                                              [id (h/replace-input-constraints
+                                                                                    (-> global-cache :models :flymine)
+                                                                                    query
+                                                                                    "Gene"
+                                                                                    (-> snapshot :input :data :payload))])
+                                                                            runnable)))]
+                                               (save-cache {:runnable transformed}))))))
+
 
   (if (or (contains? what-changed :state) (contains? what-changed :cache))
     (has-something {:service  {:root "www.flymine.org/query"}
