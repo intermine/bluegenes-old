@@ -54,7 +54,7 @@
 (defn table
   [xatom]
   (fn []
-    [:table
+    [:table.table.table-striped
      [:thead
       (into [:tr] (map (fn [x] [:th x]) (:columnHeaders @xatom)))]
      [:tbody (map (fn [x] [table-row x]) (:results @xatom))]]))
@@ -76,12 +76,42 @@
                                         (normalize-input props)))]
           (reset! a r)))))
 
+(defn swap-query-objects
+  [component a cache]
+  (let [props (reagent/props component)]
+    (go (let [r (<! (im/raw-query-rows {:root "www.flymine.org/query"}
+                                       (normalize-input props)
+                                       {:size   3
+                                        :format "jsonobjects"}))]
+          (reset! a r)))))
+
 (defn countbox
   [atom]
   (fn []
-    [:div (str @atom)]
-    ;[:div (str (map (fn [[path details]] [path (:count details)] ) @atom))]
-    ))
+    ;[:div (str @atom)]
+    [:div (str (map (fn [[path details]] [path (:count details)]) @atom))]))
+
+
+(defn structure? [x]
+  (some? (some true? (for [functions [map? list? vector? set?]]
+                       (functions x)))))
+
+(def not-structure? (complement structure?))
+
+(defn card []
+  (fn [title props]
+    [:div.card
+     [:div.title]
+     (println "together" (apply str (filter (fn [[k v]] (not-structure? v)) props)))
+     (map (fn [[k v]]
+            (cond
+              (map? v) [card (str k) v]
+              (vector? v) (map (fn [c] [card (str k) c]) v))) props)]))
+
+(defn cards []
+  (fn [response]
+    (into [:div] (map (fn [r]
+                        [card (:class r) r]) (:results @response)))))
 
 (defn county []
   (let [xatom        (reagent/atom nil)
@@ -100,9 +130,22 @@
        :component-did-update #(swap-query-results % xatom @global-cache)
        :reagent-render       (fn [] [table xatom])})))
 
+
+(defn cardy []
+  (let [xatom        (reagent/atom nil)
+        global-cache (re-frame/subscribe [:global-cache])]
+    (reagent/create-class
+      {:component-did-mount  #(swap-query-objects % xatom @global-cache)
+       :component-did-update #(swap-query-objects % xatom @global-cache)
+       :reagent-render       (fn [] [cards xatom])})))
+
+
 (defn ^:export main []
   (fn [step-data]
     [:div.lighttable-container
      [:h3 "Results"]
      ;[county step-data]
-     [mounty step-data]]))
+     ;[mounty step-data]
+     [cardy step-data]
+     ]))
+
