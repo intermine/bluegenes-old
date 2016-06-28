@@ -156,14 +156,14 @@
       (let [location [:projects @project :networks @network :nodes (:_id step-data)]
             comms    {:has-something (partial api/has-something location)
                       :save-state    (partial api/save-state location)
-                      :update-state    (partial api/update-state location)
+                      :update-state  (partial api/update-state location)
                       :save-cache    (partial api/save-cache location)}
             tool     (-> bluegenes.tools
                          (aget (:tool step-data))
                          (aget "core")
                          (aget "main"))]
         [:div.step-container
-         [savetodrawer/main step-data]
+         ;[savetodrawer/main step-data]
          [:div.body
           [tool (assoc step-data :api comms
                                  :global-cache @global-cache)]]]))))
@@ -215,12 +215,15 @@
       (into [:div.prevsteps
              [whatnext/main]]
             (-> (map (fn [id]
-                 [:div.workflow-step
-                       [:div.workflow-step-content
+                       [:div.workflow-step
+                        [:div.workflow-step-content
                          [:div.workflow-tool [cont (get @steps id)]]
-                         [:div.workflow-data [lighttable/main (:output (get @steps id))]
-                          [input-filter (get @steps id)]
-                          ]]
+                         [:div.workflow-data
+                          [:br] [:br] [:br]
+                          [savetodrawer/main (get @steps id)]
+                          [lighttable/main (:output (get @steps id))]
+                          [input-filter (get @steps id)]]
+                         ]
                         ]) (reverse @step-path)))
 
             ))))
