@@ -156,6 +156,7 @@
       (let [location [:projects @project :networks @network :nodes (:_id step-data)]
             comms    {:has-something (partial api/has-something location)
                       :save-state    (partial api/save-state location)
+                      :update-state    (partial api/update-state location)
                       :save-cache    (partial api/save-cache location)}
             tool     (-> bluegenes.tools
                          (aget (:tool step-data))

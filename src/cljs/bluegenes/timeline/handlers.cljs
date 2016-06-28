@@ -464,6 +464,7 @@
           (if (nil? diffmap) node diffmap)                  ;Difference in data
           {:has-something (partial api/has-something location) ;API
            :save-state    (partial api/save-state location)
+           :update-state    (partial api/update-state location)
            :save-cache    (partial api/save-cache location)
            :update-cache (partial api/update-cache location)}
           (get-in db [:cache])                              ;Global Cache

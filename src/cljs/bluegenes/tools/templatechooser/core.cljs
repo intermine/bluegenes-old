@@ -9,20 +9,31 @@
   (fn []
     (fn [{:keys [step-data template]}]
       (let [[id query] template
-            save-state (-> step-data :api :save-state)]
+            update-state (-> step-data :api :update-state)]
         [:a.list-group-item
-         {:class    (if (= (:state step-data) id) "active")
-          :on-click (fn [] (save-state id))}
+         {:class    (if (= (:selected (:state step-data)) id) "active")
+          :on-click (fn [] (update-state (fn [state] (assoc state :selected id))))}
          [:h4.list-group-item-heading
           (last (clojure.string/split (:title query) "-->"))]
          [:p.list-group-item-text (:description query)]]))))
 
+
+(defn has-tag? [template tag]
+  (some? (some #{tag} (:tags template))))
+
 (defn templates []
-  (fn [step-data]
-    (into [:div.list-group]
-          (for [t (-> step-data :cache :runnable)]
-            [template {:step-data step-data
-                       :template  t}]))))
+  (fn [{:keys [cache state] :as step-data}]
+
+    (let [filtered-templates (if (some? (:active-category state))
+                               (filter (fn [[_ details]]
+                                         (has-tag? details (str "im:aspect:" (:active-category state))))
+                                       (:runnable cache))
+                               (:runnable cache))]
+
+      (into [:div.list-group]
+            (for [t filtered-templates]
+              [template {:step-data step-data
+                         :template  t}])))))
 
 (defn categories-from-template [[name template-details]]
   (->> (:tags template-details)
@@ -30,10 +41,7 @@
        (map (fn [tag] (last (clojure.string/split tag #"im:aspect:"))))))
 
 (defn parse-categories [templates]
-  (println "PARSING CATEGORIES")
   (into [] (distinct) (mapcat categories-from-template templates)))
-
-
 
 (def missing? (complement contains?))
 
@@ -79,13 +87,22 @@
     (has-something {:service  {:root "www.flymine.org/query"}
                     :data     {:format  "query"
                                :type    "Gene"
-                               :payload (get-in snapshot [:cache :runnable (:state snapshot)])}
+                               :payload (get-in snapshot [:cache :runnable (:selected (:state snapshot))])}
                     :shortcut "viewtable"})))
 
 (defn menu []
-  (fn [step-data]
-    [:div "MENU"
-     (into [:ul.nav.nav-pills] (map (fn [category] ^{:key (str category)} [:li.active (str category)]) (:categories (:cache step-data))))]))
+  (fn [{:keys [state cache api]}]
+    (into [:ul.nav.nav-pills]
+          (map (fn [category]
+                 [:li
+                  {:class    (if (= category (:active-category state)) "active")
+                   :on-click (partial (:update-state api)
+                                      (fn [state] (assoc state :active-category
+                                                               (if (= category (:active-category state))
+                                                                 nil ; Clear the state
+                                                                 category
+                                                                 ))))}
+                  [:a (str category)]]) (:categories cache)))))
 
 (defn upstream-data []
   (fn [data]
