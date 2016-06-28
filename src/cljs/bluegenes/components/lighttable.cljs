@@ -54,7 +54,7 @@
 (defn table
   [xatom]
   (fn []
-    [:table.table.table-striped
+    [:table
      [:thead
       (into [:tr] (map (fn [x] [:th x]) (:columnHeaders @xatom)))]
      [:tbody (map (fn [x] [table-row x]) (:results @xatom))]]))
@@ -106,4 +106,3 @@
      [:h3 "Results"]
      ;[county step-data]
      [mounty step-data]]))
-
