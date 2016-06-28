@@ -30,7 +30,9 @@
                                        (:runnable cache))
                                (:runnable cache))]
 
-      (into [:div.list-group]
+      (into [:div.list-group
+             {:style {:height "700px"
+                      :overflow-y "scroll"}}]
             (for [t filtered-templates]
               [template {:step-data step-data
                          :template  t}])))))

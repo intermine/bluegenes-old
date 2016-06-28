@@ -70,7 +70,6 @@
 (defn raw-query-rows
   "Returns IMJS row-style result"
   [service query options]
-  (println "running query" query)
   (let [c (chan)]
     (-> (js/imjs.Service. (clj->js service))
         (.query (clj->js query))
