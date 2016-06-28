@@ -169,7 +169,7 @@
 
 (defn input-filter []
   (fn [data]
-    [:ul.nav.nav-pills
+    [:ul.nav.nav-pills.workflow-step-output
      (for [i (:Gene (:decon data))]
        [:li
         {:class    (if (= (:path i) (:filter data)) "active")
@@ -214,11 +214,13 @@
       (into [:div.prevsteps
              [whatnext/main]]
             (-> (map (fn [id]
-                       [:div.abc
-                        [:div.row
-                         [:div.col-md-8 [cont (get @steps id)]]
-                         [:div.col-md-4 [lighttable/main (:output (get @steps id))]]]
-                        [input-filter (get @steps id)]]) (reverse @step-path)))
+                 [:div.workflow-step
+                       [:div.workflow-step-content
+                         [:div.workflow-tool [cont (get @steps id)]]
+                         [:div.workflow-data [lighttable/main (:output (get @steps id))]
+                          [input-filter (get @steps id)]
+                          ]]
+                        ]) (reverse @step-path)))
 
             ))))
 (defn tabs []
@@ -249,7 +251,7 @@
         active-data    (re-frame/subscribe [:active-data])]
     [:div.timeline-container
      [drawer/main]
-     [:div.stretchme
+     [:main
       [tabs]
       [:div.prevsteps
        [whatnext/main]
@@ -270,6 +272,6 @@
   [:div.timeline-container
    [drawer/main]
 
-   [:div.stretchme
+   [:main
     [tabs]
     [previous-steps]]])
