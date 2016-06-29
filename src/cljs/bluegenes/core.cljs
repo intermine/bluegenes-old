@@ -21,6 +21,7 @@
               [bluegenes.tools.enrichment.core :as enrichment]
               [bluegenes.tools.dashboard.core :as dashboard]
               [bluegenes.tools.templatechooser.core :as templatechooser]
+              [bluegenes.tools.datamerger.core :as datamerger]
               [intermine.imjs :as imjs]
               [devtools.core :as devtools]))
 

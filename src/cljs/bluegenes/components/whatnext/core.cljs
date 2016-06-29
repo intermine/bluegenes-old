@@ -72,6 +72,12 @@
                                                              :title "Pathway Enrichment"}])}
      "Run Enrichment"]))
 
+(defn mergetool []
+  (fn []
+    [:button.next-tool
+     {:on-click #(re-frame/dispatch [:add-step "datamerger" {}])}
+     "Merge Data"]))
+
 
 (defn listtool []
   (fn []
@@ -110,5 +116,6 @@
         [listtool]
         [templatetool]
         [tabletool]
-        [enrichtool]]
+        [enrichtool]
+        [mergetool]]
 ])))

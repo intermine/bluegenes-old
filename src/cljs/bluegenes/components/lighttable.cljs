@@ -88,7 +88,6 @@
 (defn countbox
   [atom]
   (fn []
-    ;[:div (str @atom)]
     [:div (str (map (fn [[path details]] [path (:count details)]) @atom))]))
 
 
@@ -99,7 +98,6 @@
 (def not-structure? (complement structure?))
 
 (defn stringify-im-class [properties]
-  (println "sees props" properties)
   (clojure.string/join ", " (map second (filter (fn [[k v]] (not-structure? v))
                                                 (dissoc properties :class :objectId)))))
 
