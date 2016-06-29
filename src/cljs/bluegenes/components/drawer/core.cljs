@@ -18,8 +18,8 @@
 (defn operations []
   (fn []
     [:div.heading
-     [:div.btn.btn-primary
-      {:on-click (fn [] (re-frame/dispatch [:set-active-panel :operations-panel]))} "Operations"]]))
+     [:a
+      {:on-click (fn [] (re-frame/dispatch [:set-active-panel :operations-panel]))} "List Operations"]]))
 
 
 

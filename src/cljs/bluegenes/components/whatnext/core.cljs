@@ -30,11 +30,6 @@
           ^{:key name} [tool @available-data]
           name)]])))
 
-; (.tooltip (js/$ (reagent/dom-node this))
-;           #js{:title @data
-;               :data-placement "bottom"
-;               :html true})
-
 (defn data-popover []
   (let [available-data (re-frame/subscribe [:available-data])]
     (reagent/create-class
@@ -60,19 +55,19 @@
 
 (defn tabletool []
   (fn []
-    [:button.btn
+    [:button.next-tool
      {:on-click #(re-frame/dispatch [:add-step "viewtable" {}])}
      "View Table"]))
 
 (defn templatetool []
   (fn []
-    [:button.btn
+    [:button.next-tool
      {:on-click #(re-frame/dispatch [:add-step "templatechooser" {}])}
      "Run Template"]))
 
 (defn enrichtool []
   (fn []
-    [:button.btn
+    [:button.next-tool
      {:on-click #(re-frame/dispatch [:add-step "enrichment" {:widget "pathway_enrichment"
                                                              :title "Pathway Enrichment"}])}
      "Run Enrichment"]))
@@ -80,7 +75,7 @@
 
 (defn listtool []
   (fn []
-    [:button.btn
+    [:button.next-tool
      {:on-click #(re-frame/dispatch
                   [:add-step "dashboard" {:active 0
                                           :tools [{:tool "enrichment"

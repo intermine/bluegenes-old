@@ -215,16 +215,15 @@
       (into [:div.prevsteps
              [whatnext/main]]
             (-> (map (fn [id]
-                       [:div.workflow-step
-                        [:div.workflow-step-content
-                         [:div.workflow-tool [cont (get @steps id)]]
-                         [:div.workflow-data
-                          [:br] [:br] [:br]
-                          [savetodrawer/main (get @steps id)]
-                          [lighttable/main (:output (get @steps id))]
-                          [input-filter (get @steps id)]]
-                         ]
-                        ]) (reverse @step-path)))
+
+             [:div.workflow-step
+                [:div.workflow-step-content
+                  [:div.workflow-tool [cont (get @steps id)]]
+                    [:div.workflow-data
+                     [savetodrawer/main (get @steps id)]
+                      [lighttable/main (:output (get @steps id))]
+                      [input-filter (get @steps id)]]]
+                    ]) (reverse @step-path)))
 
             ))))
 (defn tabs []
@@ -239,8 +238,8 @@
                                                  "project1" (:slug details)])
                   :class    (if (= @active-network id) "active")}
              [:a (:label details)]]))
-        [:li [:div.btn.btn-primary
-              {:on-click #(dispatch [:new-network])} "New"]]]])))
+        [:li [:a
+              {:on-click #(dispatch [:new-network])} [:svg.icon.icon-plus [:use {:xlinkHref "#icon-plus"}]]]]]])))
 
 
 (defn history-details []

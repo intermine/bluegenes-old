@@ -15,7 +15,7 @@
             {:dangerouslySetInnerHTML {:__html image-elem-html}})]))
 
 ;;TO USE AN SVG INLINE, do it like so:
-;;[:svg.icon.icon-share [:use {:xlinkHref "#icon-share"}]]
+;;[:svg.icon.icon-plus [:use {:xlinkHref "#icon-plus"}]]
 ;;The definitions of icons are below ) use the part after # in the symbol
 ;;tag as identifiers.
 

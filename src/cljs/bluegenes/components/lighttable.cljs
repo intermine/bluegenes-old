@@ -98,11 +98,16 @@
 
 (def not-structure? (complement structure?))
 
+(defn stringify-im-class [properties]
+  (println "sees props" properties)
+  (clojure.string/join ", " (map second (filter (fn [[k v]] (not-structure? v))
+                                                (dissoc properties :class :objectId)))))
+
 (defn card []
   (fn [title props]
     [:div.card
-     [:div.title]
-     (println "together" (apply str (filter (fn [[k v]] (not-structure? v)) props)))
+     ;[:div.title ]
+     [:div.title (str title ": " (stringify-im-class props))]
      (map (fn [[k v]]
             (cond
               (map? v) [card (str k) v]
