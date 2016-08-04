@@ -228,15 +228,16 @@
             ))))
 (defn tabs []
   (let [networks       (subscribe [:networks])
-        active-network (subscribe [:active-network])]
+        active-network @(subscribe [:active-network])]
     (fn []
       [:div.tabber
        [:ul.nav.nav-tabs
         (for [[id details] @networks]
           (doall
+            ^{:key (gensym)}
             [:li {:on-click #(re-frame/dispatch [:set-timeline-panel :timeline-panel
                                                  "project1" (:slug details)])
-                  :class    (if (= @active-network id) "active")}
+                  :class   (doall (if (= active-network id) "active"))}
              [:a (:label details)]]))
         [:li [:a
               {:on-click #(dispatch [:new-network])} [:svg.icon.icon-plus [:use {:xlinkHref "#icon-plus"}]]]]]])))
