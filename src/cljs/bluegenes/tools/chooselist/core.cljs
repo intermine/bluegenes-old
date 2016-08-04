@@ -42,9 +42,17 @@
                (swap! local-state assoc
                       :results (partition-all (:rows-per-page @pager) im-lists))))))
 
+(defn get-list-name-from-state
+  "Nuff said."
+  [state]
+  (:value (first (:where (:payload (:data state)))))
+  )
+
 (defn is-selected [list state]
   "Returns true when a list name matches the most recent state (user chosen) list name"
-  (= (:name list) (:payload (:data state))))
+  (= (:name list) (get-list-name-from-state state)))
+
+
 
 (defn list-row []
   "Generates a single list row with  counts and list type."
