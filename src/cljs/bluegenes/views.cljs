@@ -5,6 +5,7 @@
             [bluegenes.components.dimmer :as dimmer]
             [bluegenes.timeline.api :as timeline-api]
             [bluegenes.components.listentry.core :as lists]
+            [bluegenes.components.homecircles.core :as circles]
             [clojure.string :as str]
             [bluegenes.utils.icons :as icons]
     ; [bluegenes.components.googlesignin :as google-sign-in]
@@ -78,7 +79,9 @@
   (.log js/console "Setting global search term to:" @state)
   (re-frame/dispatch [:set-search-term (str/trim @state)])  ;;set global search
   (aset js/window "location" "href"
-        "/#timeline/search"))
+  ;;temporarily disable search because it's broken
+    ;"/#timeline/search"))
+  "#/timeline/project1/network1"))
 
 (defn searchbox []
   "Outputs main top search boc"
@@ -90,7 +93,9 @@
           [:form#search {
                          :on-submit (fn [event] (submit-search event local-state))
                          :method    "get"
-                         :action    "/#/timeline/search"}
+                         ;;search is broken. So just point to the workflow 'til we fix it.
+;                         :action    "/#/timeline/search"}
+                         :action    "#/timeline/project1/network1"}
            [:input {
                     :type        "text"
                     :value       (cond (some? @local-state) @local-state)
@@ -103,14 +108,18 @@
 (defn home-panel []
   (let [name (re-frame/subscribe [:name])]
     (fn []
-      [:main.homepage
-       [searchbox]
-       [:div.cards
-        [bubble-section]
-        [histories-section]
-        [list-upload-section]
-        [templates-section]
-        ]])))
+      [:main.home.circles
+        [circles/main-panel]
+        [:br]
+        [:div.temp "Longer term, this page will look more like "
+          [:a {:href "https://drive.google.com/file/d/0B5MwfbL4xkvrR1ZkMlR4VUxkMGM/view?usp=sharing"} "this"]
+         " or "
+          [:a {:href "https://drive.google.com/file/d/0B5MwfbL4xkvrRkhUSmd3RXJQTXM/"} "this"]
+         ". Please help us decide which by "
+         [:a {:href "https://yochannah.typeform.com/to/dRVLkz"} "voting"]
+         " on it."]
+       ;[searchbox]
+       ])))
 
 (defn about-panel []
   (fn []
@@ -183,7 +192,7 @@
 (defn main-panel []
   (let [active-panel (re-frame/subscribe [:active-panel])]
     (fn []
-      [:div.bob
+      [:div.approot
        [icons/icons]
        [nav-panel]
        (if (vector? @active-panel)
