@@ -1,0 +1,81 @@
+@stroke-width: 5px;
+@on-color: #72D9FF;
+@off-color: #DAE7EC;
+@on: #00aeef;
+svg.venn {
+  circle {
+    fill: @off-color;
+    stroke-width: 2px;
+    stroke: white;
+    &.on {
+      fill: @on;
+    }
+    &:hover {
+      stroke: #006A92;
+    }
+  }
+  path.overlap {
+    stroke-width: 2px;
+    stroke: white;
+    fill: @off-color;
+    &.on {
+      fill: @on;
+    }
+    &:hover {
+      stroke: #006A92;
+    }
+  }
+}
+.query-operations-container {
+  display: flex;
+  // align-items: center;
+  // border: 1px solid pink;
+  .child {
+    flex: 0 0 auto;
+    // border: 1px solid blue;
+  }
+}
+.tabber {
+  @bg: #333;
+  input {
+    color: white;
+  }
+  width: 100%;
+  .nav-tabs {
+    border-bottom: 0;
+    box-sizing:border-box;
+  }
+  color: white;
+  padding: 10px 10px 0;
+  background: @bg;
+  .active {
+    color:#333;
+    box-shadow:0px -2px 1px 1px #000;
+    background: white;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+  }
+
+  .nav-tabs a, .nav-tabs a:focus {
+    color: white;
+    font-size: 1.1em;
+  }
+}
+.scrollable-menu {
+  height: auto;
+  max-height: 200px;
+  overflow-x: hidden;
+  min-width: 500px;
+  padding: 20px;
+}
+
+
+.venn-count {
+    font-size: 2em;
+}
+
+.venn-label {
+    font-size: 2em;
+}
+
+

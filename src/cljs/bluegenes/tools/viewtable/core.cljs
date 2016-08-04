@@ -1,32 +1,35 @@
 (ns bluegenes.tools.viewtable.core
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [clojure.string :as str]
+            [bluegenes.utils.imcljs :as im]
             [intermine.imtables :as imtables]
             [reagent.impl.util :as impl :refer [extract-props]]
-            [intermine.imjs :as imjs]))
+            [intermine.imjs :as imjs]
+            [cljs.core.async :refer [put! chan <! >! timeout close!]]))
 
 (enable-console-print!)
 
 (defn get-list-query
   "Construct a query using a collection of object ids."
   [payload]
-  {:from (:type payload)
+  {:from   (:type payload)
    :select "*"
-   :where [{:path (:type payload)
-            :op "IN"
-            :value (:payload payload)
-            :code "A"}]})
+   :where  [{:path  (:type payload)
+             :op    "IN"
+             :value (:payload payload)
+             :code  "A"}]})
 
 (defn get-id-query
   "Construct a query using an intermine list name."
   [payload]
-  {:from (:type payload)
+  {:from   (:type payload)
    :select "*"
-   :where [{:path "Gene.id"
-            :values (:payload payload)
-            :op "ONE OF"
-            :code "A"}]})
+   :where  [{:path   (str (:type payload) ".id")
+             :values (:payload payload)
+             :op     "ONE OF"
+             :code   "A"}]})
 
 (defn normalize-input
   "Convert a variety of inputs into an imjs compatible clojure map."
@@ -34,7 +37,7 @@
   (cond
     (= "list" (-> input-data :data :format))
     (get-list-query (get-in input-data [:data]))
-    (= "ids" (-> input-data  :data :format))
+    (= "ids" (-> input-data :data :format))
     (get-id-query (get-in input-data [:data]))
     (= "query" (-> input-data :data :format))
     (get-in input-data [:data :payload])))
@@ -60,46 +63,48 @@
        [:div.indented (str @state " rows.")]]
       )))
 
-(defn inner-table
-  "Renders an im-table"
-  []
-  (let [update-table (fn [comp]
-   (let [{:keys [state upstream-data api]} (reagent/props comp)
-         node (reagent/dom-node comp)
-         target  (.item (.getElementsByClassName node "imtable") 0)
-         query (normalize-input upstream-data)]
-     (-> (.loadTable js/imtables
-                     target
-                     (clj->js {:start 0 :size 5})
-                     (clj->js {:service (:service upstream-data) :query query}))
-         (.then
-          (fn [e]
-            (let [clone (.clone (-> e .-query))
-                  adj (.select clone #js [(str (-> e .-query .-root) ".id")])]
-              (-> (js/imjs.Service. (clj->js (:service upstream-data)))
-                  (.values adj)
-                  (.then (fn [v]
-                           ((:has-something api) {:service (:service upstream-data)
-                                                  :data {:format "ids"
-                                                         :type (-> e .-query .-root)
-                                                         :payload (js->clj v)}}))))))))))]
 
-    (reagent/create-class
-     {:reagent-render (fn []
-                        [:div
-                         [:div.imtable]])
-      :component-did-update update-table
-      :component-did-mount update-table})))
+(defn ^:export run
+  "This function is called whenever the tool makes a change to its state, or its
+  upstream data changes."
+  [snapshot what-changed {:keys [has-something save-state save-cache]}]
 
+  (if (contains? what-changed :input)
+    (do
+      (save-state {:service (:service (:input snapshot))
+                   :data    {:payload (normalize-input (:input snapshot))
+                             :format  "query"
+                             :type    "Gene"}})))
 
-(defn ^:export main
-  "Render the main view of the tool."
-  []
+  (if (contains? what-changed :state)
+    (has-something (:state snapshot))))
+
+(defn somefn [component]
+  (let [{:keys [state api]} (reagent/props component)
+        node   (reagent/dom-node component)
+        target (.item (.getElementsByClassName node "imtable") 0)]
+
+    (if-not (empty? state) (-> (.loadTable js/imtables
+                                           target
+                                           (clj->js {:start 0 :size 10})
+                                           (clj->js {:service (:service state)
+                                                     :query   (:payload (:data state))}))
+                               (.then (fn [table]
+                                        (-> table .-history (.on "changed:current"
+                                                                 (fn [x]
+                                                                   ((:save-state api)
+                                                                     {:service (:service state)
+                                                                      :data    {:payload (js->clj (-> x .-attributes .-query (.toJSON)) :keywordize-keys true)
+                                                                                :format  "query"
+                                                                                :type    "Gene"}})))))
+                                      (fn [error] (println "TABLE ERROR" error)))))))
+
+(defn mytable []
   (reagent/create-class
-   {:reagent-render (fn [props]
-;      (.log js/console "props" (clj->js props))
-                      [inner-table props])
-    :should-component-update (fn [this old-argv new-argv]
-                               (not (=
-                                     (dissoc (extract-props old-argv) :api)
-                                     (dissoc (extract-props new-argv) :api))))}))
+    {:component-did-mount  somefn
+     :component-did-update somefn
+     :reagent-render       (fn [] [:div [:div.imtable "I AM TABLE"]])}))
+
+(defn ^:export main []
+  (fn [{:keys [state api] :as step-data}]
+    [mytable (select-keys step-data [:api :state])]))

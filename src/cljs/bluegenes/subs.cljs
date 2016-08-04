@@ -30,6 +30,16 @@
   (fn [db _]
     (reaction (:active-history @db))))
 
+(re-frame/register-sub
+  :active-project
+  (fn [db _]
+    (reaction (:active-project @db))))
+
+(re-frame/register-sub
+  :active-network
+  (fn [db _]
+    (reaction (:active-network @db))))
+
 
 (re-frame/register-sub
   :dimmer
@@ -70,3 +80,8 @@
  :models
  (fn [db _]
    (reaction (get-in @db [:cache :models]))))
+
+(re-frame/register-sub
+  :lists
+  (fn [db _]
+    (reaction (get-in @db [:cache :lists]))))

@@ -312,9 +312,9 @@
     (if-not (empty? output)
       ((:has-something api) {:data
                              {:format "ids"
-                              :type "Gene"
+                              :type (:type values)
                               :payload (remove nil? (map #(-> % :product :id) (:identifiers values)))}
-                             :service {:root "beta.flymine.org/beta"}
+                             :service {:root "beta.humanmine.org/beta"}
                              :shortcut "viewtable"}))))
 
 (defn stats
@@ -436,8 +436,13 @@
                          ])
       :component-did-mount (fn [this]
                              ; Asynchronously fetch our list of organisms
-                             (go (let [organisms (<! (fetch-organisms {:service {:root "beta.flymine.org/beta"}}))]
+                             (go (let [organisms (<! (fetch-organisms {:service {:root "beta.humanmine.org/beta"}}))]
                                    (swap! local-state assoc :organisms organisms))))})))
+
+
+
+(defn run [snapshot input api]
+  (println "ID Resolver is running" snapshot))
 
 
 (defn ^:export main [step-data]

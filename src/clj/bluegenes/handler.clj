@@ -12,7 +12,8 @@
             [bluegenes.webservice.routes :as webservice])
   (:gen-class))
 
-(mount/start)
+; Disabling database connection for now.
+;(mount/start)
 
 (defn wrap-log-request [handler]
   (fn [req]

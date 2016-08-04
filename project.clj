@@ -14,6 +14,7 @@
                  [mount "0.1.9"]
                  [prismatic/schema "1.0.5"]
                  [slugger "1.0.1"]
+                 [funcool/cuerdas "0.7.0"]
                  [reagent-forms "0.5.8"]
                  [clj-http "2.0.1"]
                  [com.taoensso/timbre "4.1.0"]
@@ -22,7 +23,9 @@
                  [org.clojure/core.async "0.2.374"]
                  [prismatic/dommy "1.1.0"]
                  [cljs-http "0.1.39"]
-                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]]
+                 [com.rpl/specter "0.10.0"]
+                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [binaryage/devtools "0.6.1"]]
 
   :source-paths ["src/clj"]
 
@@ -40,7 +43,11 @@
   :plugins [[lein-cljsbuild "1.1.2"]
             [lein-figwheel "0.5.0-3"]
             [lein-environ "1.0.0"]
-            [lein-shell "0.5.0"]]
+            [lein-shell "0.5.0"]
+            [lein-less "1.7.5"]]
+
+  :less {:source-paths ["src/less"]
+         :target-path "resources/public/css"}
 
   :min-lein-version "2.5.0"
 
