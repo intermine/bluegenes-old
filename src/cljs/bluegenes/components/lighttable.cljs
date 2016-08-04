@@ -104,7 +104,6 @@
 (defn card []
   (fn [title props]
     [:div.card {:key title :class (str "result-type type-" title )}
-     ;[:div.title ]
      [:div.title (str title ": " (stringify-im-class props))]
      (map (fn [[k v]]
             (cond

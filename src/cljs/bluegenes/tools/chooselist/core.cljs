@@ -10,6 +10,8 @@
 
 (enable-console-print!)
 
+
+;;;;;TODO: Paginate this.
 ; TODO: This should be passed into the tool as a property.
 (def flymine {:root "www.flymine.org/query"})
 (def pager (reagent/atom
@@ -121,7 +123,8 @@
                                ;(println "CHOOSE LIST IS RENDERING" step-data)
                                ;(println "GOT STEP DATA" api)
                                [:div
-                                [pagination-control]
+                                ;;;TODO PUT THIS BACK:
+                              ;  [pagination-control]
                                 [:table {:class "list-chooser"}
                                  [:thead
                                   [:tr
