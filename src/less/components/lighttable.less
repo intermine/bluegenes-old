@@ -1,8 +1,33 @@
-.card, .card.result-type {
-    padding: 5px;
-    border: 1px solid #dddddd;
-    margin-left: 5px;
-    margin: 5px;
+.card,
+.card.result-type {
+  border-top: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+  margin: 5px;
+    li:before {
+        content: '';
+        border-bottom:solid 1px grey;
+        width:9px;
+        top:-0.4em;
+        left:-3px;
+        position: relative;
+        display: inline-block;
+    }
+    .card,
+    .card.result-type {
+      border: 0;
+      border-left: solid 1px grey;
+      border-radius: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      margin-left: 1em;
+    }
     background: white;
-    display:block;
+    display: block;
+    list-style-type: none;
+    text-align: left;
+    span.title {
+        font-weight: bold;
+        text-transform: capitalize;
+    }
 }

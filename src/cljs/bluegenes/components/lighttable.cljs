@@ -103,12 +103,12 @@
 
 (defn card []
   (fn [title props]
-    [:div.card {:key title :class (str "result-type type-" title )}
-     [:div.title (str title ": " (stringify-im-class props))]
+    [:ul.card {:key (gensym) :class (str "result-type type-" title )}
+     [:li.title [:span.title title] ": " (stringify-im-class props)]
      (map (fn [[k v]]
             (cond
-              (map? v) ^{:key k} [card (str k) v]
-              (vector? v) (map (fn [c] ^{:key k} [card (str k) c]) v))) props)]))
+              (map? v) ^{:key (gensym)} [card (clj->js k) v]
+              (vector? v) (map (fn [c] ^{:key (gensym)} [card (clj->js k) c]) v))) props)]))
 
 (defn cards []
   (fn [response]
