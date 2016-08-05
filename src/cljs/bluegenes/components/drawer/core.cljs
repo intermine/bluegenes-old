@@ -66,7 +66,7 @@
   (let [saved-research (re-frame/subscribe [:saved-research])]
     (fn []
       [:div.drawer
-       [:div.heading [:h3 "Saved Queries"]]
+       [:div.heading [:h3 "My Cart " [:span.subtitle "(Saved Queries)"]]]
        (if (or (nil? @saved-research) (empty? @saved-research))
          [no-research]
          (do

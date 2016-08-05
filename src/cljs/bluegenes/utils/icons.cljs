@@ -153,6 +153,7 @@
        {:view-box "0 0 16 16"}
        [:title "arrow-right"]
        [:path.path1 {:d "M15.5 8l-7.5-7.5v4.5h-8v6h8v4.5z"}]]
+
        [:symbol#icon-eh
          {:view-box "-0.5 -2 7 15"}
            [:title "Eh?"]
@@ -186,21 +187,61 @@
                    {:d
                     "M11.5 9h-7c-0.276 0-0.5-0.224-0.5-0.5s0.224-0.5 0.5-0.5h7c0.276 0 0.5 0.224 0.5 0.5s-0.224 0.5-0.5 0.5z"}]]
 
-                    [:symbol#icon-summary
-                      {:view-box "0 0 16 16"}
-                      [:title "summary"]
-                      [:path.path1
-                       {:d
-                        "M13.5 0h-12c-0.825 0-1.5 0.675-1.5 1.5v13c0 0.825 0.675 1.5 1.5 1.5h12c0.825 0 1.5-0.675 1.5-1.5v-13c0-0.825-0.675-1.5-1.5-1.5zM13 14h-11v-12h11v12zM4 7h7v1h-7zM4 9h7v1h-7zM4 11h7v1h-7zM4 5h7v1h-7z"}]]
+    [:symbol#icon-summary
+      {:view-box "0 0 16 16"}
+      [:title "summary"]
+      [:path.path1
+       {:d
+        "M13.5 0h-12c-0.825 0-1.5 0.675-1.5 1.5v13c0 0.825 0.675 1.5 1.5 1.5h12c0.825 0 1.5-0.675 1.5-1.5v-13c0-0.825-0.675-1.5-1.5-1.5zM13 14h-11v-12h11v12zM4 7h7v1h-7zM4 9h7v1h-7zM4 11h7v1h-7zM4 5h7v1h-7z"}]]
 
-                        [:symbol#expanded-row
-                          {:view-box "0 0 16 16"}
-                            [:title "Expanded row"]
-                            [:path
-                              {:stroke-width "2",
-                               :d "M0 0 L 0 9, L 26 09 L 26 07 L 2 07 L 2 0"}]
-                             [:path.path2
-                              {:d
-                                 "M11 11l1.414 1.414 4.457-4.457-4.457-4.457-1.414 1.414 3.043 3.043z"}]]
+    [:symbol#expanded-row
+      {:view-box "0 0 16 16"}
+        [:title "Expanded row"]
+        [:path
+          {:stroke-width "2",
+           :d "M0 0 L 0 9, L 26 09 L 26 07 L 2 07 L 2 0"}]
+         [:path.path2
+          {:d
+             "M11 11l1.414 1.414 4.457-4.457-4.457-4.457-1.414 1.414 3.043 3.043z"}]]
+
+    [:symbol#icon-table
+      {:view-box "0 0 16 16"}
+      [:title "table"]
+      [:path.path1
+       {:d
+        "M0 1v14h16v-14h-16zM6 10v-3h4v3h-4zM10 11v3h-4v-3h4zM10 3v3h-4v-3h4zM5 3v3h-4v-3h4zM1 7h4v3h-4v-3zM11 7h4v3h-4v-3zM11 6v-3h4v3h-4zM1 11h4v3h-4v-3zM11 14v-3h4v3h-4z"}]]
+
+  [:symbol#icon-venn
+    {:view-box "0 0 150 90"}
+      [:title "combine"]
+      [:circle#path4136
+        {:style
+          { :fill "none"
+           :stroke "currentColor"
+            :stroke-width 5}
+          :cx "50",
+          :cy "45",
+          :r "45"}]
+  [:circle#path4136-3
+   {:style
+    {:stroke-width 1}
+    :cx "100",
+    :cy "45",
+    :r "45"}]
+]
+
+[:symbol#icon-cart
+{:view-box "0 0 16 16"}
+[:title "cart"]
+[:path.path1
+{:d
+ "M6 14.5c0 0.828-0.672 1.5-1.5 1.5s-1.5-0.672-1.5-1.5c0-0.828 0.672-1.5 1.5-1.5s1.5 0.672 1.5 1.5z"}]
+[:path.path2
+{:d
+ "M16 14.5c0 0.828-0.672 1.5-1.5 1.5s-1.5-0.672-1.5-1.5c0-0.828 0.672-1.5 1.5-1.5s1.5 0.672 1.5 1.5z"}]
+[:path.path3
+{:d
+ "M16 8v-6h-12c0-0.552-0.448-1-1-1h-3v1h2l0.751 6.438c-0.458 0.367-0.751 0.93-0.751 1.562 0 1.105 0.895 2 2 2h12v-1h-12c-0.552 0-1-0.448-1-1 0-0.003 0-0.007 0-0.010l13-1.99z"}]]
+
 
    ]])

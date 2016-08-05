@@ -145,7 +145,15 @@
 (defn ^:export main []
   (fn [step-data]
     [:div.lighttable-container
-     [:h3 "Results"]
+     [:h3
+      [:svg.icon.arrow [:use {:xlinkHref "#icon-arrow-right"}]]
+      "Results preview"
+      [:a
+      {:on-click #(re-frame/dispatch [:add-step "viewtable" {}])}
+       "("
+      [:svg.icon.icon-table [:use {:xlinkHref "#icon-table"}]]
+      "View All Results)"]
+      ]
      ;[county step-data]
      ;[mounty step-data]
      [cardy step-data]

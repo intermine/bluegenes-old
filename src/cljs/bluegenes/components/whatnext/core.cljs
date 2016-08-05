@@ -57,12 +57,14 @@
   (fn []
     [:button.next-tool
      {:on-click #(re-frame/dispatch [:add-step "viewtable" {}])}
-     "View Table"]))
+     [:svg.icon.icon-table [:use {:xlinkHref "#icon-table"}]]
+     "View All Results"]))
 
 (defn templatetool []
   (fn []
     [:button.next-tool
      {:on-click #(re-frame/dispatch [:add-step "templatechooser" {}])}
+     [:svg.icon.icon-template [:use {:xlinkHref "#icon-search"}]]
      "Run Template"]))
 
 (defn enrichtool []
@@ -70,15 +72,18 @@
     [:button.next-tool
      {:on-click #(re-frame/dispatch [:add-step "enrichment" {:widget "pathway_enrichment"
                                                              :title "Pathway Enrichment"}])}
+     [:svg.icon.icon-barchart [:use {:xlinkHref "#icon-bar-chart"}]]
      "Run Enrichment"]))
 
 (defn mergetool []
   (fn []
     [:button.next-tool
      {:on-click #(re-frame/dispatch [:add-step "datamerger" {}])}
+     [:svg.icon.icon-table [:use {:xlinkHref "#icon-venn"}]]
      "Merge Data"]))
 
 
+;;;TODO: figure out if we can delete this or spruce it up? It doesn't work right now
 (defn listtool []
   (fn []
     [:button.next-tool
@@ -112,10 +117,10 @@
   (let [available-data (re-frame/subscribe [:available-data])]
     (fn []
       [:div.next-step-chooser
-       [:div
-        [listtool]
+       [:div "Tools:"]
         [templatetool]
-        [tabletool]
         [enrichtool]
-        [mergetool]]
+        [mergetool]
+        [tabletool]
+
 ])))

@@ -103,7 +103,7 @@
   (reagent/create-class
     {:component-did-mount  somefn
      :component-did-update somefn
-     :reagent-render       (fn [] [:div [:div.imtable "I AM TABLE"]])}))
+     :reagent-render       (fn [] [:div [:div.imtable "Loading..."]])}))
 
 (defn ^:export main []
   (fn [{:keys [state api] :as step-data}]

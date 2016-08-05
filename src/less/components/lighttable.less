@@ -1,26 +1,26 @@
 .card,
 .card.result-type {
-  border-top: 1px solid #dddddd;
-  border-right: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
-  margin: 5px;
+    border-top: 1px solid #dddddd;
+    border-right: 1px solid #dddddd;
+    border-bottom: 1px solid #dddddd;
+    margin: 5px;
     li:before {
         content: '';
-        border-bottom:solid 1px grey;
-        width:9px;
-        top:-0.4em;
-        left:-3px;
+        border-bottom: solid 1px grey;
+        width: 9px;
+        top: -0.4em;
+        left: -3px;
         position: relative;
         display: inline-block;
     }
     .card,
     .card.result-type {
-      border: 0;
-      border-left: solid 1px grey;
-      border-radius: 0;
-      margin-top: 0;
-      margin-bottom: 0;
-      margin-left: 1em;
+        border: 0;
+        border-left: solid 1px grey;
+        border-radius: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 1em;
     }
     background: white;
     display: block;
@@ -29,5 +29,31 @@
     span.title {
         font-weight: bold;
         text-transform: capitalize;
+    }
+}
+.lighttable-container {
+    h3 {
+        svg {
+            margin-top:-2px;
+        }
+        a {
+            font-size: 0.6em;
+        }
+    }
+    svg.icon {
+        width: 0.8em;
+        margin-right: 0.2em;
+    }
+}
+.workflow-data .next-tools {
+    display: flex;
+    justify-content: center;
+    button {
+        flex-grow: 1;
+        margin: 0 0.2em;
+        svg {
+            height: 0.9em;
+            margin-top: -1px;
+        }
     }
 }

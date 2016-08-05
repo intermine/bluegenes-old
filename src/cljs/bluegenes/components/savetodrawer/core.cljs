@@ -24,8 +24,6 @@
                           :switched "LOCKED"
                           :switchable false}]})
 
-;[trimmed-paths (distinct (reduce (fn [total next]
-;                                   (conj total (im/trim-path-to-class model next))) [] (:select test-query)))]
 
 (defn query-saver []
   (fn [payload]
@@ -42,21 +40,6 @@
                                            (assoc-in (:output payload)
                                                      [:data :payload] (:query details))])}
           [:a (str (:display-name details) "s")]]))
-      ;(for [{:keys [display-name query count] :as to-save} (:saver payload)]
-      ;  [:li
-      ;   ;{:on-click #(println to-save)}
-      ;   {:on-click (fn []
-      ;                (println "to-save" to-save)
-      ;                (let [saveme {:service (:service to-save)
-      ;                              :data {:format "query"
-      ;                                     :type "Gene"
-      ;                                     :payload query}}]
-      ;                  (println "saveme" saveme)
-      ;                  (re-frame/dispatch [:save-research (:_id payload) saveme])))}
-      ;   [:a
-      ;    [:span.badge.active count]
-      ;    [:span (str " " display-name)]]])
-
       ]]))
 
 (defn ids-saver []
@@ -73,12 +56,12 @@
 (defn list-saver []
   (fn [payload]
     ;(println "list saver sees payload" (:output payload))
-    [:div.btn.btn-success
-     ;{:on-click #(println "has payload" (dissoc payload :cache))}
-
-     {:on-click #(re-frame/dispatch [:save-research (:_id payload) (:output payload)])}
-     [:i.fa.fa-floppy-o]
-     [:span (str " Save")]]))
+    [:div.next-tools
+      [:button.btn.btn-success
+        {:on-click #(re-frame/dispatch [:save-research (:_id payload) (:output payload)])}
+        [:i.fa.fa-floppy-o]
+        [:span (str " Save to cart")]]
+     ]))
 
 (defn main []
   (fn [step-data]

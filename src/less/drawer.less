@@ -5,126 +5,147 @@
 @divider-color: #ccc;
 @header-color: #bbe9f0;
 .timeline-container {
-  display: flex;
-  align-items: stretch;
-  .drawer {
-    width: 300px;
-    min-width: 300px;
-    background: #333;
-    align-self: stretch;
-    color: #fff;
-    padding: @spacer/2 @spacer;
-    .heading {
-      text-align: center;
-    }
-    input {color:#fff;}
-    h3 {
-      color: @header-color;
-      font-weight: bolder;
-      font-size: 2em;
-    }
-  }
-  main {
-    flex-grow: 1;
-    box-sizing: border-box;
-    //    &:nth-child(even){background:#fff;}
-    .lighttable-container {
-      overflow: auto;
-    }
-    .next-step-chooser {
-      padding: @spacer @spacer 0 @spacer;
-      background: @stripe-a;
-      border-right: solid @results-size @results;
-      .next-tool {
-        .btn;
-        .btn-primary;
-        margin-right:@spacer/2;
-      }
-      // .next-tool {
-      //   background-color: @cta-color;
-      //   color: @cta-color-text;
-      //   border: 0;
-      // }
-    }
-    .workflow-step {
-      &:after {
-        @size: 30px;
-        content: "";
-        width: 0;
-        height: 0;
-        position: relative;
-        top: -23px;
-        left: 40%;
-        border-style: solid;
-        border-width: 0 @size @size @size;
-        border-color: transparent transparent @stripe-a transparent;
-      }
-      //      margin-bottom:30px;
-      border-bottom: solid 3px @divider-color;
-      padding: 0;
-      &:nth-child(even) {
-        background: @stripe-a;
-        &:after {
-          border-color: transparent transparent @stripe-b transparent;
+    display: flex;
+    align-items: stretch;
+    .drawer {
+        width: 300px;
+        min-width: 300px;
+        background: #333;
+        align-self: stretch;
+        color: #fff;
+        padding: @spacer/2 @spacer;
+        a {margin:0em 0.2em}
+        .heading {
+            text-align: center;
         }
-        .workflow-data:before {
-          border-color: transparent transparent transparent @stripe-a;
+        input {
+            color: #fff;
         }
-      }
-      &:nth-child(odd) {
-        background: @stripe-b;
-        &:after {
-          border-color: transparent transparent @stripe-a transparent;
+        h3 {
+            color: @header-color;
+            font-weight: bolder;
+            font-size: 2em;
+            .subtitle {
+                display: block;
+                font-size: 60%;
+                font-weight: normal;
+                color: @divider-color
+            }
         }
-        .workflow-data:before {
-          border-color: transparent transparent transparent @stripe-b;
+    }
+    main {
+        flex-grow: 1;
+        box-sizing: border-box;
+        //    &:nth-child(even){background:#fff;}
+        .lighttable-container {
+            overflow: auto;
         }
-      }
-      &:last-child:after {
-        border-color: transparent transparent transparent transparent;
-      }
+        .next-step-chooser {
+            display: flex;
+            padding: 0;
+            color: grey;
+            //    background-color:@favoriteblue;
+            border-bottom: solid 1px @divider-color;
+            box-shadow: 5px 5px 5px 5px fadein(@results,100%);
+            svg {
+                height: 0.9em;
+                margin-top: -1px;
+            }
+            height: 3em;
+            line-height: 3em;
+            text-align: center;
+            div {
+                padding: 0 @spacer/2;
+            }
+            .next-tool {
+                background-color: lighten(@divider-color,15%);
+                //        background-color:@favoriteblue;
+                border: 0;
+                color: #000;
+                svg {
+                    color: @favoriteblue;
+                }
+                line-height: normal;
+                flex-grow: 1;
+                padding: 0;
+                margin: 2px;
+            }
+        }
+        .workflow-step {
+            &:after {
+                @size: 30px;
+                content: "";
+                width: 0;
+                height: 0;
+                position: relative;
+                top: -23px;
+                left: 40%;
+                border-style: solid;
+                border-width: 0 @size @size @size;
+                border-color: transparent transparent @stripe-a transparent;
+            }
+            //      margin-bottom:30px;
+            border-bottom: solid 3px @divider-color;
+            padding: 0;
+            &:nth-child(even) {
+                background: @stripe-a;
+                &:after {
+                    border-color: transparent transparent @stripe-b transparent;
+                }
+                .workflow-data:before {
+                    border-color: transparent transparent transparent @stripe-a;
+                }
+            }
+            &:nth-child(odd) {
+                background: @stripe-b;
+                &:after {
+                    border-color: transparent transparent @stripe-a transparent;
+                }
+                .workflow-data:before {
+                    border-color: transparent transparent transparent @stripe-b;
+                }
+            }
+            &:last-child:after {
+                border-color: transparent transparent transparent transparent;
+            }
+        }
+        .workflow-step-content {
+            display: flex;
+        }
+        .workflow-tool {
+            flex-grow: 3;
+            padding: 0 0 @spacer @spacer;
+            overflow-y: auto;
+        }
+        .workflow-data {
+            overflow-y: auto;
+            @margin-bottom: 26px; //this is a magic number. I'm not sure why it works. Something to do with the triangle but if so why does 26 look better than 25?
+            &:before {
+                @size: 25px;
+                content: "";
+                height: 0;
+                display: inline-block;
+                position: relative;
+                top: 50px;
+                left: -@spacer;
+                margin-top: -20px;
+                border-style: solid;
+                border-width: @size 0 @size @size;
+                border-color: transparent transparent transparent @stripe-a;
+            }
+            flex-grow: 1;
+            min-width: @results-size;
+            max-width: @results-size;
+            background: @results;
+            padding: 0 @spacer @spacer;
+            margin-bottom: -@margin-bottom;
+        }
     }
-    .workflow-step-content {
-      display: flex;
-    }
-    .workflow-tool {
-      flex-grow: 3;
-      padding: @spacer 0 @spacer @spacer;
-      overflow-y: auto;
-    }
-    .workflow-data {
-      overflow-y: auto;
-      @margin-bottom: 26px; //this is a magic number. I'm not sure why it works. Something to do with the triangle but if so why does 26 look better than 25?
-      &:before {
-        @size: 25px;
-        content: "";
-        height: 0;
-        display: inline-block;
-        position: relative;
-        top: 50px;
-        left: -@spacer;
-        margin-top: -20px;
-        border-style: solid;
-        border-width: @size 0 @size @size;
-        border-color: transparent transparent transparent @stripe-a;
-      }
-      padding: @spacer @spacer @spacer 0;
-      flex-grow: 1;
-      min-width: @results-size;
-      max-width: @results-size;
-      background: @results;
-      padding: @spacer;
-      margin-bottom: -@margin-bottom;
-    }
-  }
 }
-
-
 .clip-and-scroll-333 {
     max-height: 333px;
     overflow-y: scroll;
 }
-
 .skinny {
     .list-group-item {
         padding: 0;
