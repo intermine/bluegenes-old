@@ -1,3 +1,6 @@
+BlueGenes is retired in favour of RedGenes: https://github.com/intermine/redgenes 
+
+
 # bluegenes
 
 A [re-frame](https://github.com/Day8/re-frame) application designed to function as a UI for [InterMine's](http://www.intermine.org) data warehouse layer.
