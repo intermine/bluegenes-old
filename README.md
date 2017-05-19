@@ -1,4 +1,4 @@
-BlueGenes is retired in favour of RedGenes: https://github.com/intermine/redgenes 
+Retired in favour of BlueGenes: https://github.com/intermine/bluegenes 
 
 
 # bluegenes
